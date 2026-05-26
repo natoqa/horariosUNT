@@ -19,9 +19,10 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
+  X,
 } from 'lucide-react';
 import { logoutAction } from '@/modules/auth/presentation/actions/logout.action';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MenuItem {
   title: string;
@@ -36,10 +37,19 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Periodos']);
+
+  useEffect(() => {
+    if (onClose) onClose();
+  }, [pathname]);
 
   if (!user) return null;
 
@@ -47,7 +57,7 @@ export function Sidebar() {
 
   const menuSections: MenuSection[] = [
     {
-      label: 'GESTIÓN ACADÉMICA',
+      label: 'GESTION ACADEMICA',
       items: [
         {
           title: 'Dashboard',
@@ -85,7 +95,7 @@ export function Sidebar() {
       ],
     },
     {
-      label: 'PLANIFICACIÓN',
+      label: 'PLANIFICACION',
       items: [
         {
           title: 'Disponibilidad',
@@ -123,7 +133,7 @@ export function Sidebar() {
           roles: ['director', 'secretaria', 'docente'],
         },
         {
-          title: 'Configuración',
+          title: 'Configuracion',
           href: `/${role}/configuracion`,
           icon: Settings,
           roles: ['director'],
@@ -138,12 +148,6 @@ export function Sidebar() {
     );
   };
 
-  const roleLabels: Record<string, string> = {
-    director: 'Director',
-    secretaria: 'Secretaria',
-    docente: 'Docente',
-  };
-
   const getInitials = () => {
     if (user.fullName) {
       const parts = user.fullName.split(' ');
@@ -154,8 +158,8 @@ export function Sidebar() {
     return user.email?.substring(0, 2).toUpperCase() || 'US';
   };
 
-  return (
-    <aside className="w-64 h-screen bg-white border-r border-[var(--sidebar-border)] flex flex-col fixed left-0 top-0 z-20">
+  const sidebarContent = (
+    <>
       {/* Logo */}
       <div className="h-14 flex items-center gap-3 px-5 border-b border-[var(--sidebar-border)]">
         <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
@@ -164,7 +168,13 @@ export function Sidebar() {
         <div className="flex-1">
           <h1 className="text-sm font-bold text-foreground tracking-tight">Horarios UNT</h1>
         </div>
-        <button className="p-1 rounded-md hover:bg-muted transition-colors">
+        <button
+          onClick={onClose}
+          className="p-1 rounded-md hover:bg-muted transition-colors lg:hidden"
+        >
+          <X className="w-4 h-4 text-muted-foreground" />
+        </button>
+        <button className="p-1 rounded-md hover:bg-muted transition-colors hidden lg:block">
           <FileText className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
@@ -174,7 +184,7 @@ export function Sidebar() {
         <div className="flex items-center gap-2 h-9 px-3 rounded-lg bg-muted/60 border border-border/60">
           <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
           <span className="text-xs text-muted-foreground">Buscar...</span>
-          <div className="ml-auto flex items-center gap-0.5">
+          <div className="ml-auto items-center gap-0.5 hidden lg:flex">
             <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">⌘</kbd>
             <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">K</kbd>
           </div>
@@ -264,12 +274,35 @@ export function Sidebar() {
           <button
             onClick={() => logoutAction()}
             className="p-1.5 rounded-md hover:bg-muted transition-colors flex-shrink-0"
-            title="Cerrar sesión"
+            title="Cerrar sesion"
           >
             <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Backdrop — mobile only */}
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar — desktop: fixed, mobile: slide-in overlay */}
+      <aside
+        className={cn(
+          "w-64 h-screen bg-white border-r border-[var(--sidebar-border)] flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 ease-in-out",
+          "lg:translate-x-0 lg:z-20",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

@@ -76,19 +76,19 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         },
         {
           title: 'Docentes',
-          href: '/director/docentes',
+          href: `/${role}/docentes`,
           icon: Users,
           roles: ['director', 'secretaria'],
         },
         {
           title: 'Cursos',
-          href: '/director/cursos',
+          href: `/${role}/cursos`,
           icon: BookOpen,
           roles: ['director', 'secretaria'],
         },
         {
           title: 'Aulas',
-          href: '/director/aulas',
+          href: `/${role}/aulas`,
           icon: Building2,
           roles: ['director', 'secretaria'],
         },

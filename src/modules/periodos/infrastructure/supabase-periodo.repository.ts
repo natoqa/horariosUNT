@@ -105,6 +105,18 @@ export class SupabasePeriodoRepository implements IPeriodoRepository {
     return this.update(id, { state });
   }
 
+  async delete(id: string): Promise<void> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('periodos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message || 'Error al eliminar el periodo.');
+    }
+  }
+
   private mapToPeriodo(row: PeriodoRow): Periodo {
     return {
       id: row.id,

@@ -31,6 +31,7 @@ function createMockRepo(
     save: vi.fn().mockResolvedValue(SAVED_PERIODO),
     update: vi.fn().mockResolvedValue(SAVED_PERIODO),
     updateState: vi.fn().mockResolvedValue(SAVED_PERIODO),
+    delete: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

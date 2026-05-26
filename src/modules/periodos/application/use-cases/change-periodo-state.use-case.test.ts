@@ -29,6 +29,7 @@ function createMockRepo(
     updateState: vi.fn().mockImplementation((_id, newState) =>
       Promise.resolve({ ...periodo!, state: newState }),
     ),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
 }
 

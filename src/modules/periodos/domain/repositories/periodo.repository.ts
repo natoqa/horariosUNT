@@ -8,4 +8,5 @@ export interface IPeriodoRepository {
   save(periodo: Omit<Periodo, 'id' | 'createdAt' | 'updatedAt'>): Promise<Periodo>;
   update(id: string, data: Partial<Omit<Periodo, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Periodo>;
   updateState(id: string, state: EstadoPeriodo): Promise<Periodo>;
+  delete(id: string): Promise<void>;
 }

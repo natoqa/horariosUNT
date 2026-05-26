@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { Periodo, getNextStates } from '../../domain/entities/periodo.entity';
 import { changeStateAction } from '../actions/change-state.action';
+import { deletePeriodoAction } from '../actions/delete-periodo.action';
 import { Button } from '@/shared/components/ui/button';
 import { EstadoPeriodo } from '@/shared/constants/period-states';
+import { Trash2 } from 'lucide-react';
 
 interface PeriodoStateActionsProps {
   periodo: Periodo;
@@ -12,12 +14,12 @@ interface PeriodoStateActionsProps {
 }
 
 const STATE_ACTION_LABELS: Record<EstadoPeriodo, string> = {
-  Configuración: 'Configurar',
-  Recopilación: 'Abrir Recopilación',
-  Generación: 'Iniciar Generación',
-  Aprobado: 'Aprobar',
-  Publicado: 'Publicar',
-  Cerrado: 'Cerrar',
+  'Configuración': 'Configurar',
+  'Recopilación': 'Abrir Recopilacion',
+  'Generación': 'Iniciar Generacion',
+  'Aprobado': 'Aprobar',
+  'Publicado': 'Publicar',
+  'Cerrado': 'Cerrar',
 };
 
 export function PeriodoStateActions({
@@ -27,8 +29,7 @@ export function PeriodoStateActions({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nextStates = getNextStates(periodo.state);
-
-  if (nextStates.length === 0) return null;
+  const canDelete = periodo.state === 'Configuración' || periodo.state === 'Cerrado';
 
   const handleChangeState = async (newState: EstadoPeriodo) => {
     setPending(true);
@@ -38,6 +39,21 @@ export function PeriodoStateActions({
       onStateChanged();
     } else {
       setError(result.message || 'Error al cambiar estado');
+    }
+    setPending(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Estas seguro de eliminar este periodo? Esta accion no se puede deshacer.')) {
+      return;
+    }
+    setPending(true);
+    setError(null);
+    const result = await deletePeriodoAction(periodo.id);
+    if (result.success) {
+      onStateChanged();
+    } else {
+      setError(result.message || 'Error al eliminar');
     }
     setPending(false);
   };
@@ -55,7 +71,17 @@ export function PeriodoStateActions({
           {STATE_ACTION_LABELS[nextState]}
         </Button>
       ))}
-      {error && <span className="text-xs text-red-500">{error}</span>}
+      {canDelete && (
+        <button
+          onClick={handleDelete}
+          disabled={pending}
+          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+          title="Eliminar periodo"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+      {error && <span className="text-xs text-destructive">{error}</span>}
     </div>
   );
 }

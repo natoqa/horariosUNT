@@ -70,7 +70,17 @@ npx tsc --noEmit
 ```
 Corregir errores ANTES de avanzar a la siguiente capa.
 
-### 7. Checklist final
+### 7. Actualizar estado de HU y PLANNING
+
+Al terminar la implementacion, ANTES de reportar al usuario:
+1. Abrir el archivo de fase en `docs/HU/fase-*.md` y cambiar el estado de la(s) HU implementada(s) de `⏳ PENDING` a `✅ DONE`.
+2. Actualizar el contador del estado global en el encabezado del archivo de fase (ej. `0/5 READY` → `1/5 DONE`).
+3. Abrir `PLANNING.md` y actualizar:
+   - La tabla de resumen de progreso (columnas READY/PENDING y total).
+   - La tabla de archivos de HU (columna Estado).
+4. Si el plan tenia un archivo en `docs/planes/`, NO eliminarlo — queda como registro historico.
+
+### 8. Checklist final
 
 Recorrer el checklist del plan + estos checks core antes de declarar listo:
 - [ ] TypeScript compila sin errores
@@ -83,6 +93,8 @@ Recorrer el checklist del plan + estos checks core antes de declarar listo:
 - [ ] UI en espanol, codigo en ingles
 - [ ] Constantes compartidas reutilizadas (no duplicadas)
 - [ ] Componentes Shadcn reutilizados (no creados desde cero)
+- [ ] Estado de HU actualizado a DONE en `docs/HU/`
+- [ ] PLANNING.md actualizado con nuevo progreso
 
 ## Reglas duras durante la implementacion
 

@@ -2,6 +2,7 @@ export type { Horario, Asignacion, HorarioEstado, AsignacionTipo, GenerationSumm
 export { HORARIO_ESTADOS, HORARIO_ESTADO_LABELS, ASIGNACION_TIPOS, ASIGNACION_TIPO_LABELS } from './domain/entities/horario.entity';
 export type { IHorarioRepository } from './domain/repositories/horario.repository';
 export { HorariosContent } from './presentation/components/horarios-content';
+export { DocenteHorarioView } from './presentation/components/docente-horario-view';
 export { approveHorarioAction } from './presentation/actions/approve-horario.action';
 export { publishHorarioAction } from './presentation/actions/publish-horario.action';
 export { postPublishUpdateAction } from './presentation/actions/post-publish-update.action';

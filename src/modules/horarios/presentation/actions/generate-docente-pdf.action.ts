@@ -1,0 +1,119 @@
+'use server';
+
+import { createClient } from '@/shared/lib/supabase/server';
+import {
+  GenerateDocentePdfUseCase,
+  DocentePdfAsignacion,
+  DocentePdfNameMaps,
+} from '../../application/use-cases/generate-docente-pdf.use-case';
+
+interface GenerateDocentePdfResult {
+  pdfBase64?: string;
+  fileName?: string;
+  message?: string;
+}
+
+export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { message: 'No autorizado.' };
+  }
+
+  if (user.user_metadata?.role !== 'docente') {
+    return { message: 'Solo los docentes pueden descargar su horario individual.' };
+  }
+
+  // Find published/approved periodo
+  const { data: periodoData } = await supabase
+    .from('periodos')
+    .select('id, name, state')
+    .in('state', ['Aprobado', 'Publicado', 'Cerrado'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (!periodoData) {
+    return { message: 'No hay un horario publicado disponible.' };
+  }
+
+  // Find horario
+  const { data: horarioData } = await supabase
+    .from('horarios')
+    .select('id')
+    .eq('periodo_id', periodoData.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (!horarioData) {
+    return { message: 'No hay horario generado para el período actual.' };
+  }
+
+  // Get docente assignments
+  const { data: rawAsignaciones } = await supabase
+    .from('asignaciones')
+    .select('grupo_id, aula_id, dia, bloque, tipo')
+    .eq('horario_id', horarioData.id)
+    .eq('docente_id', user.id);
+
+  if (!rawAsignaciones || rawAsignaciones.length === 0) {
+    return { message: 'No tienes asignaciones en el horario actual.' };
+  }
+
+  // Load name maps
+  const [cursosRes, aulasRes, gruposRes, docenteRes] = await Promise.all([
+    supabase.from('cursos').select('id, nombre, ciclo'),
+    supabase.from('aulas').select('id, nombre, codigo'),
+    supabase.from('grupos').select('id, curso_id, nombre'),
+    supabase.from('docentes').select('nombres, apellidos').eq('id', user.id).single(),
+  ]);
+
+  const cursoIdToName = new Map<string, string>();
+  const cursoIdToCiclo = new Map<string, string>();
+  (cursosRes.data ?? []).forEach((c) => {
+    cursoIdToName.set(c.id, c.nombre);
+    cursoIdToCiclo.set(c.id, c.ciclo);
+  });
+
+  const cursoNames = new Map<string, string>();
+  const grupoCiclos = new Map<string, string>();
+  (gruposRes.data ?? []).forEach((g) => {
+    const cursoNombre = cursoIdToName.get(g.curso_id);
+    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
+    const ciclo = cursoIdToCiclo.get(g.curso_id);
+    if (ciclo) grupoCiclos.set(g.id, ciclo);
+  });
+
+  const aulaNames = new Map<string, string>();
+  (aulasRes.data ?? []).forEach((a) => {
+    aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`);
+  });
+
+  const docenteName = docenteRes.data
+    ? `${docenteRes.data.apellidos}, ${docenteRes.data.nombres}`
+    : user.user_metadata?.full_name ?? user.email ?? 'Docente';
+
+  const asignaciones: DocentePdfAsignacion[] = rawAsignaciones.map((a) => ({
+    grupoId: a.grupo_id,
+    aulaId: a.aula_id,
+    dia: a.dia,
+    bloque: a.bloque,
+    tipo: a.tipo,
+  }));
+
+  const nameMaps: DocentePdfNameMaps = {
+    cursos: cursoNames,
+    aulas: aulaNames,
+    grupoCiclos,
+  };
+
+  const useCase = new GenerateDocentePdfUseCase();
+  const pdfBytes = await useCase.execute(asignaciones, nameMaps, periodoData.name, docenteName);
+
+  const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
+  const fileName = `mi-horario-${periodoData.name.replace(/\s+/g, '-')}.pdf`;
+
+  return { pdfBase64, fileName };
+}

@@ -1,4 +1,4 @@
-import { HorariosContent } from '@/modules/horarios';
+import { DocenteHorarioView } from '@/modules/horarios';
 import { CalendarDays } from 'lucide-react';
 
 export default function HorariosPage() {
@@ -15,7 +15,7 @@ export default function HorariosPage() {
           <CalendarDays className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <HorariosContent />
+      <DocenteHorarioView />
     </div>
   );
 }

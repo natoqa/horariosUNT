@@ -32,7 +32,7 @@
 
 ---
 
-## HU-013 — Consulta de horario publicado (Docente) ⏳ PENDING
+## HU-013 — Consulta de horario publicado (Docente) ✅ DONE
 **Como** Docente
 **Quiero** consultar el horario publicado para el semestre actual
 **Para** conocer mis asignaciones de cursos, horarios y aulas

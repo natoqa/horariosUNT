@@ -108,7 +108,7 @@ export function AuditoriaFilters({ onFilterChange }: AuditoriaFiltersProps) {
           <Label className="text-xs font-medium text-muted-foreground">Módulo</Label>
           <Select
             value={filters.modulo}
-            onValueChange={(val) => handleChange('modulo', val)}
+            onValueChange={(val) => handleChange('modulo', val || '')}
           >
             <SelectTrigger className="h-10 text-sm">
               <SelectValue placeholder="Todos los módulos" />
@@ -129,7 +129,7 @@ export function AuditoriaFilters({ onFilterChange }: AuditoriaFiltersProps) {
           <Label className="text-xs font-medium text-muted-foreground">Acción</Label>
           <Select
             value={filters.accion}
-            onValueChange={(val) => handleChange('accion', val)}
+            onValueChange={(val) => handleChange('accion', val || '')}
           >
             <SelectTrigger className="h-10 text-sm">
               <SelectValue placeholder="Todas las acciones" />

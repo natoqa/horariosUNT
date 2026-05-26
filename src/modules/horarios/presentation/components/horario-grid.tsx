@@ -10,6 +10,8 @@ interface HorarioGridProps {
   cursoNames: Map<string, string>;
   aulaNames: Map<string, string>;
   grupoCiclos: Map<string, string>;
+  editable?: boolean;
+  onSelectAsignacion?: (asignacion: Asignacion) => void;
 }
 
 const CICLOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'] as const;
@@ -33,6 +35,8 @@ export function HorarioGrid({
   cursoNames,
   aulaNames,
   grupoCiclos,
+  editable = false,
+  onSelectAsignacion,
 }: HorarioGridProps) {
   const [selectedCiclo, setSelectedCiclo] = useState<string | null>(null);
 
@@ -113,7 +117,8 @@ export function HorarioGrid({
                               return (
                                 <div
                                   key={a.id}
-                                  className={`rounded border px-1.5 py-1 ${colorClass}`}
+                                  onClick={editable && onSelectAsignacion ? () => onSelectAsignacion(a) : undefined}
+                                  className={`rounded border px-1.5 py-1 ${colorClass}${editable ? ' cursor-pointer hover:ring-2 hover:ring-primary/40 transition-shadow' : ''}`}
                                 >
                                   <p className="font-semibold text-[10px] leading-tight truncate">
                                     {cursoNames.get(a.grupoId) ?? 'Curso'}

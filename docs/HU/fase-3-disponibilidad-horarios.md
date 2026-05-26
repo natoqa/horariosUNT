@@ -1,7 +1,7 @@
 # Historias de Usuario — Fase 3: Disponibilidad y Horarios
 
 > Módulos: `disponibilidad`, `horarios`
-> Estado global: ✅ 2/5 DONE — 3 pendientes
+> Estado global: ✅ 5/5 DONE
 
 ---
 
@@ -42,7 +42,7 @@
 
 ---
 
-## HU-009 — Modificación manual de horario ⏳ PENDING
+## HU-009 — Modificación manual de horario ✅ DONE
 **Como** Director de Escuela
 **Quiero** modificar manualmente una asignación en el horario generado
 **Para** ajustar casos excepcionales que el algoritmo no contempló
@@ -56,7 +56,7 @@
 
 ---
 
-## HU-010 — Aprobación y publicación del horario ⏳ PENDING
+## HU-010 — Aprobación y publicación del horario ✅ DONE
 **Como** Director de Escuela
 **Quiero** aprobar y publicar el horario final
 **Para** que los docentes y la comunidad académica puedan consultarlo
@@ -70,7 +70,7 @@
 
 ---
 
-## HU-023 — Horario post-publicación con control de cambios ⏳ PENDING
+## HU-023 — Horario post-publicación con control de cambios ✅ DONE
 **Como** Director de Escuela
 **Quiero** realizar modificaciones al horario después de su publicación
 **Para** atender situaciones imprevistas (licencias, renuncias, cambios de último momento)

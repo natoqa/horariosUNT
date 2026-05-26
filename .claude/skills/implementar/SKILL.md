@@ -45,7 +45,8 @@ Seguir el orden del plan (siempre domain → application → infrastructure → 
 6. **presentation/actions/** — Server Actions. Verifican auth + rol + validan con Zod.
 7. **presentation/components/** — Componentes React. Manejan 4 estados.
 8. **index.ts** — Barrel exports publicos del modulo.
-9. **Integracion** — Pagina en app/, sidebar, navegacion.
+9. **Paginas por rol** — Crear `app/(dashboard)/{rol}/{modulo}/page.tsx` para CADA rol con acceso segun la tabla en `.claude/rules/04-app-router.md`. NO crear solo una pagina: si el modulo es accesible por director, secretaria y docente, crear 3 paginas. Titulo y subtitulo pueden variar por rol.
+10. **Sidebar y navegacion** — Verificar que el sidebar ya tiene la entrada con los roles correctos. Si no, agregar.
 
 ### 5. Aplicar reglas continuamente
 
@@ -93,6 +94,7 @@ Recorrer el checklist del plan + estos checks core antes de declarar listo:
 - [ ] UI en espanol, codigo en ingles
 - [ ] Constantes compartidas reutilizadas (no duplicadas)
 - [ ] Componentes Shadcn reutilizados (no creados desde cero)
+- [ ] Paginas en `app/(dashboard)/{rol}/{modulo}/` creadas para TODOS los roles con acceso
 - [ ] Estado de HU actualizado a DONE en `docs/HU/`
 - [ ] PLANNING.md actualizado con nuevo progreso
 
@@ -105,6 +107,7 @@ Recorrer el checklist del plan + estos checks core antes de declarar listo:
 - NO hardcodear strings en JSX que correspondan a constantes.
 - NO dejar `.catch()` silencioso.
 - NO declarar listo sin verificar el checklist.
+- NO crear una sola pagina en app/ si el modulo es accesible por multiples roles. Consultar `04-app-router.md` para la tabla de acceso.
 
 ## Al terminar
 

@@ -32,6 +32,7 @@ function createMockRepo(
     update: vi.fn().mockImplementation((_id, data) =>
       Promise.resolve({ ...docente!, ...data }),
     ),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
 }
 

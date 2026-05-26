@@ -1,11 +1,11 @@
 # Historias de Usuario — Fase 4: Reportes y Vistas
 
 > Módulos: `reportes`
-> Estado global: ⏳ 0/5 READY — Todas pendientes
+> Estado global: ✅ 2/6 DONE — 4 pendientes
 
 ---
 
-## HU-011 — Descarga de horario en PDF ⏳ PENDING
+## HU-011 — Descarga de horario en PDF ✅ DONE
 **Como** Director de Escuela
 **Quiero** descargar el horario aprobado en formato PDF
 **Para** distribuirlo por canales oficiales de la universidad
@@ -19,7 +19,7 @@
 
 ---
 
-## HU-012 — Descarga de horario en Excel ⏳ PENDING
+## HU-012 — Descarga de horario en Excel ✅ DONE
 **Como** Secretaria Académica
 **Quiero** descargar el horario en formato Excel
 **Para** realizar análisis adicionales o compartirlo en formato editable

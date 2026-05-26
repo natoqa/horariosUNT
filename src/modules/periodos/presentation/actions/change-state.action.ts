@@ -46,5 +46,8 @@ export async function changeStateAction(
   }
 
   revalidatePath('/director/periodos');
+  revalidatePath('/director/horarios');
+  revalidatePath('/secretaria/horarios');
+  revalidatePath('/docente/horarios');
   return { success: true, message: 'Estado actualizado exitosamente.' };
 }

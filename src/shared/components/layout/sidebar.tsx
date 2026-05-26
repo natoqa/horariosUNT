@@ -113,7 +113,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           title: 'Reportes',
           href: `/${role}/reportes`,
           icon: FileText,
-          roles: ['director'],
+          roles: ['director', 'secretaria'],
         },
       ],
     },

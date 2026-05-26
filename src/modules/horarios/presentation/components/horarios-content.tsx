@@ -5,13 +5,15 @@ import { Loader2, CalendarDays, AlertCircle, Play, RefreshCw } from 'lucide-reac
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { Periodo } from '@/modules/periodos';
-import { Asignacion, GenerationSummary } from '../../domain/entities/horario.entity';
+import { Asignacion, GenerationSummary, Horario } from '../../domain/entities/horario.entity';
 import { PreValidationResult } from '../../application/use-cases/validate-pre-generation.use-case';
 import { UnassignedUnit } from '../../domain/services/schedule-generator.service';
 import { GenerationPreCheck } from './generation-pre-check';
 import { GenerationProgress } from './generation-progress';
 import { GenerationSummaryPanel } from './generation-summary';
 import { HorarioGrid } from './horario-grid';
+import { AsignacionEditDialog } from './asignacion-edit-dialog';
+import { HorarioApprovalPanel } from './horario-approval-panel';
 import { validateGenerationAction } from '../actions/validate-generation.action';
 import { generateHorarioAction } from '../actions/generate-horario.action';
 import { getHorarioAction } from '../actions/get-horario.action';
@@ -26,9 +28,12 @@ export function HorariosContent() {
   const [periodo, setPeriodo] = useState<Periodo | null>(null);
   const [preCheck, setPreCheck] = useState<PreValidationResult | null>(null);
   const [generatingPhase, setGeneratingPhase] = useState(1);
+  const [horario, setHorario] = useState<Horario | null>(null);
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [summary, setSummary] = useState<GenerationSummary | null>(null);
   const [unassigned, setUnassigned] = useState<UnassignedUnit[]>([]);
+
+  const [editingAsignacion, setEditingAsignacion] = useState<Asignacion | null>(null);
 
   // Name maps for the grid
   const [docenteNames, setDocenteNames] = useState<Map<string, string>>(new Map());
@@ -104,9 +109,9 @@ export function HorariosContent() {
     (aulasRes.data ?? []).forEach((a) => aNames.set(a.id, `${a.codigo} - ${a.nombre}`));
     setAulaNames(aNames);
 
-    // Check if horario already exists
     const horarioResult = await getHorarioAction(currentPeriodo.id);
     if (horarioResult.data) {
+      setHorario(horarioResult.data.horario);
       setAsignaciones(horarioResult.data.asignaciones);
       setSummary(horarioResult.data.horario.resumen);
       setState('result');
@@ -241,13 +246,42 @@ export function HorariosContent() {
             <GenerationSummaryPanel summary={summary} unassigned={unassigned} />
           )}
 
+          {horario && user?.role === 'director' && (
+            <HorarioApprovalPanel
+              horarioId={horario.id}
+              horarioEstado={horario.estado}
+              periodoEstado={periodo?.state ?? 'Configuración'}
+              onStateChanged={loadData}
+            />
+          )}
+
           <HorarioGrid
             asignaciones={asignaciones}
             docenteNames={docenteNames}
             cursoNames={cursoNames}
             aulaNames={aulaNames}
             grupoCiclos={grupoCiclos}
+            editable={
+              (periodo?.state === 'Generación' && horario?.estado === 'borrador') ||
+              (periodo?.state === 'Publicado' && horario?.estado === 'publicado' && user?.role === 'director')
+            }
+            onSelectAsignacion={(a) => setEditingAsignacion(a)}
           />
+
+          {editingAsignacion && (
+            <AsignacionEditDialog
+              asignacion={editingAsignacion}
+              docenteName={docenteNames.get(editingAsignacion.docenteId) ?? 'Desconocido'}
+              cursoName={cursoNames.get(editingAsignacion.grupoId) ?? 'Curso'}
+              aulaName={aulaNames.get(editingAsignacion.aulaId) ?? 'Aula'}
+              isPostPublish={horario?.estado === 'publicado'}
+              onClose={() => setEditingAsignacion(null)}
+              onSuccess={() => {
+                setEditingAsignacion(null);
+                loadData();
+              }}
+            />
+          )}
         </>
       )}
     </div>

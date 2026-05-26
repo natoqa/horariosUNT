@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Periodo } from '../../domain/entities/periodo.entity';
 import { getPeriodosAction } from '../actions/get-periodos.action';
 import { PeriodoStatusBadge } from './periodo-status-badge';
 import { PeriodoStateActions } from './periodo-state-actions';
 
-export function PeriodoTable() {
+export interface PeriodoTableRef {
+  refresh: () => void;
+}
+
+export const PeriodoTable = forwardRef<PeriodoTableRef>(function PeriodoTable(_, ref) {
   const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +26,8 @@ export function PeriodoTable() {
     }
     setLoading(false);
   }, []);
+
+  useImperativeHandle(ref, () => ({ refresh: loadPeriodos }));
 
   useEffect(() => {
     loadPeriodos();
@@ -106,4 +112,4 @@ export function PeriodoTable() {
       </table>
     </div>
   );
-}
+});

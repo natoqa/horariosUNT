@@ -1,4 +1,4 @@
-import { PeriodoForm, PeriodoTable } from '@/modules/periodos';
+import { PeriodosContent } from '@/modules/periodos';
 import { CalendarDays } from 'lucide-react';
 
 export default function PeriodosPage() {
@@ -15,16 +15,7 @@ export default function PeriodosPage() {
           <CalendarDays className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-sm font-semibold mb-4">Crear nuevo periodo</h2>
-        <PeriodoForm />
-      </div>
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-border">
-          <h2 className="text-sm font-semibold">Periodos registrados</h2>
-        </div>
-        <PeriodoTable />
-      </div>
+      <PeriodosContent />
     </div>
   );
 }

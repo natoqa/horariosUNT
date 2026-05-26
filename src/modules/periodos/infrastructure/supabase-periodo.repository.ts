@@ -68,7 +68,7 @@ export class SupabasePeriodoRepository implements IPeriodoRepository {
       .single();
 
     if (error || !data) {
-      throw new Error('Error al crear el período académico.');
+      throw new Error(error?.message || 'Error al crear el período académico.');
     }
     return this.mapToPeriodo(data as PeriodoRow);
   }

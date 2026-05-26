@@ -5,6 +5,7 @@ import { Periodo } from '../../domain/entities/periodo.entity';
 
 const VALID_DTO = {
   name: '2026-I',
+  tipoCiclo: 'Impar' as const,
   startDate: '2026-08-01',
   endDate: '2026-12-15',
   availabilityDeadline: '2026-07-15',
@@ -13,6 +14,7 @@ const VALID_DTO = {
 const SAVED_PERIODO: Periodo = {
   id: 'uuid-123',
   name: '2026-I',
+  tipoCiclo: 'Impar',
   startDate: '2026-08-01',
   endDate: '2026-12-15',
   availabilityDeadline: '2026-07-15',
@@ -52,6 +54,7 @@ describe('CreatePeriodoUseCase', () => {
     expect(mockRepo.findActive).toHaveBeenCalled();
     expect(mockRepo.save).toHaveBeenCalledWith({
       name: '2026-I',
+      tipoCiclo: 'Impar',
       startDate: '2026-08-01',
       endDate: '2026-12-15',
       availabilityDeadline: '2026-07-15',

@@ -77,6 +77,7 @@ export const PeriodoTable = forwardRef<PeriodoTableRef>(function PeriodoTable(_,
         <thead>
           <tr className="border-b border-border bg-muted/30">
             <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Nombre</th>
+            <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Ciclos</th>
             <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Inicio</th>
             <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Fin</th>
             <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Limite Disp.</th>
@@ -88,6 +89,15 @@ export const PeriodoTable = forwardRef<PeriodoTableRef>(function PeriodoTable(_,
           {periodos.map((periodo) => (
             <tr key={periodo.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
               <td className="px-6 py-3.5 font-medium text-foreground">{periodo.name}</td>
+              <td className="px-6 py-3.5">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+                  periodo.tipoCiclo === 'Impar'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                    : 'bg-violet-50 text-violet-700 border border-violet-100'
+                }`}>
+                  {periodo.tipoCiclo === 'Impar' ? 'Impar (I,III,V,VII,IX)' : 'Par (II,IV,VI,VIII,X)'}
+                </span>
+              </td>
               <td className="px-6 py-3.5 text-muted-foreground">
                 {new Date(periodo.startDate).toLocaleDateString('es-PE')}
               </td>

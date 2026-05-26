@@ -32,6 +32,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [filterTipoCiclo, setFilterTipoCiclo] = useState('');
   const [filterCiclo, setFilterCiclo] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
@@ -45,6 +46,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
     setError(null);
     const result = await getCursosAction({
       search: search || undefined,
+      tipoCiclo: (filterTipoCiclo as 'Impar' | 'Par') || undefined,
       ciclo: filterCiclo || undefined,
       tipo: filterTipo || undefined,
       estado: filterEstado || undefined,
@@ -55,7 +57,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       setError(result.message || 'Error al cargar cursos.');
     }
     setLoading(false);
-  }, [search, filterCiclo, filterTipo, filterEstado]);
+  }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado]);
 
   useImperativeHandle(ref, () => ({ refresh: loadCursos }));
 
@@ -79,14 +81,32 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
           />
         </div>
         <select
+          value={filterTipoCiclo}
+          onChange={(e) => {
+            setFilterTipoCiclo(e.target.value);
+            setFilterCiclo(''); // Reset specific cycle when changing type
+          }}
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="">Cualquier tipo de ciclo</option>
+          <option value="Impar">Ciclos Impares</option>
+          <option value="Par">Ciclos Pares</option>
+        </select>
+        <select
           value={filterCiclo}
           onChange={(e) => setFilterCiclo(e.target.value)}
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
         >
           <option value="">Todos los ciclos</option>
-          {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'].map((c) => (
-            <option key={c} value={c}>Ciclo {c}</option>
-          ))}
+          {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+            .filter((c) => {
+              if (filterTipoCiclo === 'Impar') return ['I', 'III', 'V', 'VII', 'IX'].includes(c);
+              if (filterTipoCiclo === 'Par') return ['II', 'IV', 'VI', 'VIII', 'X'].includes(c);
+              return true;
+            })
+            .map((c) => (
+              <option key={c} value={c}>Ciclo {c}</option>
+            ))}
         </select>
         <select
           value={filterTipo}

@@ -6,10 +6,13 @@ import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { ReportFilterType } from '../../domain/entities/report-config.entity';
 import { PdfFilterPanel } from './pdf-filter-panel';
+import { CargaDocenteReport } from './carga-docente-report';
+import { OcupacionAulasReport } from './ocupacion-aulas-report';
 import { generatePdfAction } from '../actions/generate-pdf.action';
 import { generateExcelAction } from '../actions/generate-excel.action';
 
 type ContentState = 'loading' | 'error' | 'empty' | 'ready' | 'generating-pdf' | 'generating-excel';
+type ReportTab = 'horarios' | 'carga-docente' | 'ocupacion-aulas';
 
 interface PeriodoOption {
   id: string;
@@ -27,6 +30,7 @@ export function ReportesContent() {
   const [filterType, setFilterType] = useState<ReportFilterType>('all');
   const [filterId, setFilterId] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ReportTab>('horarios');
 
   const loadPeriodos = useCallback(async () => {
     setState('loading');
@@ -43,7 +47,7 @@ export function ReportesContent() {
 
     if (error) {
       setState('error');
-      setErrorMessage('Error al cargar períodos.');
+      setErrorMessage('Error al cargar periodos.');
       return;
     }
 
@@ -67,7 +71,7 @@ export function ReportesContent() {
     if (authLoading) return;
     if (!user) {
       setState('error');
-      setErrorMessage('Debe iniciar sesión.');
+      setErrorMessage('Debe iniciar sesion.');
       return;
     }
     loadPeriodos();
@@ -162,19 +166,25 @@ export function ReportesContent() {
     return (
       <div className="rounded-xl border border-border bg-card p-12 text-center space-y-3">
         <FileText className="w-10 h-10 text-muted-foreground mx-auto" />
-        <p className="text-sm font-medium text-foreground">Sin períodos disponibles</p>
+        <p className="text-sm font-medium text-foreground">Sin periodos disponibles</p>
         <p className="text-xs text-muted-foreground">
-          No hay períodos en estado Aprobado, Publicado o Cerrado para generar reportes.
+          No hay periodos en estado Aprobado, Publicado o Cerrado para generar reportes.
         </p>
       </div>
     );
   }
 
+  const tabs: { key: ReportTab; label: string }[] = [
+    { key: 'horarios', label: 'Horarios' },
+    { key: 'carga-docente', label: 'Carga Docente' },
+    { key: 'ocupacion-aulas', label: 'Ocupacion Aulas' },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-card p-6 space-y-5">
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">Período académico</label>
+          <label className="text-xs font-medium text-muted-foreground">Periodo academico</label>
           <select
             value={selectedPeriodoId}
             onChange={(e) => setSelectedPeriodoId(e.target.value)}
@@ -188,60 +198,97 @@ export function ReportesContent() {
           </select>
         </div>
 
-        <PdfFilterPanel
-          filterType={filterType}
-          filterId={filterId}
-          onFilterTypeChange={setFilterType}
-          onFilterIdChange={setFilterId}
-        />
-
-        {errorMessage && (
-          <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {errorMessage}
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {successMessage}
-          </div>
-        )}
-
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            disabled={!selectedPeriodoId || state === 'generating-pdf' || state === 'generating-excel'}
-            onClick={handleDownloadExcel}
-          >
-            {state === 'generating-excel' ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                Generando Excel...
-              </>
-            ) : (
-              <>
-                <Sheet className="w-4 h-4 mr-1.5" />
-                Descargar Excel
-              </>
-            )}
-          </Button>
-          <Button
-            disabled={!canGenerate || state === 'generating-pdf' || state === 'generating-excel'}
-            onClick={handleDownloadPdf}
-          >
-            {state === 'generating-pdf' ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                Generando PDF...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 mr-1.5" />
-                Descargar PDF
-              </>
-            )}
-          </Button>
+        <div className="flex gap-1 border-b border-border">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeTab === tab.key
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.key && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+              )}
+            </button>
+          ))}
         </div>
+
+        {activeTab === 'horarios' && (
+          <div className="space-y-5">
+            <PdfFilterPanel
+              filterType={filterType}
+              filterId={filterId}
+              onFilterTypeChange={setFilterType}
+              onFilterIdChange={setFilterId}
+            />
+
+            {errorMessage && (
+              <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {errorMessage}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {successMessage}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                disabled={!selectedPeriodoId || state === 'generating-pdf' || state === 'generating-excel'}
+                onClick={handleDownloadExcel}
+              >
+                {state === 'generating-excel' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    Generando Excel...
+                  </>
+                ) : (
+                  <>
+                    <Sheet className="w-4 h-4 mr-1.5" />
+                    Descargar Excel
+                  </>
+                )}
+              </Button>
+              <Button
+                disabled={!canGenerate || state === 'generating-pdf' || state === 'generating-excel'}
+                onClick={handleDownloadPdf}
+              >
+                {state === 'generating-pdf' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    Generando PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-1.5" />
+                    Descargar PDF
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'carga-docente' && selectedPeriodoId && (
+          <CargaDocenteReport
+            key={selectedPeriodoId}
+            periodoId={selectedPeriodoId}
+          />
+        )}
+
+        {activeTab === 'ocupacion-aulas' && selectedPeriodoId && (
+          <OcupacionAulasReport
+            key={selectedPeriodoId}
+            periodoId={selectedPeriodoId}
+          />
+        )}
       </div>
     </div>
   );

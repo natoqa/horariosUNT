@@ -13,6 +13,18 @@ interface DisponibilidadRow {
   updated_at: string;
 }
 
+const ESTADO_TO_DB: Record<string, string> = {
+  disponible: 'Disponible',
+  no_disponible: 'No disponible',
+  preferido: 'Preferido',
+};
+
+const DB_TO_ESTADO: Record<string, string> = {
+  'Disponible': 'disponible',
+  'No disponible': 'no_disponible',
+  'Preferido': 'preferido',
+};
+
 export class SupabaseDisponibilidadRepository implements IDisponibilidadRepository {
   async findByDocenteAndPeriodo(docenteId: string, periodoId: string): Promise<Disponibilidad[]> {
     const supabase = await createClient();
@@ -23,7 +35,7 @@ export class SupabaseDisponibilidadRepository implements IDisponibilidadReposito
       .eq('periodo_id', periodoId);
 
     if (error || !data) return [];
-    return (data as DisponibilidadRow[]).map(this.mapToEntity);
+    return (data as DisponibilidadRow[]).map(this.mapToEntity.bind(this));
   }
 
   async saveBulk(
@@ -50,7 +62,7 @@ export class SupabaseDisponibilidadRepository implements IDisponibilidadReposito
       periodo_id: periodoId,
       dia: b.dia,
       bloque: b.bloque,
-      estado: b.estado,
+      estado: ESTADO_TO_DB[b.estado] || b.estado,
     }));
 
     const { data, error: insertError } = await supabase
@@ -62,7 +74,7 @@ export class SupabaseDisponibilidadRepository implements IDisponibilidadReposito
       throw new Error(insertError?.message || 'Error al guardar disponibilidad.');
     }
 
-    return (data as DisponibilidadRow[]).map(this.mapToEntity);
+    return (data as DisponibilidadRow[]).map(this.mapToEntity.bind(this));
   }
 
   private mapToEntity(row: DisponibilidadRow): Disponibilidad {
@@ -72,7 +84,7 @@ export class SupabaseDisponibilidadRepository implements IDisponibilidadReposito
       periodoId: row.periodo_id,
       dia: row.dia as Disponibilidad['dia'],
       bloque: row.bloque as Disponibilidad['bloque'],
-      estado: row.estado as Disponibilidad['estado'],
+      estado: (DB_TO_ESTADO[row.estado] || row.estado) as Disponibilidad['estado'],
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

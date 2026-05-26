@@ -4,6 +4,7 @@ import { Grupo } from '../entities/grupo.entity';
 export interface CursoFilters {
   search?: string;
   ciclo?: string;
+  tipoCiclo?: 'Impar' | 'Par';
   tipo?: string;
   estado?: string;
 }

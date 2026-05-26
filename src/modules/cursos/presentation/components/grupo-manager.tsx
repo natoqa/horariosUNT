@@ -8,6 +8,8 @@ import {
   getActivePeriodoAction,
   addGrupoAction,
   removeGrupoAction,
+  getDocentesForSelectAction,
+  DocenteOption,
 } from '../actions/manage-grupos.action';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -23,6 +25,7 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
   const [activePeriodId, setActivePeriodId] = useState<string | null>(null);
   const [activePeriodName, setActivePeriodName] = useState<string>('');
   const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const [docentes, setDocentes] = useState<DocenteOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionPending, setActionPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,12 +46,18 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
       if (periodRes.id) {
         setActivePeriodId(periodRes.id);
         setActivePeriodName(periodRes.name || '');
-        
-        const gruposRes = await getGruposAction(curso.id, periodRes.id);
+
+        const [gruposRes, docentesRes] = await Promise.all([
+          getGruposAction(curso.id, periodRes.id),
+          getDocentesForSelectAction(),
+        ]);
         if (gruposRes.data) {
           setGrupos(gruposRes.data);
         } else if (gruposRes.message) {
           setError(gruposRes.message);
+        }
+        if (docentesRes.data) {
+          setDocentes(docentesRes.data);
         }
       }
       setLoading(false);
@@ -148,7 +157,7 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
                 <h3 className="text-xs font-semibold text-foreground">Agregar Nueva Sección</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <Label className="text-[10px] font-medium text-muted-foreground">Nombre de Sección</Label>
+                    <Label className="text-[10px] font-medium text-muted-foreground">Nombre de Seccion</Label>
                     <Input
                       name="nombre"
                       placeholder="Ej: A"
@@ -174,6 +183,21 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
                     )}
                   </div>
                 </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-medium text-muted-foreground">Docente asignado</Label>
+                  <select
+                    name="docenteId"
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">Sin asignar</option>
+                    {docentes.map((d) => (
+                      <option key={d.id} value={d.id}>{d.nombre}</option>
+                    ))}
+                  </select>
+                  {fieldErrors.docenteId && (
+                    <p className="text-[10px] text-destructive">{fieldErrors.docenteId[0]}</p>
+                  )}
+                </div>
 
                 <div className="flex justify-end pt-1">
                   <Button type="submit" disabled={actionPending} size="xs" className="h-8">
@@ -197,11 +221,20 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
                   </p>
                 ) : (
                   <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
-                    {grupos.map((g) => (
+                    {grupos.map((g) => {
+                      const docenteName = g.docenteId
+                        ? docentes.find((d) => d.id === g.docenteId)?.nombre ?? 'Docente asignado'
+                        : null;
+                      return (
                       <div key={g.id} className="flex items-center justify-between p-3.5 bg-card hover:bg-muted/10 transition-colors">
                         <div>
-                          <p className="text-xs font-bold text-foreground">Sección {g.nombre}</p>
+                          <p className="text-xs font-bold text-foreground">Seccion {g.nombre}</p>
                           <p className="text-[10px] text-muted-foreground">Aforo estimado: {g.numEstudiantes} estudiantes</p>
+                          {docenteName ? (
+                            <p className="text-[10px] text-blue-700 font-medium mt-0.5">{docenteName}</p>
+                          ) : (
+                            <p className="text-[10px] text-amber-600 italic mt-0.5">Sin docente asignado</p>
+                          )}
                         </div>
                         <Button
                           variant="ghost"
@@ -212,7 +245,8 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

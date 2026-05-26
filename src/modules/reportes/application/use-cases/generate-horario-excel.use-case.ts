@@ -146,18 +146,19 @@ export class GenerateHorarioExcelUseCase {
   ): void {
     const sheet = workbook.addWorksheet('Carga Docente');
 
-    sheet.mergeCells('A1', 'F1');
+    sheet.mergeCells('A1', 'G1');
     const titleCell = sheet.getCell('A1');
     titleCell.value = `Carga Docente — ${periodoName}`;
     titleCell.font = { bold: true, size: 12 };
 
     const headerRow = sheet.addRow([
       'Docente',
-      'Categoría',
-      'Régimen',
+      'Categoria',
+      'Regimen',
       'Horas Asignadas',
-      'Horas Máximas',
+      'Horas Maximas',
       '% Carga',
+      'Cursos Asignados',
     ]);
     headerRow.eachCell((cell) => {
       cell.fill = HEADER_FILL;
@@ -172,10 +173,18 @@ export class GenerateHorarioExcelUseCase {
     sheet.getColumn(4).width = 16;
     sheet.getColumn(5).width = 16;
     sheet.getColumn(6).width = 12;
+    sheet.getColumn(7).width = 40;
 
     const horasPorDocente = new Map<string, number>();
+    const cursosPorDocente = new Map<string, Set<string>>();
     for (const a of asignaciones) {
       horasPorDocente.set(a.docenteId, (horasPorDocente.get(a.docenteId) ?? 0) + 1);
+
+      const cursoName = nameMaps.cursos.get(a.grupoId) ?? '';
+      if (!cursosPorDocente.has(a.docenteId)) {
+        cursosPorDocente.set(a.docenteId, new Set());
+      }
+      if (cursoName) cursosPorDocente.get(a.docenteId)!.add(cursoName);
     }
 
     for (const docente of docenteInfos) {
@@ -183,6 +192,8 @@ export class GenerateHorarioExcelUseCase {
       const porcentaje = docente.cargaMaxima > 0
         ? Math.round((horas / docente.cargaMaxima) * 100)
         : 0;
+      const cursosSet = cursosPorDocente.get(docente.id);
+      const cursosStr = cursosSet ? Array.from(cursosSet).join(', ') : '';
 
       const row = sheet.addRow([
         docente.nombre,
@@ -191,11 +202,12 @@ export class GenerateHorarioExcelUseCase {
         horas,
         docente.cargaMaxima,
         `${porcentaje}%`,
+        cursosStr,
       ]);
 
       row.eachCell((cell) => {
         cell.border = BORDER_STYLE;
-        cell.alignment = { vertical: 'middle' };
+        cell.alignment = { vertical: 'middle', wrapText: true };
       });
 
       if (porcentaje >= 90) {

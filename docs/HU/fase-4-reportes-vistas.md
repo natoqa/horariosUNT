@@ -1,7 +1,7 @@
 # Historias de Usuario — Fase 4: Reportes y Vistas
 
 > Módulos: `reportes`
-> Estado global: ✅ 2/6 DONE — 4 pendientes
+> Estado global: ✅ 4/6 DONE — 2 pendientes
 
 ---
 
@@ -48,7 +48,7 @@
 
 ---
 
-## HU-019 — Reporte de carga docente ⏳ PENDING
+## HU-019 — Reporte de carga docente ✅ DONE
 **Como** Director de Escuela
 **Quiero** generar un reporte de carga docente
 **Para** verificar la distribución equitativa de horas y cursos
@@ -62,7 +62,7 @@
 
 ---
 
-## HU-020 — Visualización de horario por aula ⏳ PENDING
+## HU-020 — Visualización de horario por aula ✅ DONE
 **Como** Director de Escuela
 **Quiero** ver el horario de ocupación de cada aula
 **Para** evaluar la eficiencia en el uso de los espacios físicos

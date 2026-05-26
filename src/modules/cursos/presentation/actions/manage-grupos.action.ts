@@ -38,7 +38,7 @@ export async function getActivePeriodoAction(): Promise<{ id?: string; name?: st
 
   const { data, error } = await supabase
     .from('periodos')
-    .select('id, nombre')
+    .select('id, name')
     .neq('state', 'Cerrado')
     .order('created_at', { ascending: false })
     .limit(1)
@@ -48,7 +48,33 @@ export async function getActivePeriodoAction(): Promise<{ id?: string; name?: st
     return { message: 'No hay ningún período activo registrado.' };
   }
 
-  return { id: data.id, name: data.nombre };
+  return { id: data.id, name: data.name };
+}
+
+export interface DocenteOption {
+  id: string;
+  nombre: string;
+}
+
+export async function getDocentesForSelectAction(): Promise<{ data?: DocenteOption[]; message?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { message: 'No autorizado.' };
+
+  const { data, error } = await supabase
+    .from('docentes')
+    .select('id, nombres, apellidos')
+    .eq('estado', 'Activo')
+    .order('apellidos', { ascending: true });
+
+  if (error || !data) return { message: 'Error al cargar docentes.' };
+
+  return {
+    data: data.map((d) => ({
+      id: d.id,
+      nombre: `${d.apellidos}, ${d.nombres}`,
+    })),
+  };
 }
 
 export async function addGrupoAction(
@@ -70,6 +96,7 @@ export async function addGrupoAction(
   const raw = {
     cursoId: formData.get('cursoId') as string,
     periodoId: formData.get('periodoId') as string,
+    docenteId: formData.get('docenteId') as string,
     nombre: formData.get('nombre') as string,
     numEstudiantes: formData.get('numEstudiantes') as string,
   };

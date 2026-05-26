@@ -42,6 +42,7 @@ export async function validateGenerationAction(
     const periodo: Periodo = {
       id: periodoRes.data.id,
       name: periodoRes.data.name,
+      tipoCiclo: periodoRes.data.tipo_ciclo,
       startDate: periodoRes.data.start_date,
       endDate: periodoRes.data.end_date,
       availabilityDeadline: periodoRes.data.availability_deadline,
@@ -68,7 +69,7 @@ export async function validateGenerationAction(
 
     const grupos: Grupo[] = (gruposRes.data ?? []).map((g) => ({
       id: g.id, cursoId: g.curso_id, periodoId: g.periodo_id,
-      nombre: g.nombre, numEstudiantes: g.num_estudiantes,
+      docenteId: g.docente_id ?? null, nombre: g.nombre, numEstudiantes: g.num_estudiantes,
       createdAt: g.created_at, updatedAt: g.updated_at,
     }));
 

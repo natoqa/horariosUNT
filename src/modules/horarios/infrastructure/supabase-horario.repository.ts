@@ -8,7 +8,7 @@ interface HorarioRow {
   periodo_id: string;
   estado: string;
   fecha_generacion: string;
-  resumen: string | null;
+  metadata: any;
   created_at: string;
   updated_at: string;
 }
@@ -62,9 +62,9 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       .from('horarios')
       .insert({
         periodo_id: periodoId,
-        estado: 'borrador',
+        estado: 'Borrador',
         fecha_generacion: new Date().toISOString(),
-        resumen: JSON.stringify(resumen),
+        metadata: resumen,
       })
       .select()
       .single();
@@ -179,12 +179,11 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
 
   private mapToHorario(row: HorarioRow): Horario {
     let resumen: GenerationSummary | null = null;
-    if (row.resumen) {
-      try {
-        resumen = JSON.parse(row.resumen) as GenerationSummary;
-      } catch {
-        resumen = null;
-      }
+    if (row.metadata) {
+      // metadata is typically a parsed JSON object when returned by Supabase
+      resumen = typeof row.metadata === 'string' 
+        ? JSON.parse(row.metadata) 
+        : (row.metadata as GenerationSummary);
     }
 
     return {

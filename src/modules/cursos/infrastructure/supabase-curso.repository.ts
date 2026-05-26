@@ -23,6 +23,7 @@ interface GrupoRow {
   id: string;
   curso_id: string;
   periodo_id: string;
+  docente_id: string | null;
   nombre: string;
   num_estudiantes: number;
   created_at: string;
@@ -53,6 +54,13 @@ export class SupabaseCursoRepository implements ICursoRepository {
     }
     if (filters?.ciclo) {
       query = query.eq('ciclo', filters.ciclo);
+    }
+    if (filters?.tipoCiclo) {
+      if (filters.tipoCiclo === 'Impar') {
+        query = query.in('ciclo', ['I', 'III', 'V', 'VII', 'IX']);
+      } else if (filters.tipoCiclo === 'Par') {
+        query = query.in('ciclo', ['II', 'IV', 'VI', 'VIII', 'X']);
+      }
     }
     if (filters?.tipo) {
       query = query.eq('tipo', filters.tipo);
@@ -173,6 +181,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
       .insert({
         curso_id: grupo.cursoId,
         periodo_id: grupo.periodoId,
+        docente_id: grupo.docenteId,
         nombre: grupo.nombre,
         num_estudiantes: grupo.numEstudiantes,
       })
@@ -220,6 +229,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
       id: row.id,
       cursoId: row.curso_id,
       periodoId: row.periodo_id,
+      docenteId: row.docente_id,
       nombre: row.nombre,
       numEstudiantes: row.num_estudiantes,
       createdAt: row.created_at,

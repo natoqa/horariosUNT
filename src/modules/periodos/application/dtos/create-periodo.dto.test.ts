@@ -3,6 +3,7 @@ import { createPeriodoSchema } from './create-periodo.dto';
 
 const VALID_DTO = {
   name: '2026-I',
+  tipoCiclo: 'Impar',
   startDate: '2026-08-01',
   endDate: '2026-12-15',
   availabilityDeadline: '2026-07-15',

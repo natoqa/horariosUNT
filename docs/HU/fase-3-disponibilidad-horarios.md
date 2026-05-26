@@ -1,11 +1,11 @@
 # Historias de Usuario — Fase 3: Disponibilidad y Horarios
 
 > Módulos: `disponibilidad`, `horarios`
-> Estado global: ⏳ 0/5 READY — Todas pendientes
+> Estado global: ✅ 2/5 DONE — 3 pendientes
 
 ---
 
-## HU-005 — Registro de disponibilidad docente ⏳ PENDING
+## HU-005 — Registro de disponibilidad docente ✅ DONE
 **Como** Docente
 **Quiero** registrar mis bloques horarios disponibles para el próximo semestre
 **Para** que el sistema considere mi disponibilidad al generar el horario
@@ -24,7 +24,7 @@
 
 ---
 
-## HU-008 — Generación automática de horarios ⏳ PENDING
+## HU-008 — Generación automática de horarios ✅ DONE
 **Como** Director de Escuela
 **Quiero** ejecutar la generación automática del horario
 **Para** obtener una propuesta óptima de asignación de docentes, cursos y aulas

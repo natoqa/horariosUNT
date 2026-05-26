@@ -13,10 +13,10 @@
 |---|---|---|---|
 | Fase 1 — Autenticación | 3 | 0 | 3 |
 | Fase 2 — Gestión de Datos | 9 | 0 | 9 |
-| Fase 3 — Disponibilidad y Horarios | 0 | 5 | 5 |
+| Fase 3 — Disponibilidad y Horarios | 2 | 3 | 5 |
 | Fase 4 — Reportes y Vistas | 0 | 6 | 6 |
 | Fase 5 — Dashboard y Sistema | 1 | 2 | 3 |
-| **TOTAL** | **13** | **13** | **26** |
+| **TOTAL** | **15** | **11** | **26** |
 
 ---
 
@@ -30,7 +30,7 @@ La documentación completa se encuentra organizada en la carpeta `docs/`:
 |---|---|---|
 | `fase-1-autenticacion.md` | HU-001, HU-021, HU-025 — Login, cambio y recuperación de contraseña | ✅ 3/3 READY |
 | `fase-2-gestion-datos.md` | HU-002 a HU-007, HU-017, HU-018, HU-022 — Períodos, docentes, cursos, aulas, grupos | ✅ 9/9 READY |
-| `fase-3-disponibilidad-horarios.md` | HU-005, HU-008 a HU-010, HU-023 — Disponibilidad, generación, modificación, aprobación | ⏳ 0/5 READY |
+| `fase-3-disponibilidad-horarios.md` | HU-005, HU-008 a HU-010, HU-023 — Disponibilidad, generación, modificación, aprobación | ✅ 2/5 DONE |
 | `fase-4-reportes-vistas.md` | HU-011 a HU-013, HU-019, HU-020, HU-024 — PDF, Excel, vistas por aula/ciclo/docente | ⏳ 0/6 READY |
 | `fase-5-dashboard-sistema.md` | HU-014 a HU-016 — Dashboard, auditoría, notificaciones | ✅ 1/3 READY |
 
@@ -50,6 +50,7 @@ Arquitectura, UI, seguridad y convenciones se cargan automáticamente según el 
 
 ## Próximo Paso
 
-Implementar las HUs de **Fase 3 — Disponibilidad y Horarios** (HU-005, HU-008):
-1. Módulo `src/modules/disponibilidad/` — Grilla interactiva de disponibilidad docente
-2. Módulo `src/modules/horarios/` — Algoritmo de generación automática
+Implementar las HUs restantes de **Fase 3** (HU-009, HU-010, HU-023):
+1. HU-009 — Modificación manual de horario
+2. HU-010 — Aprobación y publicación del horario
+3. HU-023 — Horario post-publicación con control de cambios

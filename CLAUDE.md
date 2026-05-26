@@ -1,86 +1,40 @@
-# CLAUDE.md — Sistema de Horarios Académicos UNT
+# CLAUDE.md — Horarios Académicos UNT
 
 ## Proyecto
 Sistema Inteligente de Gestión y Generación Automática de Horarios Académicos
 Escuela Profesional de Ingeniería de Sistemas — Universidad Nacional de Trujillo
 
-## Documentos de referencia
-- `PLANNING.md` → Requerimientos (RF-001 a RF-062), reglas de negocio (RN-001 a RN-032), historias de usuario, algoritmo de generación. **Leer antes de implementar cualquier módulo.**
-- `STRUCTURE.md` → Arquitectura de carpetas, reglas de dependencia, qué va en cada capa.
-- `UI_GUIDELINES.md` → **Reglas de interfaz obligatorias.** Colores, tipografía, layout de páginas, tablas, formularios, estados. **Leer antes de crear cualquier componente de UI.**
+## Reglas automáticas (`.claude/rules/`)
+Las reglas se cargan automáticamente según el contexto:
 
-## Stack (versiones exactas — no cambiar)
-- Next.js 16.2.6 (App Router, Server Components, Server Actions)
-- TypeScript strict mode
-- Tailwind CSS 4.3.0
-- Shadcn/UI CLI v4 (Radix UI)
-- React Hook Form + Zod
-- TanStack Table
-- Supabase (PostgreSQL, Auth, RLS)
-- PDF-lib + ExcelJS (reportes)
-- Despliegue: Vercel + Supabase Cloud
+| # | Rule | Tipo | Carga cuando... |
+|---|---|---|---|
+| 00 | `00-core.md` | always | Siempre |
+| 01 | `01-code-conventions.md` | always | Siempre |
+| 02 | `02-module-architecture.md` | path | Tocas `src/modules/**` |
+| 03 | `03-ui-guidelines.md` | path | Tocas `src/**/presentation/**`, `src/**/components/**` |
+| 04 | `04-app-router.md` | path | Tocas `src/app/**` |
+| 05 | `05-security.md` | path | Tocas `src/modules/auth/**`, proxy, layout |
+| 06 | `06-database.md` | path | Tocas `src/**/infrastructure/**` |
+| 07 | `07-algorithm.md` | path | Tocas `src/modules/horarios/**` |
+| 08 | `08-validation.md` | path | Tocas `src/**/dtos/**`, `src/**/actions/**` |
 
-## Arquitectura: Clean Architecture + Module-First
+## Skills (`.claude/skills/`)
+Flujo de desarrollo en 2 fases:
 
-```
-src/
-├── shared/              # Componentes UI, hooks, utils compartidos
-├── modules/             # Cada módulo es independiente
-│   ├── auth/
-│   ├── periodos/
-│   ├── docentes/
-│   ├── cursos/
-│   ├── aulas/
-│   ├── disponibilidad/
-│   ├── horarios/        # Módulo central (algoritmo)
-│   ├── reportes/
-│   ├── dashboard/
-│   ├── auditoria/
-│   └── notificaciones/
-└── app/                 # Solo ruteo Next.js, sin lógica
-```
+| Skill | Fase | Descripción |
+|---|---|---|
+| `/planificar` | 1 — Plan | Analiza HU + código existente → emite plan en `docs/planes/` |
+| `/implementar` | 2 — Implementar | Ejecuta el plan paso a paso (domain → app → infra → presentation) |
 
-Cada módulo tiene: `domain/ → application/ → infrastructure/ → presentation/`
+**Flujo:** `/planificar <HU o módulo>` → revisar plan → `/implementar <plan>`
 
-## Reglas obligatorias
-
-### Independencia de módulos
-- Un módulo SOLO importa de: sí mismo, `shared/`, o el `index.ts` de otro módulo. Motivo: evitar acoplamiento y conflictos de merge en equipo.
-- NUNCA importar archivos internos de otro módulo. Usar el barrel `index.ts`. Motivo: si el módulo cambia internamente, no rompe a los demás.
-- `domain/` NO importa de `infrastructure/`, `presentation/` ni de Next.js/Supabase/React.
-
-### Next.js
-- Server Components por defecto. `'use client'` solo con interactividad. Motivo: menos JS al navegador.
-- Server Actions para mutaciones. No crear endpoints REST para CRUD. Motivo: menos boilerplate.
-- Las páginas en `app/` son delgadas: solo importan componentes de `modules/`. Sin lógica de negocio.
-
-### Validación
-- Todo input se valida con Zod en el Server Action ANTES de la base de datos.
-- Esquemas Zod en `application/dtos/` de cada módulo. Se reutilizan en cliente y servidor.
-
-### Base de datos
-- No SQL directo. Usar cliente tipado de Supabase.
-- Toda tabla con RLS activado y políticas por rol.
-- No modificar esquema sin confirmación.
-
-### Seguridad
-- Control de Acceso: proxy.ts Next.js para rutas protegidas y RBAC.
-- JWT con refresh token en cookie HttpOnly, Secure, SameSite=Lax.
-- Roles: director, secretaria, docente.
-
-### Auditoría
-- Toda mutación registra entrada en auditoría. Sin excepciones.
-
-### Código
-- Código en inglés. UI en español.
-- Archivos: kebab-case. Componentes: PascalCase.
-- Manejar siempre: loading, error, empty, success.
-- Cero `any`. Usar `unknown` y validar.
-
-### Tests
-- Cada use-case y domain service debe tener test unitario.
-- Tests junto al archivo: `archivo.ts` → `archivo.test.ts`
-
-## Orden de implementación
-1. auth → 2. periodos → 3. docentes → 4. cursos → 5. aulas
-6. disponibilidad → 7. horarios → 8. reportes → 9. dashboard → 10. auditoria
+## Documentación detallada (`docs/`)
+- `docs/requerimientos.md` — RF-001 a RF-062, RNF, RN-001 a RN-032
+- `docs/algoritmo.md` — Algoritmo CSP completo y sistema de puntuación
+- `docs/workflows-seguridad-roadmap.md` — Flujos, permisos, roadmap
+- `docs/contexto.md` — Problema, objetivos, actores
+- `docs/HU/` — Historias de usuario por fase
+- `docs/planes/` — Planes de implementación generados por `/planificar`
+- `PLANNING.md` — Índice de progreso
+- `TEAM.md` — Distribución de trabajo del equipo

@@ -137,6 +137,18 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
     return this.mapToDocente(data as DocenteRow);
   }
 
+  async delete(id: string): Promise<void> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('docentes')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message || 'Error al eliminar el docente.');
+    }
+  }
+
   private mapToDocente(row: DocenteRow): Docente {
     return {
       id: row.id,

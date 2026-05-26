@@ -4,11 +4,12 @@ import { useEffect, useState, useCallback, useImperativeHandle, forwardRef } fro
 import { Docente, calcularAntiguedad } from '../../domain/entities/docente.entity';
 import { getDocentesAction } from '../actions/get-docentes.action';
 import { toggleDocenteStatusAction } from '../actions/toggle-docente-status.action';
+import { deleteDocenteAction } from '../actions/delete-docente.action';
 import { DocenteStatusBadge } from './docente-status-badge';
 import { DocenteEditDialog } from './docente-edit-dialog';
 import { CATEGORIAS_DOCENTE } from '@/shared/constants/categories';
 import { Input } from '@/shared/components/ui/input';
-import { Users, Pencil, UserCheck, UserX, Search } from 'lucide-react';
+import { Users, Pencil, UserCheck, UserX, Search, Trash2 } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 
 export interface DocenteTableRef {
@@ -25,6 +26,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
   const [filterEstado, setFilterEstado] = useState('');
   const [editingDocente, setEditingDocente] = useState<Docente | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const isDirector = user?.role === 'director';
 
@@ -63,6 +65,20 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
       setError(result.message || 'Error al cambiar estado.');
     }
     setToggling(null);
+  };
+
+  const handleDelete = async (docente: Docente) => {
+    if (!confirm(`¿Está seguro de eliminar a ${docente.nombres} ${docente.apellidos}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setDeleting(docente.id);
+    const result = await deleteDocenteAction(docente.id);
+    if (result.success) {
+      loadDocentes();
+    } else {
+      setError(result.message || 'Error al eliminar docente.');
+    }
+    setDeleting(null);
   };
 
   return (
@@ -184,6 +200,16 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                           ) : (
                             <UserCheck className="w-4 h-4" />
                           )}
+                        </button>
+                      )}
+                      {isDirector && (
+                        <button
+                          onClick={() => handleDelete(docente)}
+                          disabled={deleting === docente.id}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                          title="Eliminar docente"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       )}
                     </div>

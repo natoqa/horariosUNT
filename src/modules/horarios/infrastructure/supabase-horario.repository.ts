@@ -125,6 +125,58 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     return (data as AsignacionRow[]).map(this.mapToAsignacion);
   }
 
+  async findAsignacionById(id: string): Promise<Asignacion | null> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('asignaciones')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) return null;
+    return this.mapToAsignacion(data as AsignacionRow);
+  }
+
+  async updateAsignacion(
+    id: string,
+    updateData: Partial<Pick<Asignacion, 'docenteId' | 'aulaId' | 'dia' | 'bloque'>>,
+  ): Promise<Asignacion> {
+    const supabase = await createClient();
+
+    const dbData: Record<string, unknown> = {};
+    if (updateData.docenteId !== undefined) dbData.docente_id = updateData.docenteId;
+    if (updateData.aulaId !== undefined) dbData.aula_id = updateData.aulaId;
+    if (updateData.dia !== undefined) dbData.dia = updateData.dia;
+    if (updateData.bloque !== undefined) dbData.bloque = updateData.bloque;
+
+    const { data, error } = await supabase
+      .from('asignaciones')
+      .update(dbData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Error al actualizar la asignación.');
+    }
+    return this.mapToAsignacion(data as AsignacionRow);
+  }
+
+  async updateEstado(id: string, estado: string): Promise<Horario> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('horarios')
+      .update({ estado })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Error al actualizar estado del horario.');
+    }
+    return this.mapToHorario(data as HorarioRow);
+  }
+
   private mapToHorario(row: HorarioRow): Horario {
     let resumen: GenerationSummary | null = null;
     if (row.resumen) {

@@ -38,18 +38,26 @@ Usar Glob + Read directos (NO subagent salvo que el módulo sea muy grande):
 - `src/shared/lib/` — Utilidades y clientes Supabase.
 - Módulos hermanos (ej. `docentes/` si vas a crear `disponibilidad/`) para copiar patrones.
 
-### 4. Identificar dependencias cross-module
+### 4. Identificar roles con acceso y páginas por rol
+
+- Consultar la **tabla de acceso módulo → roles** en `.claude/rules/04-app-router.md`.
+- Identificar TODOS los roles que tienen acceso al módulo.
+- Para cada rol con acceso, listar la página `app/(dashboard)/{rol}/{modulo}/page.tsx` que se debe crear.
+- Si el módulo ya existe parcialmente, verificar que las páginas de TODOS los roles existan. Si faltan, incluirlas en "Archivos a crear".
+- Las páginas pueden diferir en título y subtítulo según el rol (ej. docente ve "Mi Horario", director ve "Horarios").
+
+### 5. Identificar dependencias cross-module
 
 - Types de otros módulos necesarios (importar vía `index.ts` barrel).
 - Permisos ya implementados en el módulo `auth`.
 - Constantes compartidas que ya existen vs. las que hay que crear.
 
-### 5. Consultar requerimientos y reglas de negocio
+### 6. Consultar requerimientos y reglas de negocio
 
 - Leer los RF y RN relevantes de `docs/requerimientos.md`.
 - Cruzar con la HU para asegurar que el plan cubra todas las reglas.
 
-### 6. Emitir el plan
+### 7. Emitir el plan
 
 Crear el archivo `docs/planes/{modulo}-{YYYY-MM-DD}.md` siguiendo la estructura de abajo.
 
@@ -91,6 +99,13 @@ Crear el archivo `docs/planes/{modulo}-{YYYY-MM-DD}.md` siguiendo la estructura 
 ### barrel
 - `src/modules/{modulo}/index.ts` — Exports públicos
 
+### Páginas por rol (app router)
+{Una página por cada rol con acceso, según tabla en 04-app-router.md}
+- `app/(dashboard)/director/{modulo}/page.tsx` — Título: "...", Subtítulo: "..."
+- `app/(dashboard)/secretaria/{modulo}/page.tsx` — Título: "...", Subtítulo: "..."
+- `app/(dashboard)/docente/{modulo}/page.tsx` — Título: "...", Subtítulo: "..."
+{Solo incluir los roles que aplican. Titulo y subtitulo pueden variar por rol.}
+
 ## Archivos a modificar
 {Ruta exacta y razón breve — ej. agregar ruta al sidebar, registrar en navegación}
 
@@ -127,6 +142,7 @@ Crear el archivo `docs/planes/{modulo}-{YYYY-MM-DD}.md` siguiendo la estructura 
 - [ ] Imports cross-module solo vía barrel `index.ts`
 - [ ] UI en español, código en inglés
 - [ ] Constantes compartidas reutilizadas (no duplicadas)
+- [ ] Páginas creadas para TODOS los roles con acceso (ver tabla en `04-app-router.md`)
 ```
 
 ## Lo que el plan NO debe contener

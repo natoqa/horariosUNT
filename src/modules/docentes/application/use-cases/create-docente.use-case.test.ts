@@ -34,6 +34,7 @@ function createMockRepo(
     findByCorreo: vi.fn().mockResolvedValue(null),
     save: vi.fn().mockResolvedValue(SAVED_DOCENTE),
     update: vi.fn().mockResolvedValue(SAVED_DOCENTE),
+    delete: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

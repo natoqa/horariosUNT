@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm install *)",
+      "Bash(npx vitest *)",
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\src\\\\shared\\\\components\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(findstr /i \"error warning success\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs -I {} basename {})",
+      "PowerShell(npx shadcn@latest add dialog table select badge tabs alert --yes 2>&1)",
+      "PowerShell(New-Item *)",
+      "PowerShell(npx tsc --noEmit 2>&1)"
+    ]
+  }
+}

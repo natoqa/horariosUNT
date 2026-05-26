@@ -31,6 +31,7 @@ export async function createPeriodoAction(
 
   const raw = {
     name: formData.get('name') as string,
+    tipoCiclo: formData.get('tipoCiclo') as string,
     startDate: formData.get('startDate') as string,
     endDate: formData.get('endDate') as string,
     availabilityDeadline: formData.get('availabilityDeadline') as string,

@@ -8,6 +8,7 @@ function makePeriodo(state: EstadoPeriodo): Periodo {
   return {
     id: 'uuid-123',
     name: '2026-I',
+    tipoCiclo: 'Impar',
     startDate: '2026-08-01',
     endDate: '2026-12-15',
     availabilityDeadline: '2026-07-15',

@@ -2,7 +2,8 @@ export interface Grupo {
   id: string;
   cursoId: string;
   periodoId: string;
-  nombre: string; // Ej. 'A', 'B'
+  docenteId: string | null;
+  nombre: string;
   numEstudiantes: number;
   createdAt: string;
   updatedAt: string;

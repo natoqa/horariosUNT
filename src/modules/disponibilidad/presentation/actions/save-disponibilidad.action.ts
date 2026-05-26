@@ -25,7 +25,7 @@ export async function saveDisponibilidadAction(
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
-  const role = user.user_metadata?.role;
+  const role = user.user_metadata?.role || 'docente';
   if (role !== 'docente') {
     return { message: 'Solo los docentes pueden registrar disponibilidad.' };
   }
@@ -43,6 +43,7 @@ export async function saveDisponibilidadAction(
   const periodo: Periodo = {
     id: periodoData.id,
     name: periodoData.name,
+    tipoCiclo: periodoData.tipo_ciclo,
     startDate: periodoData.start_date,
     endDate: periodoData.end_date,
     availabilityDeadline: periodoData.availability_deadline,
@@ -55,7 +56,17 @@ export async function saveDisponibilidadAction(
   const useCase = new SaveDisponibilidadUseCase(disponibilidadRepo);
 
   try {
-    await useCase.execute(user.id, periodoId, blocks, periodo, docenteRegimen);
+    const { data: docenteData, error: docenteError } = await supabase
+      .from('docentes')
+      .select('id')
+      .eq('correo', user.email)
+      .single();
+
+    if (docenteError || !docenteData) {
+      return { message: 'No se encontró un registro de docente asociado a este usuario.' };
+    }
+
+    await useCase.execute(docenteData.id, periodoId, blocks, periodo, docenteRegimen);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error al guardar disponibilidad.';
     return { message };

@@ -64,6 +64,7 @@ export function HorariosContent() {
     const currentPeriodo: Periodo = {
       id: periodoData.id,
       name: periodoData.name,
+      tipoCiclo: periodoData.tipo_ciclo,
       startDate: periodoData.start_date,
       endDate: periodoData.end_date,
       availabilityDeadline: periodoData.availability_deadline,

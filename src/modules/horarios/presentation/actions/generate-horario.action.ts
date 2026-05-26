@@ -63,7 +63,7 @@ export async function generateHorarioAction(
 
     const grupos: Grupo[] = (gruposRes.data ?? []).map((g) => ({
       id: g.id, cursoId: g.curso_id, periodoId: g.periodo_id,
-      nombre: g.nombre, numEstudiantes: g.num_estudiantes,
+      docenteId: g.docente_id ?? null, nombre: g.nombre, numEstudiantes: g.num_estudiantes,
       createdAt: g.created_at, updatedAt: g.updated_at,
     }));
 

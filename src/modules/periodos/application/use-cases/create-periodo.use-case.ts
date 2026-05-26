@@ -1,6 +1,6 @@
 import { IPeriodoRepository } from '../../domain/repositories/periodo.repository';
 import { CreatePeriodoDTO, createPeriodoSchema } from '../dtos/create-periodo.dto';
-import { Periodo } from '../../domain/entities/periodo.entity';
+import { Periodo, TipoCiclo } from '../../domain/entities/periodo.entity';
 
 export class CreatePeriodoUseCase {
   constructor(private readonly periodoRepository: IPeriodoRepository) {}
@@ -17,6 +17,7 @@ export class CreatePeriodoUseCase {
 
     return this.periodoRepository.save({
       name: validated.name,
+      tipoCiclo: validated.tipoCiclo as TipoCiclo,
       startDate: validated.startDate,
       endDate: validated.endDate,
       availabilityDeadline: validated.availabilityDeadline,

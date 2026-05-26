@@ -1,11 +1,12 @@
 import { IPeriodoRepository } from '../domain/repositories/periodo.repository';
-import { Periodo } from '../domain/entities/periodo.entity';
+import { Periodo, TipoCiclo } from '../domain/entities/periodo.entity';
 import { EstadoPeriodo } from '@/shared/constants/period-states';
 import { createClient } from '@/shared/lib/supabase/server';
 
 interface PeriodoRow {
   id: string;
   name: string;
+  tipo_ciclo: string;
   start_date: string;
   end_date: string;
   availability_deadline: string;
@@ -59,6 +60,7 @@ export class SupabasePeriodoRepository implements IPeriodoRepository {
       .from('periodos')
       .insert({
         name: periodo.name,
+        tipo_ciclo: periodo.tipoCiclo,
         start_date: periodo.startDate,
         end_date: periodo.endDate,
         availability_deadline: periodo.availabilityDeadline,
@@ -81,6 +83,7 @@ export class SupabasePeriodoRepository implements IPeriodoRepository {
 
     const dbData: Record<string, unknown> = {};
     if (updateData.name !== undefined) dbData.name = updateData.name;
+    if (updateData.tipoCiclo !== undefined) dbData.tipo_ciclo = updateData.tipoCiclo;
     if (updateData.startDate !== undefined)
       dbData.start_date = updateData.startDate;
     if (updateData.endDate !== undefined) dbData.end_date = updateData.endDate;
@@ -121,6 +124,7 @@ export class SupabasePeriodoRepository implements IPeriodoRepository {
     return {
       id: row.id,
       name: row.name,
+      tipoCiclo: row.tipo_ciclo as TipoCiclo,
       startDate: row.start_date,
       endDate: row.end_date,
       availabilityDeadline: row.availability_deadline,

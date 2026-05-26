@@ -26,7 +26,8 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
-  if (user.user_metadata?.role !== 'docente') {
+  const role = user.user_metadata?.role || 'docente';
+  if (role !== 'docente') {
     return { message: 'Solo los docentes pueden acceder a esta vista.' };
   }
 
@@ -56,12 +57,22 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     return { message: 'No hay un horario generado para el período actual.' };
   }
 
+  const { data: docenteData, error: docenteError } = await supabase
+    .from('docentes')
+    .select('id')
+    .eq('correo', user.email)
+    .single();
+
+  if (docenteError || !docenteData) {
+    return { message: 'No se encontró un registro de docente asociado a este usuario.' };
+  }
+
   // Get all assignments for this horario filtered by the docente
   const { data: rawAsignaciones } = await supabase
     .from('asignaciones')
     .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo, created_at')
     .eq('horario_id', horarioData.id)
-    .eq('docente_id', user.id);
+    .eq('docente_id', docenteData.id);
 
   const asignaciones: Asignacion[] = (rawAsignaciones ?? []).map((a) => ({
     id: a.id,

@@ -66,6 +66,12 @@ CREATE POLICY "Director y secretaria pueden editar docentes"
     (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
   );
 
+CREATE POLICY "Director puede eliminar docentes"
+  ON public.docentes FOR DELETE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
 -- =============================================
 -- TABLA: cursos
 -- Módulo: cursos (Stefano)
@@ -107,6 +113,12 @@ CREATE POLICY "Director y secretaria pueden editar cursos"
   ON public.cursos FOR UPDATE
   USING (
     (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
+  );
+
+CREATE POLICY "Director puede eliminar cursos"
+  ON public.cursos FOR DELETE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
   );
 
 -- =============================================
@@ -191,6 +203,12 @@ CREATE POLICY "Director y secretaria pueden editar aulas"
   ON public.aulas FOR UPDATE
   USING (
     (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
+  );
+
+CREATE POLICY "Director puede eliminar aulas"
+  ON public.aulas FOR DELETE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
   );
 
 -- =============================================

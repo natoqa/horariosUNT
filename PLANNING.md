@@ -14,9 +14,9 @@
 | Fase 1 — Autenticación | 3 | 0 | 3 |
 | Fase 2 — Gestión de Datos | 9 | 0 | 9 |
 | Fase 3 — Disponibilidad y Horarios | 5 | 0 | 5 |
-| Fase 4 — Reportes y Vistas | 2 | 4 | 6 |
+| Fase 4 — Reportes y Vistas | 4 | 2 | 6 |
 | Fase 5 — Dashboard y Sistema | 1 | 2 | 3 |
-| **TOTAL** | **20** | **6** | **26** |
+| **TOTAL** | **22** | **4** | **26** |
 
 ---
 
@@ -31,7 +31,7 @@ La documentación completa se encuentra organizada en la carpeta `docs/`:
 | `fase-1-autenticacion.md` | HU-001, HU-021, HU-025 — Login, cambio y recuperación de contraseña | ✅ 3/3 READY |
 | `fase-2-gestion-datos.md` | HU-002 a HU-007, HU-017, HU-018, HU-022 — Períodos, docentes, cursos, aulas, grupos | ✅ 9/9 READY |
 | `fase-3-disponibilidad-horarios.md` | HU-005, HU-008 a HU-010, HU-023 — Disponibilidad, generación, modificación, aprobación | ✅ 5/5 DONE |
-| `fase-4-reportes-vistas.md` | HU-011 a HU-013, HU-019, HU-020, HU-024 — PDF, Excel, vistas por aula/ciclo/docente | ✅ 2/6 DONE |
+| `fase-4-reportes-vistas.md` | HU-011 a HU-013, HU-019, HU-020, HU-024 — PDF, Excel, vistas por aula/ciclo/docente | ✅ 4/6 DONE |
 | `fase-5-dashboard-sistema.md` | HU-014 a HU-016 — Dashboard, auditoría, notificaciones | ✅ 1/3 READY |
 
 ### Documentación Técnica (`docs/`)

@@ -21,7 +21,8 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     return { message: 'No autorizado.' };
   }
 
-  if (user.user_metadata?.role !== 'docente') {
+  const role = user.user_metadata?.role || 'docente';
+  if (role !== 'docente') {
     return { message: 'Solo los docentes pueden descargar su horario individual.' };
   }
 
@@ -51,23 +52,32 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     return { message: 'No hay horario generado para el período actual.' };
   }
 
+  const { data: docenteData, error: docenteError } = await supabase
+    .from('docentes')
+    .select('id, nombres, apellidos')
+    .eq('correo', user.email)
+    .single();
+
+  if (docenteError || !docenteData) {
+    return { message: 'No se encontró un registro de docente asociado a este usuario.' };
+  }
+
   // Get docente assignments
   const { data: rawAsignaciones } = await supabase
     .from('asignaciones')
     .select('grupo_id, aula_id, dia, bloque, tipo')
     .eq('horario_id', horarioData.id)
-    .eq('docente_id', user.id);
+    .eq('docente_id', docenteData.id);
 
   if (!rawAsignaciones || rawAsignaciones.length === 0) {
     return { message: 'No tienes asignaciones en el horario actual.' };
   }
 
   // Load name maps
-  const [cursosRes, aulasRes, gruposRes, docenteRes] = await Promise.all([
+  const [cursosRes, aulasRes, gruposRes] = await Promise.all([
     supabase.from('cursos').select('id, nombre, ciclo'),
     supabase.from('aulas').select('id, nombre, codigo'),
     supabase.from('grupos').select('id, curso_id, nombre'),
-    supabase.from('docentes').select('nombres, apellidos').eq('id', user.id).single(),
   ]);
 
   const cursoIdToName = new Map<string, string>();
@@ -91,8 +101,8 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`);
   });
 
-  const docenteName = docenteRes.data
-    ? `${docenteRes.data.apellidos}, ${docenteRes.data.nombres}`
+  const docenteName = docenteData
+    ? `${docenteData.apellidos}, ${docenteData.nombres}`
     : user.user_metadata?.full_name ?? user.email ?? 'Docente';
 
   const asignaciones: DocentePdfAsignacion[] = rawAsignaciones.map((a) => ({

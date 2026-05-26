@@ -26,6 +26,7 @@ export async function getActivePeriodoAction(): Promise<{ data?: Periodo; messag
     data: {
       id: data.id,
       name: data.name,
+      tipoCiclo: data.tipo_ciclo,
       startDate: data.start_date,
       endDate: data.end_date,
       availabilityDeadline: data.availability_deadline,

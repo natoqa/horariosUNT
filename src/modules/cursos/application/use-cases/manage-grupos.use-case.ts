@@ -5,6 +5,7 @@ import { z } from 'zod';
 export const createGrupoSchema = z.object({
   cursoId: z.string().uuid('ID de curso no válido'),
   periodoId: z.string().uuid('ID de período no válido'),
+  docenteId: z.string().uuid('ID de docente no válido').optional().nullable().or(z.literal('')).transform((v) => v || null),
   nombre: z
     .string()
     .min(1, 'El nombre de sección no puede estar vacío')
@@ -44,6 +45,7 @@ export class ManageGruposUseCase {
     return this.cursoRepository.saveGrupo({
       cursoId: validated.cursoId,
       periodoId: validated.periodoId,
+      docenteId: validated.docenteId ?? null,
       nombre: validated.nombre,
       numEstudiantes: validated.numEstudiantes,
     });

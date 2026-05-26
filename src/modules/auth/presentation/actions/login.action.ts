@@ -5,7 +5,16 @@ import { SupabaseAuthRepository } from '../../infrastructure/supabase-auth.repos
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 import { loginSchema } from '../../application/dtos/login.dto';
 
-export async function loginAction(state: any, formData: FormData) {
+export interface LoginActionState {
+  errors?: Record<string, string[]>;
+  message?: string;
+  success?: boolean;
+}
+
+export async function loginAction(
+  _state: LoginActionState | undefined,
+  formData: FormData
+): Promise<LoginActionState> {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -26,9 +35,10 @@ export async function loginAction(state: any, formData: FormData) {
   try {
     const user = await loginUseCase.execute(validatedFields.data);
     userRole = user.role;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Credenciales inválidas.';
     return {
-      message: error.message || 'Credenciales inválidas.',
+      message,
     };
   }
 

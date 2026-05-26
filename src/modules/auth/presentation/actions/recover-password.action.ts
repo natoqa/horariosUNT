@@ -4,7 +4,16 @@ import { SupabaseAuthRepository } from '../../infrastructure/supabase-auth.repos
 import { RecoverPasswordUseCase } from '../../application/use-cases/recover-password.use-case';
 import { recoverPasswordSchema } from '../../application/dtos/recover-password.dto';
 
-export async function recoverPasswordAction(state: any, formData: FormData) {
+export interface RecoverActionState {
+  errors?: Record<string, string[]>;
+  message?: string;
+  success?: boolean;
+}
+
+export async function recoverPasswordAction(
+  _state: RecoverActionState | undefined,
+  formData: FormData
+): Promise<RecoverActionState> {
   const email = formData.get('email') as string;
 
   const validatedFields = recoverPasswordSchema.safeParse({ email });
@@ -25,9 +34,10 @@ export async function recoverPasswordAction(state: any, formData: FormData) {
       success: true,
       message: 'Se ha enviado un enlace de recuperación a su correo.',
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al procesar la solicitud.';
     return {
-      message: error.message || 'Error al procesar la solicitud.',
+      message,
     };
   }
 }

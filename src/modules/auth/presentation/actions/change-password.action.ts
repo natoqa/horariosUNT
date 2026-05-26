@@ -5,7 +5,16 @@ import { SupabaseAuthRepository } from '../../infrastructure/supabase-auth.repos
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
 import { changePasswordSchema } from '../../application/dtos/change-password.dto';
 
-export async function changePasswordAction(state: any, formData: FormData) {
+export interface AuthActionState {
+  errors?: Record<string, string[]>;
+  message?: string;
+  success?: boolean;
+}
+
+export async function changePasswordAction(
+  _state: AuthActionState | undefined,
+  formData: FormData
+): Promise<AuthActionState> {
   const currentPassword = formData.get('currentPassword') as string;
   const newPassword = formData.get('newPassword') as string;
   const confirmPassword = formData.get('confirmPassword') as string;
@@ -28,9 +37,10 @@ export async function changePasswordAction(state: any, formData: FormData) {
 
   try {
     await changePasswordUseCase.execute(validatedFields.data);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al cambiar la contraseña.';
     return {
-      message: error.message || 'Error al cambiar la contraseña.',
+      message,
     };
   }
 

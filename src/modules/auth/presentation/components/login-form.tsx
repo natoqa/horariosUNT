@@ -5,51 +5,90 @@ import { loginAction } from '../actions/login.action';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import Link from 'next/link';
+import { Lock, Mail } from 'lucide-react';
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, undefined);
 
   return (
-    <Card className="w-[400px]">
-      <CardHeader>
-        <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>
-          Ingrese sus credenciales para acceder al sistema.
-        </CardDescription>
-      </CardHeader>
-      <form action={action}>
-        <CardContent className="space-y-4">
+    <div className="w-full max-w-[380px] space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          Bienvenido
+        </h1>
+        <p className="text-sm text-gray-500">
+          Ingresa tus credenciales para acceder al sistema
+        </p>
+      </div>
+
+      <form action={action} className="space-y-5">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Institucional</Label>
-            <Input id="email" name="email" type="email" placeholder="usuario@unitru.edu.pe" />
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              Correo Institucional
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="usuario@unitru.edu.pe"
+                className="pl-10 h-11"
+              />
+            </div>
             {state?.errors?.email && (
-              <p className="text-sm text-red-500">{state.errors.email[0]}</p>
+              <p className="text-xs text-destructive">{state.errors.email[0]}</p>
             )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" name="password" type="password" />
+            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              Contrasena
+            </Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                className="pl-10 h-11"
+              />
+            </div>
             {state?.errors?.password && (
-              <p className="text-sm text-red-500">{state.errors.password[0]}</p>
+              <p className="text-xs text-destructive">{state.errors.password[0]}</p>
             )}
           </div>
-          {state?.message && (
-            <p className="text-sm text-red-500 font-medium">{state.message}</p>
-          )}
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? 'Iniciando...' : 'Entrar'}
-          </Button>
-          <div className="text-sm text-center text-gray-500">
-            <Link href="/recuperar" className="hover:underline">
-              ¿Olvidaste tu contraseña?
-            </Link>
+        </div>
+
+        {state?.message && (
+          <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3">
+            <p className="text-sm text-destructive">{state.message}</p>
           </div>
-        </CardFooter>
+        )}
+
+        <Button type="submit" className="w-full h-11 font-medium" disabled={pending}>
+          {pending ? 'Iniciando sesion...' : 'Iniciar Sesion'}
+        </Button>
+
+        <div className="text-center">
+          <Link
+            href="/recuperar"
+            className="text-sm text-primary hover:text-primary/80 transition-colors"
+          >
+            Olvidaste tu contrasena?
+          </Link>
+        </div>
       </form>
-    </Card>
+
+      <div className="pt-4 border-t">
+        <p className="text-xs text-center text-gray-400">
+          Sistema exclusivo para personal autorizado de la<br />
+          Escuela de Ingenieria de Sistemas — UNT
+        </p>
+      </div>
+    </div>
   );
 }

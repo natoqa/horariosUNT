@@ -7,6 +7,7 @@ Escuela Profesional de Ingeniería de Sistemas — Universidad Nacional de Truji
 ## Documentos de referencia
 - `PLANNING.md` → Requerimientos (RF-001 a RF-062), reglas de negocio (RN-001 a RN-032), historias de usuario, algoritmo de generación. **Leer antes de implementar cualquier módulo.**
 - `STRUCTURE.md` → Arquitectura de carpetas, reglas de dependencia, qué va en cada capa.
+- `UI_GUIDELINES.md` → **Reglas de interfaz obligatorias.** Colores, tipografía, layout de páginas, tablas, formularios, estados. **Leer antes de crear cualquier componente de UI.**
 
 ## Stack (versiones exactas — no cambiar)
 - Next.js 16.2.6 (App Router, Server Components, Server Actions)

@@ -4,100 +4,270 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../../hooks/use-auth';
 import { cn } from '../../lib/utils';
-import { 
-  CalendarDays, 
-  Users, 
-  BookOpen, 
-  Building2, 
-  Clock, 
-  BarChart
+import {
+  CalendarDays,
+  Users,
+  BookOpen,
+  Building2,
+  Clock,
+  BarChart3,
+  LogOut,
+  Search,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Settings,
+  HelpCircle,
+  MessageSquare,
 } from 'lucide-react';
+import { logoutAction } from '@/modules/auth/presentation/actions/logout.action';
+import { useState } from 'react';
+
+interface MenuItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  roles: string[];
+  children?: { title: string; href: string; roles: string[] }[];
+}
+
+interface MenuSection {
+  label: string;
+  items: MenuItem[];
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Periodos']);
 
   if (!user) return null;
 
   const role = user.role;
 
-  const menuItems = [
+  const menuSections: MenuSection[] = [
     {
-      title: 'Dashboard',
-      href: `/${role}`,
-      icon: <BarChart className="w-5 h-5" />,
-      roles: ['director', 'secretaria', 'docente'],
+      label: 'GESTIÓN ACADÉMICA',
+      items: [
+        {
+          title: 'Dashboard',
+          href: `/${role}`,
+          icon: BarChart3,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
+          title: 'Periodos',
+          href: '/director/periodos',
+          icon: CalendarDays,
+          roles: ['director'],
+          children: [
+            { title: 'Todos los periodos', href: '/director/periodos', roles: ['director'] },
+          ],
+        },
+        {
+          title: 'Docentes',
+          href: '/director/docentes',
+          icon: Users,
+          roles: ['director', 'secretaria'],
+        },
+        {
+          title: 'Cursos',
+          href: '/director/cursos',
+          icon: BookOpen,
+          roles: ['director', 'secretaria'],
+        },
+        {
+          title: 'Aulas',
+          href: '/director/aulas',
+          icon: Building2,
+          roles: ['director', 'secretaria'],
+        },
+      ],
     },
     {
-      title: 'Períodos',
-      href: '/director/periodos',
-      icon: <CalendarDays className="w-5 h-5" />,
-      roles: ['director'],
+      label: 'PLANIFICACIÓN',
+      items: [
+        {
+          title: 'Disponibilidad',
+          href: `/${role}/disponibilidad`,
+          icon: Clock,
+          roles: ['director', 'docente'],
+        },
+        {
+          title: 'Horarios',
+          href: `/${role}/horarios`,
+          icon: CalendarDays,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
+          title: 'Reportes',
+          href: `/${role}/reportes`,
+          icon: FileText,
+          roles: ['director'],
+        },
+      ],
     },
     {
-      title: 'Docentes',
-      href: '/dashboard/docentes',
-      icon: <Users className="w-5 h-5" />,
-      roles: ['director', 'secretaria'],
-    },
-    {
-      title: 'Disponibilidad',
-      href: '/dashboard/disponibilidad',
-      icon: <Clock className="w-5 h-5" />,
-      roles: ['director', 'docente'],
-    },
-    {
-      title: 'Cursos',
-      href: '/dashboard/cursos',
-      icon: <BookOpen className="w-5 h-5" />,
-      roles: ['director', 'secretaria'],
-    },
-    {
-      title: 'Aulas',
-      href: '/dashboard/aulas',
-      icon: <Building2 className="w-5 h-5" />,
-      roles: ['director', 'secretaria'],
-    },
-    {
-      title: 'Horarios',
-      href: '/dashboard/horarios',
-      icon: <CalendarDays className="w-5 h-5" />,
-      roles: ['director', 'secretaria', 'docente'],
+      label: 'SOPORTE',
+      items: [
+        {
+          title: 'Comentarios',
+          href: `/${role}/comentarios`,
+          icon: MessageSquare,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
+          title: 'Ayuda',
+          href: `/${role}/ayuda`,
+          icon: HelpCircle,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
+          title: 'Configuración',
+          href: `/${role}/configuracion`,
+          icon: Settings,
+          roles: ['director'],
+        },
+      ],
     },
   ];
 
-  const filteredItems = menuItems.filter(item => item.roles.includes(role));
+  const toggleExpand = (title: string) => {
+    setExpandedItems(prev =>
+      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
+    );
+  };
+
+  const roleLabels: Record<string, string> = {
+    director: 'Director',
+    secretaria: 'Secretaria',
+    docente: 'Docente',
+  };
+
+  const getInitials = () => {
+    if (user.fullName) {
+      const parts = user.fullName.split(' ');
+      return parts.length >= 2
+        ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+        : parts[0].substring(0, 2).toUpperCase();
+    }
+    return user.email?.substring(0, 2).toUpperCase() || 'US';
+  };
 
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-slate-100 flex flex-col fixed left-0 top-0">
-      <div className="h-16 flex items-center justify-center border-b border-slate-800">
-        <h1 className="text-xl font-bold tracking-tight">Horarios UNT</h1>
+    <aside className="w-64 h-screen bg-white border-r border-[var(--sidebar-border)] flex flex-col fixed left-0 top-0 z-20">
+      {/* Logo */}
+      <div className="h-14 flex items-center gap-3 px-5 border-b border-[var(--sidebar-border)]">
+        <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+          <CalendarDays className="w-4 h-4 text-white" />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-sm font-bold text-foreground tracking-tight">Horarios UNT</h1>
+        </div>
+        <button className="p-1 rounded-md hover:bg-muted transition-colors">
+          <FileText className="w-4 h-4 text-muted-foreground" />
+        </button>
       </div>
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-3">
-          {filteredItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <li key={item.href}>
-                <Link href={item.href}>
-                  <span className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    isActive 
-                      ? "bg-blue-600 text-white" 
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  )}>
-                    {item.icon}
-                    {item.title}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+
+      {/* Search */}
+      <div className="px-3 py-3">
+        <div className="flex items-center gap-2 h-9 px-3 rounded-lg bg-muted/60 border border-border/60">
+          <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+          <span className="text-xs text-muted-foreground">Buscar...</span>
+          <div className="ml-auto flex items-center gap-0.5">
+            <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">⌘</kbd>
+            <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">K</kbd>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 pb-3">
+        {menuSections.map((section) => {
+          const filteredItems = section.items.filter(item => item.roles.includes(role));
+          if (filteredItems.length === 0) return null;
+
+          return (
+            <div key={section.label} className="mb-4">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                {section.label}
+              </p>
+              <ul className="space-y-0.5">
+                {filteredItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const isExpanded = expandedItems.includes(item.title);
+                  const hasChildren = item.children && item.children.length > 0;
+                  const Icon = item.icon;
+
+                  return (
+                    <li key={item.href}>
+                      <div className="flex items-center">
+                        <Link href={hasChildren ? '#' : item.href} className="flex-1"
+                          onClick={hasChildren ? (e) => { e.preventDefault(); toggleExpand(item.title); } : undefined}
+                        >
+                          <span className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150",
+                            isActive && !hasChildren
+                              ? "bg-muted text-foreground"
+                              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                          )}>
+                            <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                            <span className="flex-1">{item.title}</span>
+                            {hasChildren && (
+                              isExpanded
+                                ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                                : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                            )}
+                          </span>
+                        </Link>
+                      </div>
+                      {hasChildren && isExpanded && (
+                        <ul className="ml-6 mt-0.5 space-y-0.5 border-l border-border pl-3">
+                          {item.children!.filter(c => c.roles.includes(role)).map(child => {
+                            const childActive = pathname === child.href;
+                            return (
+                              <li key={child.href}>
+                                <Link href={child.href}>
+                                  <span className={cn(
+                                    "block px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                                    childActive
+                                      ? "text-foreground bg-muted"
+                                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                  )}>
+                                    {child.title}
+                                  </span>
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </nav>
-      <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-3 py-2 text-sm text-slate-400">
-          <span className="truncate">{user.email}</span>
+
+      {/* User Profile */}
+      <div className="p-3 border-t border-[var(--sidebar-border)]">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+            {getInitials()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate">{user.fullName || user.email}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+          </div>
+          <button
+            onClick={() => logoutAction()}
+            className="p-1.5 rounded-md hover:bg-muted transition-colors flex-shrink-0"
+            title="Cerrar sesión"
+          >
+            <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
         </div>
       </div>
     </aside>

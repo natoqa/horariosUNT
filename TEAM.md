@@ -107,8 +107,7 @@ src/modules/auth/
 │   └── actions/         → login.action.ts, logout.action.ts
 └── index.ts             → Exportar lo público
 
-src/app/(auth)/          → Páginas de login y recuperación
-src/app/middleware.ts     → Verificación JWT + redirección por rol
+src/app/(auth)/          → Páginas   - **Prioridad 1**: Autenticación, RBAC y `proxy.ts` (Next.js 16 renombró middleware a proxy).     → Verificación JWT + redirección por rol
 src/app/(dashboard)/layout.tsx → Layout protegido con sidebar
 ```
 

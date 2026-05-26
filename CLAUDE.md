@@ -63,7 +63,7 @@ Cada módulo tiene: `domain/ → application/ → infrastructure/ → presentati
 - No modificar esquema sin confirmación.
 
 ### Seguridad
-- Tres niveles: middleware Next.js → Server Action → RLS Supabase.
+- Control de Acceso: proxy.ts Next.js para rutas protegidas y RBAC.
 - JWT con refresh token en cookie HttpOnly, Secure, SameSite=Lax.
 - Roles: director, secretaria, docente.
 

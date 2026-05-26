@@ -256,7 +256,7 @@ horarios-unt/
 │       │
 │       ├── layout.tsx               # Root layout
 │       ├── page.tsx                 # Redirect a login o dashboard
-│       └── middleware.ts            # Verificación JWT + redirección por rol
+│       └── proxy.ts                 # Root proxy (auth/RBAC)
 │
 ├── public/
 │   └── images/

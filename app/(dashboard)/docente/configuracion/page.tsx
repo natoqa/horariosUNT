@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Settings, Bell, Lock, User, Globe, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Bell, Lock, User, Globe, Save, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { useAuth } from '@/shared/hooks/use-auth';
+import { getOwnDocenteInfoAction } from '@/modules/docentes/presentation/actions/get-own-docente-info.action';
+import { Docente } from '@/modules/docentes/domain/entities/docente.entity';
+import { calcularAntiguedad } from '@/modules/docentes/domain/entities/docente.entity';
 
 export default function ConfiguracionPage() {
   const { user } = useAuth();
@@ -17,6 +20,25 @@ export default function ConfiguracionPage() {
     language: 'es',
     timezone: 'America/Lima',
   });
+  const [docenteInfo, setDocenteInfo] = useState<Docente | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadDocenteInfo = async () => {
+      const result = await getOwnDocenteInfoAction();
+      if (result.data) {
+        setDocenteInfo(result.data);
+      } else if (result.message) {
+        setError(result.message);
+      }
+      setLoading(false);
+    };
+
+    if (user) {
+      loadDocenteInfo();
+    }
+  }, [user]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -24,6 +46,24 @@ export default function ConfiguracionPage() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setSaving(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-2">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+        <p className="text-xs text-muted-foreground">Cargando información...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-6 text-center space-y-2">
+        <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+        <p className="text-sm text-destructive font-medium">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -33,6 +73,72 @@ export default function ConfiguracionPage() {
           Gestiona tu cuenta y preferencias del sistema
         </p>
       </div>
+
+      {/* Información de Registro del Docente */}
+      {docenteInfo && (
+        <div className="rounded-xl border border-border bg-white p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="w-5 h-5 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">Información de Registro</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Nombres</Label>
+                <p className="text-sm text-foreground">{docenteInfo.nombres}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Apellidos</Label>
+                <p className="text-sm text-foreground">{docenteInfo.apellidos}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">DNI</Label>
+                <p className="text-sm text-foreground">{docenteInfo.dni}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Correo</Label>
+                <p className="text-sm text-foreground">{docenteInfo.correo}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Teléfono</Label>
+                <p className="text-sm text-foreground">{docenteInfo.telefono || 'No registrado'}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Categoría</Label>
+                <p className="text-sm text-foreground">{docenteInfo.categoria}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Régimen</Label>
+                <p className="text-sm text-foreground">{docenteInfo.regimen}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Condición</Label>
+                <p className="text-sm text-foreground">{docenteInfo.condicion}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Escuela</Label>
+                <p className="text-sm text-foreground">{docenteInfo.escuela}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Fecha de Ingreso</Label>
+                <p className="text-sm text-foreground">{new Date(docenteInfo.fechaIngreso).toLocaleDateString('es-PE')}</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Antigüedad</Label>
+                <p className="text-sm text-foreground">{calcularAntiguedad(docenteInfo.fechaIngreso)} años</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Carga Máxima</Label>
+                <p className="text-sm text-foreground">{docenteInfo.cargaMaxima} horas/semana</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Estado</Label>
+                <p className="text-sm text-foreground">{docenteInfo.estado}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Información de Perfil */}
       <div className="rounded-xl border border-border bg-white p-6">

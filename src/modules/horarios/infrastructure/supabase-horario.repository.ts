@@ -1,5 +1,5 @@
 import { IHorarioRepository } from '../domain/repositories/horario.repository';
-import { Horario, Asignacion, GenerationSummary } from '../domain/entities/horario.entity';
+import { Horario, Asignacion, GenerationSummary, HorarioEstado } from '../domain/entities/horario.entity';
 import { GeneratedAssignment } from '../domain/services/schedule-generator.service';
 import { createClient } from '@/shared/lib/supabase/server';
 
@@ -162,7 +162,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     return this.mapToAsignacion(data as AsignacionRow);
   }
 
-  async updateEstado(id: string, estado: string): Promise<Horario> {
+  async updateEstado(id: string, estado: HorarioEstado): Promise<Horario> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('horarios')

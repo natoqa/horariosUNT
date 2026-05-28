@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Save, Clock, Check, AlertCircle, Info } from 'lucide-react';
+import { Loader2, Save, Clock, Check, AlertCircle, Info, Shuffle } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { getCargaMaximaDefault } from '@/modules/docentes';
 import { Periodo } from '@/modules/periodos';
 import { RegimenDocente } from '@/shared/constants/categories';
-import { DiaSemana, BloqueHorario } from '@/shared/constants/time-blocks';
+import { DiaSemana, BloqueHorario, DIAS_SEMANA, BLOQUES_HORARIOS } from '@/shared/constants/time-blocks';
 import { DisponibilidadEstado } from '../../domain/entities/disponibilidad.entity';
 import { DisponibilidadGrid, makeKey, getNextEstado } from './disponibilidad-grid';
 import { DisponibilidadSummary } from './disponibilidad-summary';
@@ -24,6 +24,7 @@ export function DisponibilidadContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [periodo, setPeriodo] = useState<Periodo | null>(null);
   const [docenteRegimen, setDocenteRegimen] = useState<RegimenDocente | null>(null);
+  const [docenteCargaMaxima, setDocenteCargaMaxima] = useState<number | null>(null);
   const [gridState, setGridState] = useState<Map<string, DisponibilidadEstado>>(new Map());
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function DisponibilidadContent() {
 
   const availableCount = Array.from(gridState.values()).filter((e) => e === 'disponible').length;
   const preferredCount = Array.from(gridState.values()).filter((e) => e === 'preferido').length;
-  const minRequired = docenteRegimen ? getCargaMaximaDefault(docenteRegimen) : 0;
+  const minRequired = docenteCargaMaxima ?? (docenteRegimen ? getCargaMaximaDefault(docenteRegimen) : 0);
   const totalAvailable = availableCount + preferredCount;
   const canSave = isEditable && totalAvailable >= minRequired && !saving;
 
@@ -56,6 +57,10 @@ export function DisponibilidadContent() {
       setState('error');
       setErrorMessage(disponibilidadResult.message);
       return;
+    }
+
+    if (disponibilidadResult.docenteCargaMaxima) {
+      setDocenteCargaMaxima(disponibilidadResult.docenteCargaMaxima);
     }
 
     const newGrid = new Map<string, DisponibilidadEstado>();
@@ -105,6 +110,36 @@ export function DisponibilidadContent() {
     setSuccessMsg(null);
   };
 
+  const handleAutoFill = () => {
+    const minRequired = docenteCargaMaxima ?? (docenteRegimen ? getCargaMaximaDefault(docenteRegimen) : 0);
+    if (minRequired === 0) return;
+
+    const newGrid = new Map<string, DisponibilidadEstado>();
+
+    // Get all possible blocks
+    const allBlocks: { dia: DiaSemana; bloque: BloqueHorario }[] = [];
+    for (const dia of DIAS_SEMANA) {
+      for (const bloque of BLOQUES_HORARIOS) {
+        allBlocks.push({ dia, bloque });
+      }
+    }
+
+    // Shuffle blocks randomly
+    const shuffled = [...allBlocks].sort(() => Math.random() - 0.5);
+
+    // Assign minRequired blocks as available
+    for (let i = 0; i < minRequired && i < shuffled.length; i++) {
+      const { dia, bloque } = shuffled[i];
+      const key = makeKey(dia, bloque);
+      // Randomly choose between 'disponible' and 'preferido'
+      const estado = Math.random() > 0.7 ? 'preferido' : 'disponible';
+      newGrid.set(key, estado);
+    }
+
+    setGridState(newGrid);
+    setSuccessMsg(null);
+  };
+
   const handleSave = async () => {
     if (!periodo || !docenteRegimen) return;
 
@@ -121,7 +156,7 @@ export function DisponibilidadContent() {
       };
     });
 
-    const result = await saveDisponibilidadAction(periodo.id, blocks, docenteRegimen);
+    const result = await saveDisponibilidadAction(periodo.id, blocks, docenteRegimen, docenteCargaMaxima ?? undefined);
 
     if (result.success) {
       setSuccessMsg(result.message || 'Disponibilidad registrada exitosamente.');
@@ -190,6 +225,20 @@ export function DisponibilidadContent() {
           minRequired={minRequired}
           regimen={docenteRegimen}
         />
+      )}
+
+      {isEditable && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAutoFill}
+            disabled={!docenteCargaMaxima && !docenteRegimen}
+          >
+            <Shuffle className="w-4 h-4 mr-1.5" />
+            Autocompletar Aleatoriamente
+          </Button>
+        </div>
       )}
 
       <DisponibilidadGrid

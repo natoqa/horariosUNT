@@ -198,7 +198,7 @@ export function HorariosContent() {
     );
   }
 
-  const canGenerate = periodo?.state === 'Generación' && preCheck?.valid === true;
+  const canGenerate = periodo?.state === 'Generación' && preCheck?.valid === true && user?.role === 'director';
 
   return (
     <div className="space-y-6">
@@ -210,7 +210,7 @@ export function HorariosContent() {
           </p>
         </div>
         {state === 'result' && periodo?.state === 'Generación' && (
-          <Button variant="outline" onClick={() => { setState('ready'); loadData(); }}>
+          <Button variant="outline" onClick={handleGenerate}>
             <RefreshCw className="w-4 h-4 mr-1.5" />
             Regenerar
           </Button>

@@ -22,15 +22,19 @@ export interface GenerateHorarioActionResult {
 export async function generateHorarioAction(
   periodoId: string,
 ): Promise<GenerateHorarioActionResult> {
+  console.log('[SERVER ACTION] generateHorarioAction called with periodoId:', periodoId);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
+    console.log('[SERVER ACTION] No user found');
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
   const role = user.user_metadata?.role;
+  console.log('[SERVER ACTION] User role:', role);
   if (role !== 'director') {
+    console.log('[SERVER ACTION] User not director');
     return { message: 'Solo el Director puede generar horarios.' };
   }
 
@@ -44,6 +48,19 @@ export async function generateHorarioAction(
         supabase.from('aula_restricciones').select('*'),
         supabase.from('disponibilidad').select('*').eq('periodo_id', periodoId),
       ]);
+
+    // Validation checks
+    if (!gruposRes.data || gruposRes.data.length === 0) {
+      return { message: 'No hay grupos/secciones registrados para este período. Primero cree grupos para los cursos.' };
+    }
+
+    if (!docentesRes.data || docentesRes.data.length === 0) {
+      return { message: 'No hay docentes registrados en el sistema.' };
+    }
+
+    if (!aulasRes.data || aulasRes.data.length === 0) {
+      return { message: 'No hay aulas registradas en el sistema.' };
+    }
 
     const docentes: Docente[] = (docentesRes.data ?? []).map((d) => ({
       id: d.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni,
@@ -79,17 +96,44 @@ export async function generateHorarioAction(
       motivo: r.motivo, createdAt: r.created_at,
     }));
 
-    const disponibilidades: Disponibilidad[] = (disponibilidadRes.data ?? []).map((d) => ({
-      id: d.id, docenteId: d.docente_id, periodoId: d.periodo_id,
-      dia: d.dia, bloque: d.bloque, estado: d.estado,
-      createdAt: d.created_at, updatedAt: d.updated_at,
-    }));
+    const disponibilidades: Disponibilidad[] = (disponibilidadRes.data ?? []).map((d) => {
+      const estadoMap: Record<string, string> = {
+        'Disponible': 'disponible',
+        'No disponible': 'no_disponible',
+        'Preferido': 'preferido',
+      };
+      return {
+        id: d.id, docenteId: d.docente_id, periodoId: d.periodo_id,
+        dia: d.dia, bloque: d.bloque,
+        estado: (estadoMap[d.estado] || d.estado) as Disponibilidad['estado'],
+        createdAt: d.created_at, updatedAt: d.updated_at,
+      };
+    });
+
+    const activeDocentes = docentes.filter(d => d.estado === 'Activo');
+    const activeAulas = aulas.filter(a => a.estado === 'Activa');
+
+    if (activeDocentes.length === 0) {
+      return { message: 'No hay docentes activos. Active al menos un docente para generar horarios.' };
+    }
+
+    if (activeAulas.length === 0) {
+      return { message: 'No hay aulas activas. Active al menos un aula para generar horarios.' };
+    }
 
     const repo = new SupabaseHorarioRepository();
     const useCase = new GenerateHorarioUseCase(repo);
 
+    console.log('[SERVER ACTION] Calling useCase.execute...');
     const result: GenerateHorarioResult = await useCase.execute(periodoId, {
       docentes, cursos, grupos, aulas, disponibilidades, restriccionesAula,
+    });
+
+    console.log('[SERVER ACTION] Generation result:', {
+      horarioId: result.horario?.id,
+      asignacionesCount: result.asignaciones?.length,
+      summary: result.generationResult.summary,
+      unassignedCount: result.generationResult.unassigned?.length,
     });
 
     revalidatePath('/director/horarios');
@@ -100,6 +144,7 @@ export async function generateHorarioAction(
       unassigned: result.generationResult.unassigned,
     };
   } catch (error: unknown) {
+    console.error('[SERVER ACTION] Error al generar horario:', error);
     return { message: error instanceof Error ? error.message : 'Error al generar horario.' };
   }
 }

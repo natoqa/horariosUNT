@@ -14,6 +14,7 @@ export class SaveDisponibilidadUseCase {
     blocks: DisponibilidadBlock[],
     periodo: Periodo,
     docenteRegimen: RegimenDocente,
+    docenteCargaMaxima?: number,
   ): Promise<Disponibilidad[]> {
     saveDisponibilidadSchema.parse({ periodoId, blocks });
 
@@ -25,11 +26,12 @@ export class SaveDisponibilidadUseCase {
       (b) => b.estado === 'disponible' || b.estado === 'preferido',
     ).length;
 
-    const minRequired = getCargaMaximaDefault(docenteRegimen);
+    // Use the docente's actual carga maxima if provided, otherwise use default based on regimen
+    const minRequired = docenteCargaMaxima ?? getCargaMaximaDefault(docenteRegimen);
 
     if (availableCount < minRequired) {
       throw new Error(
-        `Debe registrar al menos ${minRequired} horas disponibles según su régimen (${docenteRegimen}). Actualmente tiene ${availableCount}.`,
+        `Debe registrar al menos ${minRequired} horas disponibles según su carga máxima registrada. Actualmente tiene ${availableCount}.`,
       );
     }
 

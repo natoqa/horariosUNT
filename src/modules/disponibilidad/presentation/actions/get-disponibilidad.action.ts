@@ -7,7 +7,7 @@ import { Disponibilidad } from '../../domain/entities/disponibilidad.entity';
 
 export async function getDisponibilidadAction(
   periodoId: string,
-): Promise<{ data?: Disponibilidad[]; message?: string }> {
+): Promise<{ data?: Disponibilidad[]; docenteCargaMaxima?: number; message?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -27,7 +27,7 @@ export async function getDisponibilidadAction(
     // Resolve the actual docente_id from the public.docentes table
     const { data: docenteData, error: docenteError } = await supabase
       .from('docentes')
-      .select('id')
+      .select('id, carga_maxima')
       .eq('correo', user.email)
       .single();
 
@@ -36,7 +36,7 @@ export async function getDisponibilidadAction(
     }
 
     const data = await useCase.execute(docenteData.id, periodoId);
-    return { data };
+    return { data, docenteCargaMaxima: docenteData.carga_maxima };
   } catch (error: unknown) {
     return { message: error instanceof Error ? error.message : 'Error al cargar disponibilidad.' };
   }

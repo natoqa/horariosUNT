@@ -207,6 +207,17 @@ export function generateSchedule(
   const totalUnits = units.length;
   const assignedUnits = totalUnits - unassigned.length;
 
+  // Count unique courses instead of assignment units
+  const uniqueCursoIds = new Set(units.map(u => u.curso.id));
+  const assignedCursoIds = new Set(
+    units
+      .filter(u => !unassigned.some(un => un.grupoId === u.grupo.id && un.tipo === u.tipo))
+      .map(u => u.curso.id)
+  );
+  const totalCursos = uniqueCursoIds.size;
+  const cursosAsignados = assignedCursoIds.size;
+  const cursosNoAsignados = totalCursos - cursosAsignados;
+
   const preferredCount = assignments.filter((a) => {
     const key = `${a.docenteId}||${a.dia}||${a.bloque}`;
     return disponibilidadMap.get(key) === 'preferido';
@@ -215,9 +226,9 @@ export function generateSchedule(
   const loads = Array.from(docenteLoadMap.values()).filter((l) => l > 0);
 
   const summary: GenerationSummary = {
-    totalCursos: totalUnits,
-    cursosAsignados: assignedUnits,
-    cursosNoAsignados: unassigned.length,
+    totalCursos,
+    cursosAsignados,
+    cursosNoAsignados,
     porcentajePreferencias: assignments.length > 0 ? Math.round((preferredCount / assignments.length) * 100) : 0,
     cargaPromedio: loads.length > 0 ? Math.round((loads.reduce((s, l) => s + l, 0) / loads.length) * 10) / 10 : 0,
     cargaMaxima: loads.length > 0 ? Math.max(...loads) : 0,

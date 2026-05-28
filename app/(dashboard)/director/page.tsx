@@ -2,6 +2,9 @@
 
 import { CalendarDays, Users, BookOpen, Building2, TrendingUp, TrendingDown, Clock, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
+import { getDashboardStatsAction, DashboardStats } from './actions/get-dashboard-stats.action';
+import { getPeriodosAction, PeriodoDisplay } from './actions/get-periodos.action';
+import { useEffect, useState } from 'react';
 
 /* ─── Sparkline SVGs ─── */
 function SparklineUp() {
@@ -30,16 +33,16 @@ function SparklineFlat() {
 }
 
 /* ─── Bar Chart (decorative) ─── */
-const barData = [
-  { label: 'Lun', value: 45 },
-  { label: 'Mar', value: 72 },
-  { label: 'Mié', value: 58 },
-  { label: 'Jue', value: 88 },
-  { label: 'Vie', value: 65 },
-  { label: 'Sáb', value: 30 },
-];
+const barData: any[] = [];
 
 function BarChart() {
+  if (barData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-44 mt-4">
+        <p className="text-sm text-muted-foreground">Sin datos de carga horaria</p>
+      </div>
+    );
+  }
   const maxVal = Math.max(...barData.map(d => d.value));
   return (
     <div className="flex items-end gap-3 h-44 mt-4">
@@ -87,9 +90,50 @@ const periods = [
   { id: '#2024-II', name: 'Segundo Semestre 2024', estado: 'Archivado', fecha: '2024-08-12', responsable: 'Dir. López', estadoColor: 'bg-gray-100 text-gray-600' },
 ];
 
+function getEstadoColor(estado: string): string {
+  switch (estado) {
+    case 'Configuración':
+      return 'bg-blue-50 text-blue-700';
+    case 'Recopilación':
+      return 'bg-yellow-50 text-yellow-700';
+    case 'Generación':
+      return 'bg-purple-50 text-purple-700';
+    case 'Aprobado':
+      return 'bg-green-50 text-green-700';
+    case 'Publicado':
+      return 'bg-emerald-50 text-emerald-700';
+    case 'Cerrado':
+      return 'bg-gray-100 text-gray-600';
+    default:
+      return 'bg-gray-100 text-gray-600';
+  }
+}
+
 export default function DirectorDashboard() {
   const { user } = useAuth();
   const firstName = user?.fullName?.split(' ')[0] || user?.email?.split('@')[0] || 'Director';
+
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [periodos, setPeriodos] = useState<PeriodoDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [statsData, periodosData] = await Promise.all([
+          getDashboardStatsAction(),
+          getPeriodosAction(),
+        ]);
+        setStats(statsData);
+        setPeriodos(periodosData);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -110,126 +154,82 @@ export default function DirectorDashboard() {
         </div>
       </div>
 
-      {/* Top Row: 3 Stat Cards + Updates */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-        {/* Left: Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Card 1 - Periodo Activo */}
-          <div className="rounded-xl border border-border bg-white p-5">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-medium text-muted-foreground">Periodo Activo</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-primary bg-primary/10">
-                <CalendarDays className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-foreground tracking-tight">2026-I</p>
-            <div className="flex items-center justify-between mt-2">
-              <span className="flex items-center gap-1 text-xs font-medium text-success">
-                <TrendingUp className="w-3 h-3" />
-                Activo
-              </span>
-              <SparklineUp />
-            </div>
-          </div>
-
-          {/* Card 2 - Docentes */}
-          <div className="rounded-xl border border-border bg-white p-5">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-medium text-muted-foreground">Docentes Activos</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-3 bg-chart-3/10">
-                <Users className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-foreground tracking-tight">48</p>
-            <div className="flex items-center justify-between mt-2">
-              <span className="flex items-center gap-1 text-xs font-medium text-success">
-                <TrendingUp className="w-3 h-3" />
-                +12% vs sem. anterior
-              </span>
-              <SparklineFlat />
-            </div>
-          </div>
-
-          {/* Card 3 - Cursos */}
-          <div className="rounded-xl border border-border bg-white p-5">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-medium text-muted-foreground">Cursos Registrados</p>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10">
-                <BookOpen className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-foreground tracking-tight">32</p>
-            <div className="flex items-center justify-between mt-2">
-              <span className="flex items-center gap-1 text-xs font-medium text-destructive">
-                <TrendingDown className="w-3 h-3" />
-                -2% vs sem. anterior
-              </span>
-              <SparklineDown />
-            </div>
-          </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-muted-foreground">Cargando datos...</p>
         </div>
+      ) : (
+        <>
+          {/* Top Row: 3 Stat Cards + Updates */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+            {/* Left: Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Card 1 - Periodo Activo */}
+              <div className="rounded-xl border border-border bg-white p-5">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-muted-foreground">Periodo Activo</p>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-primary bg-primary/10">
+                    <CalendarDays className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-foreground tracking-tight">
+                  {stats?.periodoNombre || 'Sin periodo'}
+                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="flex items-center gap-1 text-xs font-medium text-success">
+                    <TrendingUp className="w-3 h-3" />
+                    {stats?.periodoActivo ? 'Activo' : 'No activo'}
+                  </span>
+                  <SparklineUp />
+                </div>
+              </div>
+
+              {/* Card 2 - Docentes */}
+              <div className="rounded-xl border border-border bg-white p-5">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-muted-foreground">Docentes Activos</p>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-3 bg-chart-3/10">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.docentesActivos || 0}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="flex items-center gap-1 text-xs font-medium text-success">
+                    <TrendingUp className="w-3 h-3" />
+                    Total
+                  </span>
+                  <SparklineFlat />
+                </div>
+              </div>
+
+              {/* Card 3 - Cursos */}
+              <div className="rounded-xl border border-border bg-white p-5">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-muted-foreground">Cursos Registrados</p>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10">
+                    <BookOpen className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+                <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.cursosRegistrados || 0}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="flex items-center gap-1 text-xs font-medium text-destructive">
+                    <TrendingDown className="w-3 h-3" />
+                    Total
+                  </span>
+                  <SparklineDown />
+                </div>
+              </div>
+            </div>
 
         {/* Right: Latest Updates */}
-        <div className="rounded-xl border border-border bg-white overflow-hidden row-span-2">
+        <div className="rounded-xl border border-border bg-white overflow-hidden">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Últimas Actualizaciones</h2>
           </div>
-          {/* Tabs */}
-          <div className="flex gap-1 px-5 pt-3">
-            <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-foreground text-white">Hoy</button>
-            <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">Ayer</button>
-            <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">Esta semana</button>
+          <div className="px-5 py-8 text-center">
+            <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No hay actualizaciones recientes</p>
           </div>
-          {/* Search */}
-          <div className="px-5 pt-3">
-            <div className="flex items-center gap-2 h-8 px-3 rounded-lg border border-border bg-muted/30">
-              <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <span className="text-xs text-muted-foreground">Buscar actividades</span>
-            </div>
-          </div>
-          {/* Count */}
-          <p className="px-5 pt-3 text-xs text-muted-foreground font-medium">{updates.length} nuevas actividades hoy</p>
-          {/* List */}
-          <div className="px-5 pt-2 pb-4 space-y-1 max-h-[400px] overflow-y-auto">
-            {updates.map((u, i) => {
-              const Icon = u.icon;
-              return (
-                <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-muted/40 transition-colors cursor-default">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-muted ${u.color}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-foreground">{u.title}</p>
-                      <span className="text-[10px] text-muted-foreground ml-2 flex-shrink-0">{u.time}</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{u.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Chart Area */}
-        <div className="rounded-xl border border-border bg-white p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">Carga Horaria Semanal</h2>
-            </div>
-            <select className="h-8 px-2.5 rounded-lg border border-border bg-white text-xs text-muted-foreground font-medium cursor-pointer">
-              <option>Último mes</option>
-              <option>Última semana</option>
-            </select>
-          </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-bold text-foreground tracking-tight">358</span>
-            <span className="text-xs font-medium text-success flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" />
-              +8% vs sem. anterior
-            </span>
-          </div>
-          <BarChart />
         </div>
       </div>
 
@@ -255,38 +255,41 @@ export default function DirectorDashboard() {
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Periodo ID</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Nombre</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estado</th>
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Responsable</th>
+                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Fecha Inicio</th>
               </tr>
             </thead>
             <tbody>
-              {periods.map((p) => (
-                <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-6 py-3.5">
-                    <span className="font-medium text-foreground">{p.id}</span>
+              {periodos.length > 0 ? (
+                periodos.map((p) => (
+                  <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                    <td className="px-6 py-3.5">
+                      <span className="font-medium text-foreground">{p.id.slice(0, 8)}...</span>
+                    </td>
+                    <td className="px-6 py-3.5 text-muted-foreground">{p.name}</td>
+                    <td className="px-6 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${getEstadoColor(p.state)}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+                        {p.state}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3.5 text-muted-foreground">{p.tipoCiclo}</td>
+                    <td className="px-6 py-3.5 text-muted-foreground">{new Date(p.startDate).toLocaleDateString('es-PE')}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    No hay periodos registrados
                   </td>
-                  <td className="px-6 py-3.5 text-muted-foreground">{p.name}</td>
-                  <td className="px-6 py-3.5">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${p.estadoColor}`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
-                      {p.estado}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                        {p.responsable.split(' ')[1]?.[0] || 'D'}
-                      </div>
-                      <span className="text-muted-foreground">{p.responsable}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-3.5 text-muted-foreground">{p.fecha}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

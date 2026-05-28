@@ -1,15 +1,16 @@
 'use client'
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { loginAction } from '../actions/login.action';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import Link from 'next/link';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, undefined);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="w-full max-w-[380px] space-y-8">
@@ -52,10 +53,21 @@ export function LoginForm() {
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className="pl-10 h-11"
+                className="pl-10 pr-10 h-11"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
             {state?.errors?.password && (
               <p className="text-xs text-destructive">{state.errors.password[0]}</p>

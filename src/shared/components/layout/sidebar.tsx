@@ -105,7 +105,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           title: 'Disponibilidad',
           href: `/${role}/disponibilidad`,
           icon: Clock,
-          roles: ['director', 'docente'],
+          roles: ['docente'],
         },
         {
           title: 'Horarios',

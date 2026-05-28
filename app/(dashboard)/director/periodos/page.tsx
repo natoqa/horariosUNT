@@ -1,5 +1,7 @@
-import { PeriodosContent } from '@/modules/periodos';
+import { PeriodoTable } from '@/modules/periodos';
 import { CalendarDays } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/shared/components/ui/button';
 
 export default function PeriodosPage() {
   return (
@@ -15,7 +17,15 @@ export default function PeriodosPage() {
           <CalendarDays className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <PeriodosContent />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Periodos registrados</h2>
+          <Link href="/director/periodos/crear">
+            <Button size="sm">Crear Periodo</Button>
+          </Link>
+        </div>
+        <PeriodoTable />
+      </div>
     </div>
   );
 }

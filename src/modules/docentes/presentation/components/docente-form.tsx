@@ -9,10 +9,12 @@ import { getCargaMaximaDefault } from '../../domain/entities/docente.entity';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
+import { AlertTriangle, LinkIcon } from 'lucide-react';
 import {
   CATEGORIAS_DOCENTE,
   REGIMENES_DOCENTE,
   CONDICIONES_DOCENTE,
+  ESCUELAS_PROCEDENCIA,
   RegimenDocente,
 } from '@/shared/constants/categories';
 import { useState, useRef } from 'react';
@@ -97,7 +99,7 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Categoría</Label>
           <select
@@ -148,6 +150,22 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
           )}
         </div>
         <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Escuela de Procedencia</Label>
+          <select
+            name="escuela"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            defaultValue=""
+          >
+            <option value="" disabled>Seleccionar...</option>
+            {ESCUELAS_PROCEDENCIA.map((esc) => (
+              <option key={esc} value={esc}>{esc}</option>
+            ))}
+          </select>
+          {state?.errors?.escuela && (
+            <p className="text-xs text-destructive">{state.errors.escuela[0]}</p>
+          )}
+        </div>
+        <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Carga Máxima (hrs)</Label>
           <Input
             name="cargaMaxima"
@@ -168,7 +186,21 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
           <p className="text-sm text-destructive">{state.message}</p>
         </div>
       )}
-      {state?.success && (
+      {state?.success && state.authLinked === true && (
+        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-3 space-y-1">
+          <div className="flex items-start gap-2">
+            <LinkIcon className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-emerald-700 font-medium">{state.message}</p>
+          </div>
+        </div>
+      )}
+      {state?.success && state.authLinked === false && (
+        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-amber-800">{state.message}</p>
+        </div>
+      )}
+      {state?.success && state.authLinked === undefined && (
         <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5">
           <p className="text-sm text-emerald-700">{state.message}</p>
         </div>

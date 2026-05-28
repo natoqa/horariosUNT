@@ -3,13 +3,16 @@
 import { useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Docente, calcularAntiguedad } from '../../domain/entities/docente.entity';
 import { getDocentesAction } from '../actions/get-docentes.action';
+import { getAuthStatusAction } from '../actions/get-auth-status.action';
+import { createAuthUserAction } from '../actions/create-auth-user.action';
 import { toggleDocenteStatusAction } from '../actions/toggle-docente-status.action';
 import { deleteDocenteAction } from '../actions/delete-docente.action';
 import { DocenteStatusBadge } from './docente-status-badge';
 import { DocenteEditDialog } from './docente-edit-dialog';
+import { DocenteDetailsDialog } from './docente-details-dialog';
 import { CATEGORIAS_DOCENTE } from '@/shared/constants/categories';
 import { Input } from '@/shared/components/ui/input';
-import { Users, Pencil, UserCheck, UserX, Search, Trash2 } from 'lucide-react';
+import { Users, Pencil, UserCheck, UserX, Search, Trash2, Eye, KeyRound } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 
 export interface DocenteTableRef {
@@ -24,7 +27,11 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
   const [search, setSearch] = useState('');
   const [filterCategoria, setFilterCategoria] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+  const [authStatus, setAuthStatus] = useState<Record<string, boolean>>({});
+  const [creatingAuth, setCreatingAuth] = useState<string | null>(null);
+  const [authSuccessMsg, setAuthSuccessMsg] = useState<string | null>(null);
   const [editingDocente, setEditingDocente] = useState<Docente | null>(null);
+  const [viewingDocente, setViewingDocente] = useState<Docente | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -33,15 +40,21 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
   const loadDocentes = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const result = await getDocentesAction({
-      search: search || undefined,
-      categoria: filterCategoria || undefined,
-      estado: filterEstado || undefined,
-    });
+    const [result, authResult] = await Promise.all([
+      getDocentesAction({
+        search: search || undefined,
+        categoria: filterCategoria || undefined,
+        estado: filterEstado || undefined,
+      }),
+      getAuthStatusAction(),
+    ]);
     if (result.data) {
       setDocentes(result.data);
     } else {
       setError(result.message || 'Error al cargar docentes.');
+    }
+    if (authResult.data) {
+      setAuthStatus(authResult.data);
     }
     setLoading(false);
   }, [search, filterCategoria, filterEstado]);
@@ -67,6 +80,22 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
     setToggling(null);
   };
 
+  const handleCreateAuth = async (docente: Docente) => {
+    setCreatingAuth(docente.id);
+    setAuthSuccessMsg(null);
+    const fullName = `${docente.nombres} ${docente.apellidos}`;
+    const result = await createAuthUserAction(docente.correo, docente.dni, fullName);
+    if (result.success) {
+      setAuthStatus((prev) => ({ ...prev, [docente.correo.toLowerCase()]: true }));
+      const pwd = result.tempPassword ? ` Contraseña: ${result.tempPassword}` : '';
+      setAuthSuccessMsg(`${result.message}${pwd}`);
+      setTimeout(() => setAuthSuccessMsg(null), 8000);
+    } else {
+      setError(result.message);
+    }
+    setCreatingAuth(null);
+  };
+
   const handleDelete = async (docente: Docente) => {
     if (!confirm(`¿Está seguro de eliminar a ${docente.nombres} ${docente.apellidos}? Esta acción no se puede deshacer.`)) {
       return;
@@ -83,6 +112,12 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
 
   return (
     <>
+      {authSuccessMsg && (
+        <div className="mx-6 mt-3 rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <p className="text-sm text-emerald-700 font-medium">{authSuccessMsg}</p>
+        </div>
+      )}
       <div className="px-6 py-3 border-b border-border flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -147,8 +182,10 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoría</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Régimen</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Condición</th>
+                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Escuela</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Antigüedad</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Carga Máx.</th>
+                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Acceso</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estado</th>
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Acciones</th>
               </tr>
@@ -168,15 +205,49 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.categoria}</td>
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.regimen}</td>
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.condicion}</td>
+                  <td className="px-6 py-3.5">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-violet-50 text-violet-700">
+                      {docente.escuela}
+                    </span>
+                  </td>
                   <td className="px-6 py-3.5 text-muted-foreground">
                     {calcularAntiguedad(docente.fechaIngreso)} años
                   </td>
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.cargaMaxima}h</td>
                   <td className="px-6 py-3.5">
+                    {authStatus[docente.correo.toLowerCase()] ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Vinculado
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleCreateAuth(docente)}
+                        disabled={creatingAuth === docente.id}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                        title="Crear usuario de acceso para este docente"
+                      >
+                        {creatingAuth === docente.id ? (
+                          <span className="w-3 h-3 border-2 border-amber-400 border-t-amber-700 rounded-full animate-spin" />
+                        ) : (
+                          <KeyRound className="w-3 h-3" />
+                        )}
+                        {creatingAuth === docente.id ? 'Creando...' : 'Crear acceso'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-6 py-3.5">
                     <DocenteStatusBadge estado={docente.estado} />
                   </td>
                   <td className="px-6 py-3.5">
                     <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setViewingDocente(docente)}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Ver detalles"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => setEditingDocente(docente)}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
@@ -229,6 +300,13 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
             setEditingDocente(null);
             loadDocentes();
           }}
+        />
+      )}
+
+      {viewingDocente && (
+        <DocenteDetailsDialog
+          docente={viewingDocente}
+          onClose={() => setViewingDocente(null)}
         />
       )}
     </>

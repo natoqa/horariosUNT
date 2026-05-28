@@ -12,6 +12,7 @@ const VALID_DTO = {
   categoria: 'Asociado' as const,
   regimen: 'Tiempo Completo' as const,
   condicion: 'Nombrado' as const,
+  escuela: 'Ingeniería de Sistemas' as const,
   fechaIngreso: '2015-03-15',
   cargaMaxima: 20,
 };

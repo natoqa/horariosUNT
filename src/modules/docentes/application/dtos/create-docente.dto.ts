@@ -3,6 +3,7 @@ import {
   CATEGORIAS_DOCENTE,
   REGIMENES_DOCENTE,
   CONDICIONES_DOCENTE,
+  ESCUELAS_PROCEDENCIA,
 } from '@/shared/constants/categories';
 
 export const createDocenteSchema = z.object({
@@ -27,6 +28,9 @@ export const createDocenteSchema = z.object({
   }),
   condicion: z.enum(CONDICIONES_DOCENTE, {
     message: 'Seleccione una condición válida',
+  }),
+  escuela: z.enum(ESCUELAS_PROCEDENCIA, {
+    message: 'Seleccione una escuela de procedencia válida',
   }),
   fechaIngreso: z
     .string()

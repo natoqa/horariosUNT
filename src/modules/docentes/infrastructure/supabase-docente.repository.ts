@@ -12,6 +12,7 @@ interface DocenteRow {
   categoria: string;
   regimen: string;
   condicion: string;
+  escuela: string;
   fecha_ingreso: string;
   carga_maxima: number;
   estado: string;
@@ -93,6 +94,7 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
         categoria: docente.categoria,
         regimen: docente.regimen,
         condicion: docente.condicion,
+        escuela: docente.escuela,
         fecha_ingreso: docente.fechaIngreso,
         carga_maxima: docente.cargaMaxima,
         estado: docente.estado,
@@ -120,6 +122,7 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
     if (updateData.categoria !== undefined) dbData.categoria = updateData.categoria;
     if (updateData.regimen !== undefined) dbData.regimen = updateData.regimen;
     if (updateData.condicion !== undefined) dbData.condicion = updateData.condicion;
+    if (updateData.escuela !== undefined) dbData.escuela = updateData.escuela;
     if (updateData.fechaIngreso !== undefined) dbData.fecha_ingreso = updateData.fechaIngreso;
     if (updateData.cargaMaxima !== undefined) dbData.carga_maxima = updateData.cargaMaxima;
     if (updateData.estado !== undefined) dbData.estado = updateData.estado;
@@ -160,6 +163,7 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
       categoria: row.categoria as Docente['categoria'],
       regimen: row.regimen as Docente['regimen'],
       condicion: row.condicion as Docente['condicion'],
+      escuela: row.escuela as Docente['escuela'],
       fechaIngreso: row.fecha_ingreso,
       cargaMaxima: row.carga_maxima,
       estado: row.estado as Docente['estado'],

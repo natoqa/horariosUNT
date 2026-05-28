@@ -10,6 +10,7 @@ import {
   CATEGORIAS_DOCENTE,
   REGIMENES_DOCENTE,
   CONDICIONES_DOCENTE,
+  ESCUELAS_PROCEDENCIA,
 } from '@/shared/constants/categories';
 import { X } from 'lucide-react';
 
@@ -40,6 +41,7 @@ export function DocenteEditDialog({ docente, onClose, onSuccess }: DocenteEditDi
       categoria: formData.get('categoria') as string,
       regimen: formData.get('regimen') as string,
       condicion: formData.get('condicion') as string,
+      escuela: formData.get('escuela') as string,
       fechaIngreso: formData.get('fechaIngreso') as string,
       cargaMaxima: formData.get('cargaMaxima') as string,
     };
@@ -140,7 +142,22 @@ export function DocenteEditDialog({ docente, onClose, onSuccess }: DocenteEditDi
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Escuela de Procedencia</Label>
+              <select
+                name="escuela"
+                defaultValue={docente.escuela}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {ESCUELAS_PROCEDENCIA.map((esc) => (
+                  <option key={esc} value={esc}>{esc}</option>
+                ))}
+              </select>
+              {fieldErrors.escuela && (
+                <p className="text-xs text-destructive">{fieldErrors.escuela[0]}</p>
+              )}
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Condición</Label>
               <select
@@ -156,6 +173,9 @@ export function DocenteEditDialog({ docente, onClose, onSuccess }: DocenteEditDi
                 <p className="text-xs text-destructive">{fieldErrors.condicion[0]}</p>
               )}
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Fecha de Ingreso</Label>
               <Input name="fechaIngreso" type="date" defaultValue={docente.fechaIngreso} className="h-10" />

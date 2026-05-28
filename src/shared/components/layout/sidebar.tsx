@@ -79,6 +79,10 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           href: `/${role}/docentes`,
           icon: Users,
           roles: ['director', 'secretaria'],
+          children: [
+            { title: 'Ver Docentes', href: `/${role}/docentes`, roles: ['director', 'secretaria'] },
+            { title: 'Crear Docente', href: `/${role}/docentes/crear`, roles: ['director', 'secretaria'] },
+          ],
         },
         {
           title: 'Cursos',

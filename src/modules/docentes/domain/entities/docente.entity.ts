@@ -2,6 +2,7 @@ import {
   CategoriaDocente,
   RegimenDocente,
   CondicionDocente,
+  EscuelaProcedencia,
 } from '@/shared/constants/categories';
 
 export interface Docente {
@@ -14,6 +15,7 @@ export interface Docente {
   categoria: CategoriaDocente;
   regimen: RegimenDocente;
   condicion: CondicionDocente;
+  escuela: EscuelaProcedencia;
   fechaIngreso: string;
   cargaMaxima: number;
   estado: 'Activo' | 'Inactivo';

@@ -5,11 +5,13 @@ import { SupabaseDocenteRepository } from '../../infrastructure/supabase-docente
 import { CreateDocenteUseCase } from '../../application/use-cases/create-docente.use-case';
 import { createDocenteSchema } from '../../application/dtos/create-docente.dto';
 import { createClient } from '@/shared/lib/supabase/server';
+import { createAdminClient } from '@/shared/lib/supabase/admin';
 
 export interface DocenteActionState {
   errors?: Record<string, string[]>;
   message?: string;
   success?: boolean;
+  authLinked?: boolean;
 }
 
 export async function createDocenteAction(
@@ -37,6 +39,7 @@ export async function createDocenteAction(
     categoria: formData.get('categoria') as string,
     regimen: formData.get('regimen') as string,
     condicion: formData.get('condicion') as string,
+    escuela: formData.get('escuela') as string,
     fechaIngreso: formData.get('fechaIngreso') as string,
     cargaMaxima: formData.get('cargaMaxima') as string,
   };
@@ -61,5 +64,54 @@ export async function createDocenteAction(
 
   revalidatePath('/director/docentes');
   revalidatePath('/secretaria/docentes');
-  return { success: true, message: 'Docente registrado exitosamente.' };
+
+  const adminClient = createAdminClient();
+  if (!adminClient) {
+    return {
+      success: true,
+      authLinked: false,
+      message:
+        'Docente registrado, pero no se pudo crear el usuario de acceso (SUPABASE_SERVICE_ROLE_KEY no configurada).',
+    };
+  }
+
+  try {
+    const tempPassword = `${validated.data.dni}UNT!`;
+    const fullName = `${validated.data.nombres} ${validated.data.apellidos}`;
+
+    const { error: authError } = await adminClient.auth.admin.createUser({
+      email: validated.data.correo,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { role: 'docente', full_name: fullName },
+    });
+
+    if (authError) {
+      if (authError.message.includes('already been registered')) {
+        return {
+          success: true,
+          authLinked: true,
+          message: 'Docente registrado y vinculado con usuario de acceso existente.',
+        };
+      }
+
+      return {
+        success: true,
+        authLinked: false,
+        message: `Docente registrado, pero falló la creación del usuario de acceso: ${authError.message}`,
+      };
+    }
+
+    return {
+      success: true,
+      authLinked: true,
+      message: `Docente registrado con usuario de acceso creado. Contraseña temporal: ${tempPassword}`,
+    };
+  } catch {
+    return {
+      success: true,
+      authLinked: false,
+      message: 'Docente registrado, pero ocurrió un error al crear el usuario de acceso.',
+    };
+  }
 }

@@ -3,6 +3,7 @@ import {
   CATEGORIAS_DOCENTE,
   REGIMENES_DOCENTE,
   CONDICIONES_DOCENTE,
+  ESCUELAS_PROCEDENCIA,
 } from '@/shared/constants/categories';
 
 export const updateDocenteSchema = z.object({
@@ -29,6 +30,11 @@ export const updateDocenteSchema = z.object({
   condicion: z
     .enum(CONDICIONES_DOCENTE, {
       message: 'Seleccione una condición válida',
+    })
+    .optional(),
+  escuela: z
+    .enum(ESCUELAS_PROCEDENCIA, {
+      message: 'Seleccione una escuela de procedencia válida',
     })
     .optional(),
   fechaIngreso: z

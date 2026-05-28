@@ -27,6 +27,7 @@ export class CreateDocenteUseCase {
       categoria: validated.categoria,
       regimen: validated.regimen,
       condicion: validated.condicion,
+      escuela: validated.escuela,
       fechaIngreso: validated.fechaIngreso,
       cargaMaxima: validated.cargaMaxima,
       estado: 'Activo',

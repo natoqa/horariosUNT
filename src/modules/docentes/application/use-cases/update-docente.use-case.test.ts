@@ -13,6 +13,7 @@ const EXISTING_DOCENTE: Docente = {
   categoria: 'Asociado',
   regimen: 'Tiempo Completo',
   condicion: 'Nombrado',
+  escuela: 'Ingeniería de Sistemas',
   fechaIngreso: '2015-03-15',
   cargaMaxima: 20,
   estado: 'Activo',

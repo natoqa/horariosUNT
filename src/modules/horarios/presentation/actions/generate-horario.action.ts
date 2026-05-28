@@ -48,8 +48,8 @@ export async function generateHorarioAction(
     const docentes: Docente[] = (docentesRes.data ?? []).map((d) => ({
       id: d.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni,
       correo: d.correo, telefono: d.telefono, categoria: d.categoria,
-      regimen: d.regimen, condicion: d.condicion, fechaIngreso: d.fecha_ingreso,
-      cargaMaxima: d.carga_maxima, estado: d.estado,
+      regimen: d.regimen, condicion: d.condicion, escuela: d.escuela,
+      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, estado: d.estado,
       createdAt: d.created_at, updatedAt: d.updated_at,
     }));
 

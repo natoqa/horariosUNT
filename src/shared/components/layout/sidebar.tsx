@@ -114,6 +114,12 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           roles: ['director', 'secretaria', 'docente'],
         },
         {
+          title: 'Carga no lectiva',
+          href: `/${role}/carga-no-lectiva`,
+          icon: FileText,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
           title: 'Reportes',
           href: `/${role}/reportes`,
           icon: FileText,

@@ -25,11 +25,11 @@ export class SaveDisponibilidadUseCase {
       (b) => b.estado === 'disponible' || b.estado === 'preferido',
     ).length;
 
-    const minRequired = 2;
+    const minRequired = getCargaMaximaDefault(docenteRegimen);
 
     if (availableCount < minRequired) {
       throw new Error(
-        `Debe registrar al menos ${minRequired} horas disponibles. Actualmente tiene ${availableCount}.`,
+        `Debe registrar al menos ${minRequired} horas disponibles según su régimen (${docenteRegimen}). Actualmente tiene ${availableCount}.`,
       );
     }
 

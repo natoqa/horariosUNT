@@ -15,7 +15,7 @@ export default function DocentesPage() {
           <Users className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-x-auto">
         <div className="px-6 py-4 border-b border-border">
           <h2 className="text-sm font-semibold">Docentes registrados</h2>
         </div>

@@ -173,8 +173,8 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-muted/20">
+          <table className="w-full text-sm min-w-[1100px]">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Docente</th>

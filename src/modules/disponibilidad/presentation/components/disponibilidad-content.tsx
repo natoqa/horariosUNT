@@ -32,7 +32,7 @@ export function DisponibilidadContent() {
 
   const availableCount = Array.from(gridState.values()).filter((e) => e === 'disponible').length;
   const preferredCount = Array.from(gridState.values()).filter((e) => e === 'preferido').length;
-  const minRequired = docenteRegimen ? getCargaMaximaDefault(docenteRegimen) : 0;
+  const minRequired = docenteRegimen ? 2 : 0;
   const totalAvailable = availableCount + preferredCount;
   const canSave = isEditable && totalAvailable >= minRequired && !saving;
 

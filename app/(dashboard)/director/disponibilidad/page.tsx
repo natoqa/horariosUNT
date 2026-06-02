@@ -1,4 +1,4 @@
-import { DisponibilidadContent } from '@/modules/disponibilidad';
+import { DirectorDisponibilidadContent } from '@/modules/disponibilidad';
 import { Clock } from 'lucide-react';
 
 export default function DisponibilidadPage() {
@@ -15,7 +15,7 @@ export default function DisponibilidadPage() {
           <Clock className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <DisponibilidadContent />
+      <DirectorDisponibilidadContent />
     </div>
   );
 }

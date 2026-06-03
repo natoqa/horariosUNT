@@ -1,7 +1,15 @@
-import { CursosContent } from '@/modules/cursos';
+'use client';
+
+import { CursoTable } from '@/modules/cursos';
 import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/shared/components/ui/button';
+import { useAuth } from '@/shared/hooks/use-auth';
 
 export default function CursosPage() {
+  const { user } = useAuth();
+  const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -15,7 +23,17 @@ export default function CursosPage() {
           <BookOpen className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <CursosContent />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Cursos registrados en el plan de estudios</h2>
+          {isAllowed && (
+            <Link href="/director/cursos/crear">
+              <Button size="sm">Crear Curso</Button>
+            </Link>
+          )}
+        </div>
+        <CursoTable />
+      </div>
     </div>
   );
 }

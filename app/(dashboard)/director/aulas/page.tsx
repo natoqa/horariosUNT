@@ -1,7 +1,15 @@
-import { AulasContent } from '@/modules/aulas';
+'use client';
+
+import { AulaTable } from '@/modules/aulas';
 import { Landmark } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/shared/components/ui/button';
+import { useAuth } from '@/shared/hooks/use-auth';
 
 export default function AulasPage() {
+  const { user } = useAuth();
+  const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -15,7 +23,17 @@ export default function AulasPage() {
           <Landmark className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <AulasContent />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Aulas e infraestructura física registradas</h2>
+          {isAllowed && (
+            <Link href="/director/aulas/crear">
+              <Button size="sm">Crear Aula</Button>
+            </Link>
+          )}
+        </div>
+        <AulaTable />
+      </div>
     </div>
   );
 }

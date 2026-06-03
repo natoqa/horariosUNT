@@ -14,6 +14,11 @@ export async function getHorarioAction(
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
+  const role = user.user_metadata?.role;
+  if (role !== 'director' && role !== 'secretaria') {
+    return { message: 'Solo director y secretaria pueden acceder a esta vista.' };
+  }
+
   const repo = new SupabaseHorarioRepository();
   const useCase = new GetHorarioUseCase(repo);
 

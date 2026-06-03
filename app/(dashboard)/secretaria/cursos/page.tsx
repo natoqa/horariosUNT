@@ -1,5 +1,9 @@
-import { CursosContent } from '@/modules/cursos';
+'use client';
+
+import { CursoTable } from '@/modules/cursos';
 import { BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/shared/components/ui/button';
 
 export default function CursosPage() {
   return (
@@ -15,7 +19,15 @@ export default function CursosPage() {
           <BookOpen className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <CursosContent />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Cursos registrados en el plan de estudios</h2>
+          <Link href="/secretaria/cursos/crear">
+            <Button size="sm">Crear Curso</Button>
+          </Link>
+        </div>
+        <CursoTable />
+      </div>
     </div>
   );
 }

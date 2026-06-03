@@ -1,5 +1,9 @@
-import { AulasContent } from '@/modules/aulas';
+'use client';
+
+import { AulaTable } from '@/modules/aulas';
 import { Landmark } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/shared/components/ui/button';
 
 export default function AulasPage() {
   return (
@@ -15,7 +19,15 @@ export default function AulasPage() {
           <Landmark className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <AulasContent />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Aulas e infraestructura física registradas</h2>
+          <Link href="/secretaria/aulas/crear">
+            <Button size="sm">Crear Aula</Button>
+          </Link>
+        </div>
+        <AulaTable />
+      </div>
     </div>
   );
 }

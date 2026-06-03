@@ -28,6 +28,7 @@ CREATE TABLE public.docentes (
   categoria VARCHAR(20) NOT NULL CHECK (categoria IN ('Principal', 'Asociado', 'Auxiliar')),
   regimen VARCHAR(25) NOT NULL CHECK (regimen IN ('Dedicación Exclusiva', 'Tiempo Completo', 'Tiempo Parcial')),
   condicion VARCHAR(15) NOT NULL CHECK (condicion IN ('Nombrado', 'Contratado')),
+  escuela VARCHAR(50) NOT NULL CHECK (escuela IN ('Ingeniería de Sistemas', 'Ingeniería Industrial', 'Contabilidad', 'Economía', 'Física', 'Matemática', 'Psicología', 'Filosofía', 'Estadística', 'Informática', 'Ingeniería Mecánica', 'Ingeniería Civil', 'Otra')),
   fecha_ingreso DATE NOT NULL,
   carga_maxima INTEGER NOT NULL DEFAULT 40,
   estado VARCHAR(10) NOT NULL DEFAULT 'Activo' CHECK (estado IN ('Activo', 'Inactivo')),
@@ -70,6 +71,143 @@ CREATE POLICY "Director puede eliminar docentes"
   ON public.docentes FOR DELETE
   USING (
     (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+-- =============================================
+-- TABLA: cargas_no_lectivas
+-- Módulo: carga no lectiva
+-- =============================================
+CREATE TABLE public.cargas_no_lectivas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  docente_id UUID NOT NULL REFERENCES public.docentes(id) ON DELETE CASCADE,
+  periodo_id UUID NOT NULL REFERENCES public.periodos(id) ON DELETE CASCADE,
+  horas_lectivas_asignadas INTEGER NOT NULL DEFAULT 0,
+  horas_lectivas_no_asignadas INTEGER NOT NULL DEFAULT 0,
+  lectiva_declarada BOOLEAN NOT NULL DEFAULT false,
+  declaracion_lectiva TEXT NOT NULL DEFAULT '',
+  total_horas INTEGER NOT NULL DEFAULT 0,
+  estado VARCHAR(20) NOT NULL DEFAULT 'Borrador' CHECK (estado IN ('Borrador', 'En revisión', 'Aprobado', 'Rechazado')),
+  director_aprobado BOOLEAN NOT NULL DEFAULT false,
+  secretaria_aprobado BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_updated_at_cargas_no_lectivas
+  BEFORE UPDATE ON public.cargas_no_lectivas
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.cargas_no_lectivas ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Director y secretaria pueden ver todas las cargas no lectivas"
+  ON public.cargas_no_lectivas FOR SELECT
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
+  );
+
+CREATE POLICY "Docente puede ver su propia carga no lectiva"
+  ON public.cargas_no_lectivas FOR SELECT
+  USING (
+    docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Docente puede insertar su propia carga no lectiva"
+  ON public.cargas_no_lectivas FOR INSERT
+  WITH CHECK (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'docente'
+    AND docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Docente puede actualizar su propia carga no lectiva si no está aprobada"
+  ON public.cargas_no_lectivas FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'docente'
+    AND docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+    AND estado <> 'Aprobado'
+  );
+
+CREATE POLICY "Director y secretaria pueden aprobar cargas no lectivas"
+  ON public.cargas_no_lectivas FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
+  );
+
+-- =============================================
+-- TABLA: actividades_no_lectivas
+-- Módulo: carga no lectiva
+-- =============================================
+CREATE TABLE public.actividades_no_lectivas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  docente_id UUID NOT NULL REFERENCES public.docentes(id) ON DELETE CASCADE,
+  periodo_id UUID NOT NULL REFERENCES public.periodos(id) ON DELETE CASCADE,
+  tipo VARCHAR(120) NOT NULL CHECK (tipo IN (
+    'Preparación y Evaluación',
+    'Consejería y Tutoría',
+    'Investigación',
+    'Capacitación',
+    'Actividades de Gobierno',
+    'Actividades de Administración',
+    'Asesoría de Tesis, Exámenes Profesionales y Experiencia Profesional',
+    'Responsabilidad Social Universitaria',
+    'Comités Técnicos y Comisiones'
+  )),
+  horas INTEGER NOT NULL DEFAULT 0,
+  detalles TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (docente_id, periodo_id, tipo)
+);
+
+CREATE TRIGGER set_updated_at_actividades_no_lectivas
+  BEFORE UPDATE ON public.actividades_no_lectivas
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.actividades_no_lectivas ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Director y secretaria pueden ver todas las actividades no lectivas"
+  ON public.actividades_no_lectivas FOR SELECT
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
+  );
+
+CREATE POLICY "Docente puede ver sus propias actividades no lectivas"
+  ON public.actividades_no_lectivas FOR SELECT
+  USING (
+    docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Docente puede insertar sus propias actividades no lectivas"
+  ON public.actividades_no_lectivas FOR INSERT
+  WITH CHECK (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'docente'
+    AND docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Docente puede actualizar sus propias actividades no lectivas"
+  ON public.actividades_no_lectivas FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'docente'
+    AND docente_id = (
+      SELECT id FROM public.docentes WHERE correo = auth.jwt() ->> 'email'
+    )
+  );
+
+CREATE POLICY "Director y secretaria pueden administrar actividades no lectivas"
+  ON public.actividades_no_lectivas FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
   );
 
 -- =============================================
@@ -122,12 +260,58 @@ CREATE POLICY "Director puede eliminar cursos"
   );
 
 -- =============================================
+-- TABLA: periodos
+-- Módulo: periodos (Andy)
+-- =============================================
+CREATE TABLE public.periodos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  tipo_ciclo VARCHAR(10) NOT NULL CHECK (tipo_ciclo IN ('Impar', 'Par')),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  availability_deadline DATE NOT NULL,
+  state VARCHAR(20) NOT NULL DEFAULT 'Configuración' CHECK (state IN ('Configuración', 'Recopilación', 'Generación', 'Aprobado', 'Publicado', 'Cerrado')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_updated_at_periodos
+  BEFORE UPDATE ON public.periodos
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.periodos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Todos los autenticados pueden ver periodos"
+  ON public.periodos FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Director puede gestionar periodos"
+  ON public.periodos FOR INSERT
+  WITH CHECK (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+CREATE POLICY "Director puede editar periodos"
+  ON public.periodos FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+CREATE POLICY "Director puede eliminar periodos"
+  ON public.periodos FOR DELETE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+-- =============================================
 -- TABLA: grupos (secciones de un curso por período)
 -- =============================================
 CREATE TABLE public.grupos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   curso_id UUID NOT NULL REFERENCES public.cursos(id) ON DELETE CASCADE,
   periodo_id UUID NOT NULL REFERENCES public.periodos(id) ON DELETE CASCADE,
+  docente_id UUID REFERENCES public.docentes(id) ON DELETE SET NULL,
   nombre VARCHAR(5) NOT NULL DEFAULT 'A',
   num_estudiantes INTEGER NOT NULL DEFAULT 30,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -313,9 +497,7 @@ CREATE TABLE public.horarios (
   estado VARCHAR(15) NOT NULL DEFAULT 'Borrador' CHECK (estado IN ('Borrador', 'Aprobado', 'Publicado')),
   generado_por UUID REFERENCES auth.users(id),
   fecha_generacion TIMESTAMPTZ,
-  fecha_aprobacion TIMESTAMPTZ,
-  fecha_publicacion TIMESTAMPTZ,
-  metadata JSONB DEFAULT '{}',
+  resumen JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -330,7 +512,7 @@ ALTER TABLE public.horarios ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Todos pueden ver horarios publicados, director y secretaria ven todos"
   ON public.horarios FOR SELECT
   USING (
-    estado = 'Publicado' OR
+    estado = 'publicado' OR
     (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
   );
 
@@ -357,7 +539,7 @@ CREATE TABLE public.asignaciones (
   aula_id UUID NOT NULL REFERENCES public.aulas(id),
   dia VARCHAR(10) NOT NULL CHECK (dia IN ('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado')),
   bloque VARCHAR(15) NOT NULL,
-  tipo_sesion VARCHAR(10) NOT NULL DEFAULT 'Teórica' CHECK (tipo_sesion IN ('Teórica', 'Práctica')),
+  tipo VARCHAR(10) NOT NULL DEFAULT 'teorico' CHECK (tipo IN ('teorico', 'practico')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(horario_id, aula_id, dia, bloque),
@@ -374,7 +556,7 @@ ALTER TABLE public.asignaciones ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Todos pueden ver asignaciones de horarios publicados"
   ON public.asignaciones FOR SELECT
   USING (
-    horario_id IN (SELECT id FROM public.horarios WHERE estado = 'Publicado')
+    horario_id IN (SELECT id FROM public.horarios WHERE estado = 'publicado')
     OR (auth.jwt() -> 'user_metadata' ->> 'role') IN ('director', 'secretaria')
   );
 

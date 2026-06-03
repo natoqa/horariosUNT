@@ -17,6 +17,7 @@ export async function saveDisponibilidadAction(
   periodoId: string,
   blocks: DisponibilidadBlock[],
   docenteRegimen: RegimenDocente,
+  docenteCargaMaxima?: number,
 ): Promise<SaveDisponibilidadState> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -58,7 +59,7 @@ export async function saveDisponibilidadAction(
   try {
     const { data: docenteData, error: docenteError } = await supabase
       .from('docentes')
-      .select('id')
+      .select('id, carga_maxima')
       .eq('correo', user.email)
       .single();
 
@@ -66,7 +67,7 @@ export async function saveDisponibilidadAction(
       return { message: 'No se encontró un registro de docente asociado a este usuario.' };
     }
 
-    await useCase.execute(docenteData.id, periodoId, blocks, periodo, docenteRegimen);
+    await useCase.execute(docenteData.id, periodoId, blocks, periodo, docenteRegimen, docenteCargaMaxima ?? docenteData.carga_maxima);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error al guardar disponibilidad.';
     return { message };

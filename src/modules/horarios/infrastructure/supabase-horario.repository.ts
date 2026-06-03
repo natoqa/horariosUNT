@@ -1,5 +1,5 @@
 import { IHorarioRepository } from '../domain/repositories/horario.repository';
-import { Horario, Asignacion, GenerationSummary } from '../domain/entities/horario.entity';
+import { Horario, Asignacion, GenerationSummary, HorarioEstado } from '../domain/entities/horario.entity';
 import { GeneratedAssignment } from '../domain/services/schedule-generator.service';
 import { createClient } from '@/shared/lib/supabase/server';
 
@@ -8,7 +8,7 @@ interface HorarioRow {
   periodo_id: string;
   estado: string;
   fecha_generacion: string;
-  metadata: any;
+  resumen: any;
   created_at: string;
   updated_at: string;
 }
@@ -64,7 +64,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
         periodo_id: periodoId,
         estado: 'Borrador',
         fecha_generacion: new Date().toISOString(),
-        metadata: resumen,
+        resumen: resumen,
       })
       .select()
       .single();
@@ -162,7 +162,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     return this.mapToAsignacion(data as AsignacionRow);
   }
 
-  async updateEstado(id: string, estado: string): Promise<Horario> {
+  async updateEstado(id: string, estado: HorarioEstado): Promise<Horario> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('horarios')
@@ -178,12 +178,12 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
   }
 
   private mapToHorario(row: HorarioRow): Horario {
-    let resumen: GenerationSummary | null = null;
-    if (row.metadata) {
-      // metadata is typically a parsed JSON object when returned by Supabase
-      resumen = typeof row.metadata === 'string' 
-        ? JSON.parse(row.metadata) 
-        : (row.metadata as GenerationSummary);
+    let resumenData: GenerationSummary | null = null;
+    if (row.resumen) {
+      // resumen is typically a parsed JSON object when returned by Supabase
+      resumenData = typeof row.resumen === 'string'
+        ? JSON.parse(row.resumen)
+        : (row.resumen as GenerationSummary);
     }
 
     return {
@@ -191,7 +191,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       periodoId: row.periodo_id,
       estado: row.estado as Horario['estado'],
       fechaGeneracion: row.fecha_generacion,
-      resumen,
+      resumen: resumenData,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

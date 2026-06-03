@@ -15,6 +15,12 @@ export class SupabaseAuthRepository implements IAuthRepository {
     });
 
     if (error || !data.user) {
+      if (error?.message?.includes('fetch failed')) {
+        throw new Error(
+          'No se pudo conectar a Supabase. Revisa NEXT_PUBLIC_SUPABASE_URL y la conexión de red.'
+        );
+      }
+
       throw new Error(error?.message || 'Credenciales inválidas');
     }
 

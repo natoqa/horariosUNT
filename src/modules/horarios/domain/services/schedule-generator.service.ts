@@ -71,6 +71,16 @@ export function generateSchedule(
   const activeDocentes = input.docentes.filter((d) => d.estado === 'Activo');
   const activeAulas = input.aulas.filter((a) => a.estado === 'Activa');
 
+  console.log('[GENERATION] Input data:', {
+    totalDocentes: input.docentes.length,
+    activeDocentes: activeDocentes.length,
+    totalAulas: input.aulas.length,
+    activeAulas: activeAulas.length,
+    totalCursos: input.cursos.length,
+    totalGrupos: input.grupos.length,
+    totalDisponibilidad: input.disponibilidades.length,
+  });
+
   // Phase 2: Build availability matrix
   onProgress?.(2, 'Filtrando disponibilidad', 0);
   const disponibilidadMap = buildDisponibilidadMap(input.disponibilidades);
@@ -87,10 +97,27 @@ export function generateSchedule(
   onProgress?.(5, 'Asignando cursos a docentes', 0);
   const units = buildAssignmentUnits(input.cursos, input.grupos);
 
+  console.log('[GENERATION] Assignment units:', {
+    totalUnits: units.length,
+    units: units.map(u => ({
+      curso: u.curso.nombre,
+      grupo: u.grupo.nombre,
+      tipo: u.tipo,
+      horasNeeded: u.horasNeeded,
+      docenteAsignado: u.grupo.docenteId,
+    })),
+  });
+
   const docenteLoadMap = new Map<string, number>();
   activeDocentes.forEach((d) => docenteLoadMap.set(d.id, 0));
 
   const unitDocentes = assignDocentesToUnits(units, scoredDocentes, docenteLoadMap);
+
+  console.log('[GENERATION] Docente assignments:', {
+    totalUnits: units.length,
+    assignedUnits: unitDocentes.size,
+    assignments: Array.from(unitDocentes.entries()),
+  });
 
   // Phase 6: Assign blocks and rooms
   onProgress?.(6, 'Asignando bloques y aulas', 0);
@@ -103,6 +130,11 @@ export function generateSchedule(
     const docenteId = unitDocentes.get(unitKey(unit));
 
     if (!docenteId) {
+      console.log('[GENERATION] No docente assigned for unit:', {
+        curso: unit.curso.nombre,
+        grupo: unit.grupo.nombre,
+        tipo: unit.tipo,
+      });
       unassigned.push({
         grupoId: unit.grupo.id,
         cursoNombre: unit.curso.nombre,
@@ -113,11 +145,24 @@ export function generateSchedule(
     }
 
     const docente = activeDocentes.find((d) => d.id === docenteId);
-    if (!docente) continue;
+    if (!docente) {
+      console.log('[GENERATION] Docente not found in active list:', docenteId);
+      continue;
+    }
 
     const slots = getDocenteAvailableSlots(docenteId, disponibilidadMap);
+    console.log('[GENERATION] Docente slots:', {
+      docenteId,
+      docenteName: `${docente.nombres} ${docente.apellidos}`,
+      totalSlots: slots.length,
+      preferredSlots: slots.filter(s => s.preferred).length,
+    });
+
     const curso = cursoMap.get(unit.grupo.cursoId);
-    if (!curso) continue;
+    if (!curso) {
+      console.log('[GENERATION] Curso not found:', unit.grupo.cursoId);
+      continue;
+    }
 
     let assigned = false;
 
@@ -140,6 +185,16 @@ export function generateSchedule(
           return true;
         });
 
+        if (compatibleAulas.length === 0) {
+          console.log('[GENERATION] No compatible aulas for slot:', {
+            slot: `${slot.dia} ${slot.bloque}`,
+            curso: curso.nombre,
+            requiereLaboratorio: curso.requiereLaboratorio,
+            numEstudiantes: unit.grupo.numEstudiantes,
+            activeAulas: activeAulas.map(a => ({ nombre: a.nombre, tipo: a.tipo, capacidad: a.capacidad })),
+          });
+        }
+
         for (const aula of compatibleAulas) {
           const candidate: PartialAssignment = {
             grupoId: unit.grupo.id,
@@ -158,6 +213,17 @@ export function generateSchedule(
           const hardViolations = validateHardConstraints(partials, candidate);
           const consecutiveViolations = validateMaxConsecutiveHours(partials, candidate);
 
+          console.log('[GENERATION] Assignment attempt:', {
+            curso: curso.nombre,
+            grupo: unit.grupo.nombre,
+            docente: docenteId,
+            aula: aula.nombre,
+            dia: slot.dia,
+            bloque: slot.bloque,
+            hardViolations: hardViolations.map(v => v.rule),
+            consecutiveViolations: consecutiveViolations.map(v => v.rule),
+          });
+
           if (hardViolations.length === 0 && consecutiveViolations.length === 0) {
             assignments.push({
               grupoId: unit.grupo.id,
@@ -171,6 +237,7 @@ export function generateSchedule(
             slots.splice(slots.indexOf(slot), 1);
             docenteLoadMap.set(docenteId, (docenteLoadMap.get(docenteId) ?? 0) + 1);
             blockAssigned = true;
+            console.log('[GENERATION] Assignment successful');
             break;
           }
         }
@@ -207,6 +274,17 @@ export function generateSchedule(
   const totalUnits = units.length;
   const assignedUnits = totalUnits - unassigned.length;
 
+  // Count unique courses instead of assignment units
+  const uniqueCursoIds = new Set(units.map(u => u.curso.id));
+  const assignedCursoIds = new Set(
+    units
+      .filter(u => !unassigned.some(un => un.grupoId === u.grupo.id && un.tipo === u.tipo))
+      .map(u => u.curso.id)
+  );
+  const totalCursos = uniqueCursoIds.size;
+  const cursosAsignados = assignedCursoIds.size;
+  const cursosNoAsignados = totalCursos - cursosAsignados;
+
   const preferredCount = assignments.filter((a) => {
     const key = `${a.docenteId}||${a.dia}||${a.bloque}`;
     return disponibilidadMap.get(key) === 'preferido';
@@ -215,9 +293,9 @@ export function generateSchedule(
   const loads = Array.from(docenteLoadMap.values()).filter((l) => l > 0);
 
   const summary: GenerationSummary = {
-    totalCursos: totalUnits,
-    cursosAsignados: assignedUnits,
-    cursosNoAsignados: unassigned.length,
+    totalCursos,
+    cursosAsignados,
+    cursosNoAsignados,
     porcentajePreferencias: assignments.length > 0 ? Math.round((preferredCount / assignments.length) * 100) : 0,
     cargaPromedio: loads.length > 0 ? Math.round((loads.reduce((s, l) => s + l, 0) / loads.length) * 10) / 10 : 0,
     cargaMaxima: loads.length > 0 ? Math.max(...loads) : 0,
@@ -325,6 +403,21 @@ function assignDocentesToUnits(
 
   for (const unit of units) {
     const key = unitKey(unit);
+
+    // Check if grupo has a pre-assigned docente
+    if (unit.grupo.docenteId) {
+      const preAssignedDocente = scoredDocentes.find((sd) => sd.docente.id === unit.grupo.docenteId);
+      if (preAssignedDocente) {
+        const currentLoad = docenteLoadMap.get(unit.grupo.docenteId) ?? 0;
+        const maxLoad = getCargaMaximaDefault(preAssignedDocente.docente.regimen);
+        if (currentLoad + unit.horasNeeded <= maxLoad && preAssignedDocente.availableSlots.length >= unit.horasNeeded) {
+          result.set(key, unit.grupo.docenteId);
+          cursoDocenteMap.set(unit.grupo.cursoId, unit.grupo.docenteId);
+          docenteLoadMap.set(unit.grupo.docenteId, currentLoad + unit.horasNeeded);
+          continue;
+        }
+      }
+    }
 
     // RN-030: Prefer same docente for theory+practice of same curso
     const existingDocente = cursoDocenteMap.get(unit.grupo.cursoId);

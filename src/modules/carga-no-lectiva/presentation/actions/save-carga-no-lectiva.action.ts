@@ -1,0 +1,50 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { createClient } from '@/shared/lib/supabase/server';
+import { SupabaseCargaNoLectivaRepository } from '../../infrastructure/supabase-carga-no-lectiva.repository';
+import { SaveCargaNoLectivaUseCase } from '../../application/use-cases/save-carga-no-lectiva.use-case';
+import { normalizeFormAccessor } from './form-utils';
+
+export async function saveCargaNoLectivaAction(
+  _prevState: unknown,
+  formData?: FormData | Record<string, any>,
+) {
+  const fd = normalizeFormAccessor(formData);
+  if (!fd) {
+    return { message: 'No se recibieron datos del formulario. Recarga la página e intenta nuevamente.' };
+  }
+
+  const periodoId = fd.get('periodoId')?.toString() ?? '';
+  const totalHoras = Number(fd.get('totalHoras')?.toString() ?? '0');
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { message: 'No autorizado. Debe iniciar sesión.' };
+  }
+
+  const { data: docenteData, error: docenteError } = await supabase
+    .from('docentes')
+    .select('id')
+    .eq('correo', user.email)
+    .single();
+
+  if (docenteError || !docenteData) {
+    return { message: 'No se encontró un docente asociado a este usuario.' };
+  }
+
+  const repository = new SupabaseCargaNoLectivaRepository();
+  const useCase = new SaveCargaNoLectivaUseCase(repository);
+
+  try {
+    await useCase.execute(docenteData.id, periodoId, totalHoras);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al guardar la carga no lectiva.';
+    return { message };
+  }
+
+  revalidatePath('/docente/carga-no-lectiva');
+  return { success: true, message: 'Carga no lectiva registrada para aprobación.' };
+}

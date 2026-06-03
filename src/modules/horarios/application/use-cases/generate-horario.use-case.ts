@@ -32,9 +32,7 @@ export class GenerateHorarioUseCase {
     const generationResult = generateSchedule(input);
 
     // Save horario
-    const horario = existing
-      ? await this.horarioRepository.save(periodoId, generationResult.summary)
-      : await this.horarioRepository.save(periodoId, generationResult.summary);
+    const horario = await this.horarioRepository.save(periodoId, generationResult.summary);
 
     // Save asignaciones
     const asignaciones = generationResult.assignments.length > 0

@@ -105,12 +105,18 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           title: 'Disponibilidad',
           href: `/${role}/disponibilidad`,
           icon: Clock,
-          roles: ['director', 'docente'],
+          roles: ['docente'],
         },
         {
           title: 'Horarios',
           href: `/${role}/horarios`,
           icon: CalendarDays,
+          roles: ['director', 'secretaria', 'docente'],
+        },
+        {
+          title: 'Carga no lectiva',
+          href: `/${role}/carga-no-lectiva`,
+          icon: FileText,
           roles: ['director', 'secretaria', 'docente'],
         },
         {

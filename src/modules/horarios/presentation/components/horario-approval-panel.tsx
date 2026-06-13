@@ -27,8 +27,14 @@ export function HorarioApprovalPanel({
   const [success, setSuccess] = useState<string | null>(null);
   const [violations, setViolations] = useState<Violation[]>([]);
 
-  const canApprove = horarioEstado === 'borrador' && periodoEstado === 'Generación';
-  const canPublish = horarioEstado === 'aprobado' && periodoEstado === 'Aprobado';
+  const canApprove = (horarioEstado === 'Borrador' || horarioEstado === 'borrador') && (periodoEstado === 'Generación' || periodoEstado === 'Publicado');
+  const canPublish = (horarioEstado === 'Aprobado' || horarioEstado === 'aprobado') && (periodoEstado === 'Aprobado' || periodoEstado === 'Publicado');
+  const needsFix = false; // Ya no necesita fix porque usamos mayúsculas
+
+  console.log('[HorarioApprovalPanel] horarioEstado:', horarioEstado);
+  console.log('[HorarioApprovalPanel] periodoEstado:', periodoEstado);
+  console.log('[HorarioApprovalPanel] canApprove:', canApprove);
+  console.log('[HorarioApprovalPanel] canPublish:', canPublish);
 
   const handleApprove = async () => {
     if (!confirm('¿Está seguro de aprobar este horario? Se validarán todos los conflictos antes de aprobar.')) {
@@ -124,7 +130,7 @@ export function HorarioApprovalPanel({
               Publicar
             </Button>
           )}
-          {horarioEstado === 'publicado' && (
+          {horarioEstado === 'Publicado' && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Publicado

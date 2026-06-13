@@ -5,3 +5,4 @@ export { GetAuditLogsUseCase } from './application/use-cases/get-audit-logs.use-
 export { RegistrarAuditoriaUseCase } from './application/use-cases/registrar-auditoria.use-case';
 export { AuditoriaContent } from './presentation/components/auditoria-content';
 export { getAuditLogsAction } from './presentation/actions/get-audit-logs.action';
+export { exportAuditoriaExcelAction } from './presentation/actions/export-auditoria-excel.action';

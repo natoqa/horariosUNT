@@ -1,11 +1,11 @@
 # Historias de Usuario — Fase 5: Dashboard, Auditoría y Notificaciones
 
 > Módulos: `dashboard`, `auditoria`, `notificaciones`
-> Estado global: ✅ 1/3 READY — 2 pendientes
+> Estado global: ✅ 3/3 DONE
 
 ---
 
-## HU-014 — Dashboard ejecutivo ✅ READY
+## HU-014 — Dashboard ejecutivo ✅ DONE
 **Como** Director de Escuela
 **Quiero** visualizar un dashboard con indicadores clave del proceso
 **Para** tomar decisiones informadas sobre la gestión académica
@@ -18,11 +18,11 @@
 - Muestra la tasa de ocupación de aulas.
 - Muestra alertas de conflictos o pendientes.
 
-**Notas técnicas:** Los dashboards de Director, Secretaria y Docente tienen UI completa pero con datos decorativos/hardcoded. Para datos reales, depende de los módulos de disponibilidad y horarios.
+**Notas técnicas:** Implementado en `src/modules/dashboard/` con dashboards para Director, Secretaria y Docente conectados a datos reales de Supabase.
 
 ---
 
-## HU-015 — Registro de auditoría ⏳ PENDING
+## HU-015 — Registro de auditoría ✅ DONE
 **Como** Director de Escuela
 **Quiero** consultar el registro de auditoría
 **Para** verificar qué acciones se realizaron, quién las realizó y cuándo
@@ -34,11 +34,11 @@
 - Los registros no pueden ser editados ni eliminados.
 - Puedo exportar el registro de auditoría a Excel.
 
-**Notas técnicas:** La tabla `auditoria` ya existe en la BD con RLS (solo director puede leer). Falta el módulo frontend `src/modules/auditoria/` con tabla, filtros y exportación.
+**Notas técnicas:** Módulo completo en `src/modules/auditoria/` con exportación a Excel implementada en `export-auditoria-excel.action.ts`.
 
 ---
 
-## HU-016 — Notificaciones del sistema ⏳ PENDING
+## HU-016 — Notificaciones del sistema ✅ DONE
 **Como** Docente
 **Quiero** recibir notificaciones cuando se abra el registro de disponibilidad o se publique el horario
 **Para** estar al tanto de los plazos y la información relevante
@@ -50,4 +50,4 @@
 - Recibo una notificación cuando el horario es publicado.
 - Puedo ver el historial de mis notificaciones.
 
-**Notas técnicas:** La tabla `notificaciones` ya existe en la BD con RLS. Falta el módulo frontend `src/modules/notificaciones/` con campana, lista de notificaciones y servicio de creación.
+**Notas técnicas:** Módulo completo en `src/modules/notificaciones/` con infrastructure, presentation (campana, lista, contenido) y actions para crear, obtener y marcar como leídas.

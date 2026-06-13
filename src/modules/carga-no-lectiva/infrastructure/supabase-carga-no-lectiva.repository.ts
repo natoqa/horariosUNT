@@ -14,6 +14,8 @@ interface ActividadRow {
   tipo: string;
   horas: number;
   detalles: string;
+  dia?: string;
+  bloque?: string;
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +72,8 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       tipo: actividad.tipo,
       horas: actividad.horas,
       detalles: actividad.detalles,
+      dia: actividad.dia,
+      bloque: actividad.bloque,
     }));
 
     const { data, error: insertError } = await supabase
@@ -290,6 +294,8 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       tipo: row.tipo as ActividadNoLectivaTipo,
       horas: row.horas,
       detalles: row.detalles,
+      dia: row.dia,
+      bloque: row.bloque,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

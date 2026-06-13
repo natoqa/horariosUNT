@@ -1,7 +1,7 @@
 # Historias de Usuario — Fase 4: Reportes y Vistas
 
 > Módulos: `reportes`
-> Estado global: ✅ 4/6 DONE — 2 pendientes
+> Estado global: ✅ 6/6 DONE
 
 ---
 
@@ -76,7 +76,7 @@
 
 ---
 
-## HU-024 — Visualización de horario por ciclo ⏳ PENDING
+## HU-024 — Visualización de horario por ciclo ✅ DONE
 **Como** Director de Escuela
 **Quiero** ver el horario filtrado por ciclo académico
 **Para** verificar que no haya superposición de cursos del mismo ciclo
@@ -86,3 +86,5 @@
 - Puedo seleccionar un ciclo (I al X) y ver solo los cursos de ese ciclo en la grilla.
 - El sistema resalta visualmente si hay cursos del mismo ciclo en el mismo bloque horario.
 - Puedo alternar rápidamente entre ciclos.
+
+**Notas técnicas:** Implementado en `src/modules/reportes/presentation/components/horario-por-ciclo.tsx` con detección automática de conflictos.

@@ -69,6 +69,13 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     .eq('horario_id', horarioData.id)
     .eq('docente_id', docenteData.id);
 
+  // Get actividades no lectivas for the docente
+  const { data: actividadesNoLectivas } = await supabase
+    .from('actividades_no_lectivas')
+    .select('tipo, horas, detalles, dia, bloque')
+    .eq('docente_id', docenteData.id)
+    .eq('periodo_id', periodoData.id);
+
   if (!rawAsignaciones || rawAsignaciones.length === 0) {
     return { message: 'No tienes asignaciones en el horario actual.' };
   }
@@ -113,6 +120,14 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     tipo: a.tipo,
   }));
 
+  const actividadesNoLectivasData = (actividadesNoLectivas ?? []).map((act) => ({
+    tipo: act.tipo,
+    horas: act.horas,
+    detalles: act.detalles,
+    dia: act.dia,
+    bloque: act.bloque,
+  }));
+
   const nameMaps: DocentePdfNameMaps = {
     cursos: cursoNames,
     aulas: aulaNames,
@@ -120,7 +135,7 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
   };
 
   const useCase = new GenerateDocentePdfUseCase();
-  const pdfBytes = await useCase.execute(asignaciones, nameMaps, periodoData.name, docenteName);
+  const pdfBytes = await useCase.execute(asignaciones, nameMaps, periodoData.name, docenteName, actividadesNoLectivasData);
 
   const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
   const fileName = `mi-horario-${periodoData.name.replace(/\s+/g, '-')}.pdf`;

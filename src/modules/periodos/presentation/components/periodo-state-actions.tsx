@@ -28,7 +28,12 @@ export function PeriodoStateActions({
 }: PeriodoStateActionsProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const nextStates = getNextStates(periodo.state);
+  let nextStates = getNextStates(periodo.state);
+  // Excluir "Aprobado" cuando el período está en "Generación"
+  // Esta transición debe hacerse desde el módulo de horarios al aprobar el horario
+  if (periodo.state === 'Generación') {
+    nextStates = nextStates.filter((state) => state !== 'Aprobado');
+  }
   const canDelete = periodo.state === 'Configuración' || periodo.state === 'Cerrado';
 
   const handleChangeState = async (newState: EstadoPeriodo) => {

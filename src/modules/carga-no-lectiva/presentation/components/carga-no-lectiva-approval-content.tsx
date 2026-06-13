@@ -21,6 +21,10 @@ interface CargaRow {
   horasLectivasAsignadas?: number;
   lectivaDeclarada?: boolean;
   cargaId?: string;
+  cargaMaxima?: number;
+  cargaElectiva?: number;
+  horasDisponiblesNoLectivas?: number;
+  cursos?: Array<{ codigo: string; nombre: string; horas: number }>;
 }
 
 interface DocenteRow {
@@ -28,6 +32,9 @@ interface DocenteRow {
   nombres: string;
   apellidos: string;
   correo: string;
+  cargaMaxima: number;
+  cargaElectiva: number;
+  cursos: Array<{ codigo: string; nombre: string; horas: number }>;
 }
 
 interface ApprovalContentProps {
@@ -61,6 +68,10 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
           secretariaAprobado: carga?.secretariaAprobado ?? false,
           horasLectivasAsignadas: carga?.horasLectivasAsignadas ?? 0,
           lectivaDeclarada: carga?.lectivaDeclarada ?? false,
+          cargaMaxima: docente.cargaMaxima,
+          cargaElectiva: docente.cargaElectiva,
+          cursos: docente.cursos,
+          horasDisponiblesNoLectivas: Math.max(0, docente.cargaMaxima - docente.cargaElectiva),
         };
       });
     }
@@ -121,9 +132,9 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Aprobación de carga no lectiva</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Carga Horaria</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Como {role}, revisa y aprueba las cargas no lectivas registradas por los docentes.
+            Resumen de carga horaria de los docentes: cursos asignados y carga no lectiva registrada.
           </p>
         </div>
       </div>
@@ -138,63 +149,87 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
           <p className="text-sm text-muted-foreground">No hay cargas no lectivas para aprobar en este periodo.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-3xl border border-border bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-border text-sm text-left">
-            <thead className="bg-slate-50 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Docente</th>
-                <th className="px-4 py-3">Correo</th>
-                {role === 'secretaria' && <th className="px-4 py-3">Horas lectivas asignadas</th>}
-                <th className="px-4 py-3">Horas totales</th>
-                <th className="px-4 py-3">Estado</th>
-                <th className="px-4 py-3">Director</th>
-                <th className="px-4 py-3">Secretaria</th>
-                <th className="px-4 py-3">Acción</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {rows.map((row) => {
-                const alreadyApproved = role === 'director' ? row.directorAprobado : row.secretariaAprobado;
-                return (
-                  <tr key={row.id}>
-                    <td className="px-4 py-4 font-medium text-foreground">{row.docenteNombre || 'Sin nombre'}</td>
-                    <td className="px-4 py-4 text-muted-foreground">{row.docenteEmail || '-'}</td>
-                    {role === 'secretaria' && (
-                      <td className="px-4 py-4">
-                        <form action={assignAction} className="flex items-center gap-2">
-                          <input type="hidden" name="periodoId" value={periodoId} />
-                          <input type="hidden" name="docenteId" value={row.id} />
-                          <input
-                            type="number"
-                            name="horasLectivasAsignadas"
-                            defaultValue={row.horasLectivasAsignadas ?? 0}
-                            min={0}
-                            className="w-20 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                          />
-                          <Button type="submit" size="sm" disabled={assigning}>
-                            Asignar
-                          </Button>
-                        </form>
-                      </td>
+        <div className="space-y-4">
+          {rows.map((row) => {
+            const alreadyApproved = role === 'director' ? row.directorAprobado : row.secretariaAprobado;
+            return (
+              <div key={row.id} className="rounded-3xl border border-border bg-white shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-border">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">{row.docenteNombre || 'Sin nombre'}</h3>
+                      <p className="text-sm text-muted-foreground">{row.docenteEmail || '-'}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        row.directorAprobado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        Director: {row.directorAprobado ? 'Aprobado' : 'Pendiente'}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        row.secretariaAprobado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        Secretaria: {row.secretariaAprobado ? 'Aprobado' : 'Pendiente'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 grid gap-6 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-foreground">Carga Horaria</h4>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-lg bg-slate-50 p-3">
+                        <p className="text-xs text-muted-foreground">Carga Máxima</p>
+                        <p className="text-lg font-semibold text-foreground">{row.cargaMaxima ?? 0} h</p>
+                      </div>
+                      <div className="rounded-lg bg-emerald-50 p-3">
+                        <p className="text-xs text-muted-foreground">Carga Electiva (Cursos)</p>
+                        <p className="text-lg font-semibold text-emerald-700">{row.cargaElectiva ?? 0} h</p>
+                      </div>
+                      <div className="rounded-lg bg-blue-50 p-3">
+                        <p className="text-xs text-muted-foreground">Disponible No Lectiva</p>
+                        <p className="text-lg font-semibold text-primary">{row.horasDisponiblesNoLectivas ?? 0} h</p>
+                      </div>
+                      <div className="rounded-lg bg-purple-50 p-3">
+                        <p className="text-xs text-muted-foreground">Carga No Lectiva</p>
+                        <p className="text-lg font-semibold text-purple-700">{row.totalHoras} h</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-foreground">Cursos Asignados</h4>
+                    {row.cursos && row.cursos.length > 0 ? (
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {row.cursos.map((curso, idx) => (
+                          <div key={idx} className="rounded-lg bg-slate-50 p-2 text-sm">
+                            <p className="font-medium text-foreground">{curso.codigo} - {curso.nombre}</p>
+                            <p className="text-xs text-muted-foreground">{curso.horas} horas</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Sin cursos asignados</p>
                     )}
-                    <td className="px-4 py-4">{row.totalHoras} h</td>
-                    <td className="px-4 py-4">{row.estado}</td>
-                    <td className="px-4 py-4">{row.directorAprobado ? '✅' : '—'}</td>
-                    <td className="px-4 py-4">{row.secretariaAprobado ? '✅' : '—'}</td>
-                    <td className="px-4 py-4">
-                      <form action={approvalAction}>
-                        <input type="hidden" name="cargaId" value={row.cargaId ?? ''} />
-                        <Button type="submit" size="sm" disabled={approving || alreadyApproved || !row.cargaId}>
-                          <Check className="mr-2 h-4 w-4" />
-                          {row.cargaId ? (alreadyApproved ? 'Aprobado' : 'Aprobar') : 'Sin carga'}
-                        </Button>
-                      </form>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+
+                <div className="p-5 border-t border-border bg-slate-50 flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Estado: <span className="font-medium text-foreground">{row.estado}</span>
+                  </div>
+                  <form action={approvalAction}>
+                    <input type="hidden" name="cargaId" value={row.cargaId ?? ''} />
+                    <Button type="submit" size="sm" disabled={approving || alreadyApproved || !row.cargaId}>
+                      <Check className="mr-2 h-4 w-4" />
+                      {row.cargaId ? (alreadyApproved ? 'Aprobado' : 'Aprobar') : 'Sin carga'}
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

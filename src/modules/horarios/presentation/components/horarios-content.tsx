@@ -209,7 +209,7 @@ export function HorariosContent() {
             Período: {periodo?.name} — Estado: {periodo?.state}
           </p>
         </div>
-        {state === 'result' && periodo?.state === 'Generación' && (
+        {state === 'result' && (periodo?.state === 'Generación' || periodo?.state === 'Publicado') && (
           <Button variant="outline" onClick={handleGenerate}>
             <RefreshCw className="w-4 h-4 mr-1.5" />
             Regenerar
@@ -263,8 +263,8 @@ export function HorariosContent() {
             aulaNames={aulaNames}
             grupoCiclos={grupoCiclos}
             editable={
-              (periodo?.state === 'Generación' && horario?.estado === 'borrador') ||
-              (periodo?.state === 'Publicado' && horario?.estado === 'publicado' && user?.role === 'director')
+              (periodo?.state === 'Generación' && horario?.estado === 'Borrador') ||
+              (periodo?.state === 'Publicado' && horario?.estado === 'Publicado' && user?.role === 'director')
             }
             onSelectAsignacion={(a) => setEditingAsignacion(a)}
           />
@@ -275,7 +275,7 @@ export function HorariosContent() {
               docenteName={docenteNames.get(editingAsignacion.docenteId) ?? 'Desconocido'}
               cursoName={cursoNames.get(editingAsignacion.grupoId) ?? 'Curso'}
               aulaName={aulaNames.get(editingAsignacion.aulaId) ?? 'Aula'}
-              isPostPublish={horario?.estado === 'publicado'}
+              isPostPublish={horario?.estado === 'Publicado'}
               onClose={() => setEditingAsignacion(null)}
               onSuccess={() => {
                 setEditingAsignacion(null);

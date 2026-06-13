@@ -18,6 +18,7 @@ export interface Docente {
   escuela: EscuelaProcedencia;
   fechaIngreso: string;
   cargaMaxima: number;
+  cargaElectiva: number;
   estado: 'Activo' | 'Inactivo';
   createdAt: string;
   updatedAt: string;
@@ -39,4 +40,8 @@ export function getCargaMaximaDefault(regimen: RegimenDocente): number {
     case 'Tiempo Parcial':
       return 12;
   }
+}
+
+export function getHorasDisponiblesNoLectivas(docente: Docente): number {
+  return Math.max(0, docente.cargaMaxima - docente.cargaElectiva);
 }

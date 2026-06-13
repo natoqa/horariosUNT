@@ -33,7 +33,7 @@ export class ApproveHorarioUseCase {
       return { success: false, message: 'Horario no encontrado.' };
     }
 
-    if (horario.estado !== 'borrador') {
+    if (horario.estado !== 'Borrador') {
       return { success: false, message: `El horario debe estar en estado "Borrador" para aprobar. Estado actual: "${horario.estado}".` };
     }
 
@@ -42,7 +42,7 @@ export class ApproveHorarioUseCase {
       return { success: false, violations: allViolations, message: 'No se puede aprobar: existen conflictos.' };
     }
 
-    await this.horarioRepository.updateEstado(validated.horarioId, 'aprobado');
+    await this.horarioRepository.updateEstado(validated.horarioId, 'Aprobado');
 
     return { success: true };
   }

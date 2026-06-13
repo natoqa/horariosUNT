@@ -17,14 +17,11 @@ import {
   ACTIVIDADES_NO_LECTIVAS_INSTRUCTIONS,
   ActividadNoLectivaTipo,
 } from '../../domain/entities/carga-no-lectiva.entity';
-import { DIAS_SEMANA, BLOQUES_HORARIOS } from '@/shared/constants/time-blocks';
 
 interface ActividadFormRow {
   tipo: ActividadNoLectivaTipo;
   horas: number;
   detalles: string;
-  dia?: string;
-  bloque?: string;
 }
 
 interface CargaNoLectivaData {
@@ -55,7 +52,7 @@ export function CargaNoLectivaContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [data, setData] = useState<CargaNoLectivaData | null>(null);
   const [actividades, setActividades] = useState<ActividadFormRow[]>(
-    ACTIVIDADES_NO_LECTIVAS.map((tipo) => ({ tipo, horas: 0, detalles: '', dia: '', bloque: '' })),
+    ACTIVIDADES_NO_LECTIVAS.map((tipo) => ({ tipo, horas: 0, detalles: '' })),
   );
 
   const [activitiesState, activitiesAction, savingActivities] = useActionState<any, FormData>(saveActividadesCargaNoLectivaAction, undefined);
@@ -165,7 +162,7 @@ export function CargaNoLectivaContent() {
     }
   }, [activitiesState?.success, totalState?.success]);
 
-  const updateActividad = (index: number, field: 'horas' | 'detalles' | 'dia' | 'bloque', value: string) => {
+  const updateActividad = (index: number, field: 'horas' | 'detalles', value: string) => {
     setActividades((current) => {
       const next = [...current];
       next[index] = {
@@ -351,36 +348,6 @@ export function CargaNoLectivaContent() {
                   className="min-h-[112px]"
                   placeholder="Describe la actividad detalladamente. Si no aplica, escribe 'No aplica'."
                 />
-              </div>
-            </div>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">Día (opcional)</Label>
-                <select
-                  name="dia"
-                  value={actividades[index]?.dia ?? ''}
-                  onChange={(event) => updateActividad(index, 'dia', event.target.value)}
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="">Sin asignar</option>
-                  {DIAS_SEMANA.map((dia) => (
-                    <option key={dia} value={dia}>{dia}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">Bloque horario (opcional)</Label>
-                <select
-                  name="bloque"
-                  value={actividades[index]?.bloque ?? ''}
-                  onChange={(event) => updateActividad(index, 'bloque', event.target.value)}
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="">Sin asignar</option>
-                  {BLOQUES_HORARIOS.map((bloque) => (
-                    <option key={bloque} value={bloque}>{bloque}</option>
-                  ))}
-                </select>
               </div>
             </div>
             <input type="hidden" name="tipo" value={tipo} />

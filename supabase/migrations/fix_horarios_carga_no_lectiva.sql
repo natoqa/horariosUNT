@@ -31,3 +31,17 @@ USING (
   (horario_id IN ( SELECT horarios.id FROM horarios WHERE horarios.estado = 'Publicado')) OR 
   ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['director'::text, 'secretaria'::text])
 );
+
+-- 4. Agregar política RLS para permitir inserciones en actividades_no_lectivas para director y secretaria
+DROP POLICY IF EXISTS "Permitir inserciones en actividades_no_lectivas para servicio de generación" ON actividades_no_lectivas;
+
+CREATE POLICY "Permitir inserciones en actividades_no_lectivas para servicio de generación"
+ON actividades_no_lectivas FOR INSERT
+TO public
+WITH CHECK (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['director'::text, 'secretaria'::text])
+);
+
+-- 5. Eliminar restricción de unicidad para permitir múltiples instancias del mismo tipo (una por bloque horario)
+ALTER TABLE actividades_no_lectivas
+DROP CONSTRAINT IF EXISTS actividades_no_lectivas_docente_id_periodo_id_tipo_key;

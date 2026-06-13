@@ -5,8 +5,6 @@ const actividadSchema = z.object({
   tipo: z.enum(ACTIVIDADES_NO_LECTIVAS),
   horas: z.coerce.number().min(0),
   detalles: z.string().min(1, 'El campo "Detalles" es obligatorio. Por favor, describa brevemente la actividad.'),
-  dia: z.string().optional(),
-  bloque: z.string().optional(),
 });
 
 export const saveActividadesCargaNoLectivaSchema = z.object({

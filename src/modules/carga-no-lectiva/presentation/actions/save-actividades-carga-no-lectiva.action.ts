@@ -21,15 +21,11 @@ export async function saveActividadesCargaNoLectivaAction(
   const tipos = (fd.getAll('tipo') || []).map((value: any) => value?.toString() as ActividadNoLectivaTipo);
   const horas = (fd.getAll('horas') || []).map((value: any) => Number(value?.toString()));
   const detalles = (fd.getAll('detalles') || []).map((value: any) => value?.toString());
-  const dias = (fd.getAll('dia') || []).map((value: any) => value?.toString());
-  const bloques = (fd.getAll('bloque') || []).map((value: any) => value?.toString());
 
   const actividades: ActividadNoLectivaInput[] = tipos.map((tipo, index) => ({
     tipo,
     horas: horas[index] ?? 0,
     detalles: detalles[index] ?? '',
-    dia: dias[index] || undefined,
-    bloque: bloques[index] || undefined,
   }));
 
   const supabase = await createClient();

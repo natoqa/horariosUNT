@@ -244,16 +244,7 @@ export async function generateHorarioAction(
         }
       }
 
-      // Eliminar actividades originales
-      if (actividadesOriginalesParaEliminar.length > 0) {
-        await supabase
-          .from('actividades_no_lectivas')
-          .delete()
-          .in('id', actividadesOriginalesParaEliminar);
-        console.log(`[SERVER ACTION] Se eliminaron ${actividadesOriginalesParaEliminar.length} actividades originales.`);
-      }
-
-      // Insertar nuevas instancias
+      // Insertar nuevas instancias solo si hay instancias para insertar
       if (instanciasParaInsertar.length > 0) {
         const { error: insertError } = await supabase
           .from('actividades_no_lectivas')
@@ -263,7 +254,18 @@ export async function generateHorarioAction(
           console.error('[SERVER ACTION] Error al insertar instancias:', insertError);
         } else {
           console.log(`[SERVER ACTION] Se insertaron ${instanciasParaInsertar.length} instancias de actividades no lectivas.`);
+          
+          // Solo eliminar actividades originales si la inserción fue exitosa
+          if (actividadesOriginalesParaEliminar.length > 0) {
+            await supabase
+              .from('actividades_no_lectivas')
+              .delete()
+              .in('id', actividadesOriginalesParaEliminar);
+            console.log(`[SERVER ACTION] Se eliminaron ${actividadesOriginalesParaEliminar.length} actividades originales.`);
+          }
         }
+      } else {
+        console.log('[SERVER ACTION] No hay instancias para insertar, se preservan las actividades originales.');
       }
     }
 

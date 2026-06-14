@@ -96,32 +96,32 @@ export async function getOcupacionAulaAction(
   const cursos = cursosRes.data ?? [];
   const aulasRaw = aulasRes.data ?? [];
 
-  const docenteNameMap = new Map<string, string>();
-  docentes.forEach((d) => docenteNameMap.set(d.id, `${d.apellidos}, ${d.nombres}`));
+  const docenteNameMap: Record<string, string> = {};
+  docentes.forEach((d) => docenteNameMap[d.id] = `${d.apellidos}, ${d.nombres}`);
 
-  const cursoNameMap = new Map<string, string>();
-  cursos.forEach((c) => cursoNameMap.set(c.id, c.nombre));
+  const cursoNameMap: Record<string, string> = {};
+  cursos.forEach((c) => cursoNameMap[c.id] = c.nombre);
 
-  const grupoToCursoName = new Map<string, string>();
+  const grupoToCursoName: Record<string, string> = {};
   grupos.forEach((g) => {
-    const cursoNombre = cursoNameMap.get(g.curso_id) ?? '';
-    grupoToCursoName.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
+    const cursoNombre = cursoNameMap[g.curso_id] ?? '';
+    grupoToCursoName[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
   });
 
-  const aulaNameMap = new Map<string, string>();
-  aulasRaw.forEach((a) => aulaNameMap.set(a.id, `${a.codigo} - ${a.nombre}`));
+  const aulaNameMap: Record<string, string> = {};
+  aulasRaw.forEach((a) => aulaNameMap[a.id] = `${a.codigo} - ${a.nombre}`);
 
   const aulaId = typeof data.aulaId === 'string' && data.aulaId ? data.aulaId : undefined;
 
   if (aulaId) {
-    const aulaName = aulaNameMap.get(aulaId) ?? 'Aula desconocida';
+    const aulaName = aulaNameMap[aulaId] ?? 'Aula desconocida';
     const aulaAsignaciones = asignaciones.filter((a) => a.aula_id === aulaId);
 
     const slots: OcupacionSlot[] = aulaAsignaciones.map((a) => ({
       dia: a.dia as DiaSemana,
       bloque: a.bloque as BloqueHorario,
-      curso: grupoToCursoName.get(a.grupo_id) ?? '',
-      docente: docenteNameMap.get(a.docente_id) ?? '',
+      curso: grupoToCursoName[a.grupo_id] ?? '',
+      docente: docenteNameMap[a.docente_id] ?? '',
     }));
 
     const porcentaje = TOTAL_BLOQUES > 0
@@ -131,13 +131,13 @@ export async function getOcupacionAulaAction(
     return { slots, aulaName, porcentaje, periodoName: periodo.name };
   }
 
-  const bloquesPorAula = new Map<string, number>();
+  const bloquesPorAula: Record<string, number> = {};
   for (const a of asignaciones) {
-    bloquesPorAula.set(a.aula_id, (bloquesPorAula.get(a.aula_id) ?? 0) + 1);
+    bloquesPorAula[a.aula_id] = (bloquesPorAula[a.aula_id] ?? 0) + 1;
   }
 
   const aulas: AulaResumen[] = aulasRaw.map((aula) => {
-    const ocupados = bloquesPorAula.get(aula.id) ?? 0;
+    const ocupados = bloquesPorAula[aula.id] ?? 0;
     return {
       aulaId: aula.id,
       aulaName: `${aula.codigo} - ${aula.nombre}`,

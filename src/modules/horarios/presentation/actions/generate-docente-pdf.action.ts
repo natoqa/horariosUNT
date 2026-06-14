@@ -87,25 +87,25 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const cursoIdToName = new Map<string, string>();
-  const cursoIdToCiclo = new Map<string, string>();
+  const cursoIdToName: Record<string, string> = {};
+  const cursoIdToCiclo: Record<string, string> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoIdToName.set(c.id, c.nombre);
-    cursoIdToCiclo.set(c.id, c.ciclo);
+    cursoIdToName[c.id] = c.nombre;
+    cursoIdToCiclo[c.id] = c.ciclo;
   });
 
-  const cursoNames = new Map<string, string>();
-  const grupoCiclos = new Map<string, string>();
+  const cursoNames: Record<string, string> = {};
+  const grupoCiclos: Record<string, string> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    const cursoNombre = cursoIdToName.get(g.curso_id);
-    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
-    const ciclo = cursoIdToCiclo.get(g.curso_id);
-    if (ciclo) grupoCiclos.set(g.id, ciclo);
+    const cursoNombre = cursoIdToName[g.curso_id];
+    cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
+    const ciclo = cursoIdToCiclo[g.curso_id];
+    if (ciclo) grupoCiclos[g.id] = ciclo;
   });
 
-  const aulaNames = new Map<string, string>();
+  const aulaNames: Record<string, string> = {};
   (aulasRes.data ?? []).forEach((a) => {
-    aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`);
+    aulaNames[a.id] = `${a.codigo} - ${a.nombre}`;
   });
 
   const docenteName = docenteData

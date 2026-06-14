@@ -75,13 +75,13 @@ export async function generateHorarioAction(
     }
 
     // Validación de carga no lectiva para docentes asignados
-    const docentesAsignados = new Set(
+    const docentesAsignados = Array.from(new Set(
       gruposRes.data
         .filter((g) => g.docente_id)
         .map((g) => g.docente_id)
-    );
+    ));
 
-    if (docentesAsignados.size === 0) {
+    if (docentesAsignados.length === 0) {
       return { message: 'No hay docentes asignados a los grupos. Asigne docentes a los grupos antes de generar horarios.' };
     }
 
@@ -91,7 +91,7 @@ export async function generateHorarioAction(
       .eq('periodo_id', periodoId);
 
     const docentesConCarga = new Set(cargasNoLectivas?.map((c) => c.docente_id) || []);
-    const docentesSinCarga = [...docentesAsignados].filter((id) => !docentesConCarga.has(id));
+    const docentesSinCarga = docentesAsignados.filter((id) => !docentesConCarga.has(id));
 
     if (docentesSinCarga.length > 0) {
       return { 
@@ -203,20 +203,21 @@ export async function generateHorarioAction(
 
     if (actividadesNoLectivas && actividadesNoLectivas.length > 0) {
       // Agrupar actividades por docente
-      const actividadesPorDocente = new Map<string, any[]>();
+      const actividadesPorDocente: Record<string, any[]> = {};
       for (const actividad of actividadesNoLectivas) {
         const docenteId = actividad.docente_id;
-        if (!actividadesPorDocente.has(docenteId)) {
-          actividadesPorDocente.set(docenteId, []);
+        if (!actividadesPorDocente[docenteId]) {
+          actividadesPorDocente[docenteId] = [];
         }
-        actividadesPorDocente.get(docenteId)!.push(actividad);
+        actividadesPorDocente[docenteId].push(actividad);
       }
 
       // Distribuir actividades para cada docente
       const instanciasParaInsertar: any[] = [];
       const actividadesOriginalesParaEliminar: string[] = [];
 
-      for (const [docenteId, actividades] of actividadesPorDocente) {
+      for (const docenteId in actividadesPorDocente) {
+        const actividades = actividadesPorDocente[docenteId];
         const distribucionResult = distribuirActividadesNoLectivas(
           actividades,
           result.asignaciones || [],

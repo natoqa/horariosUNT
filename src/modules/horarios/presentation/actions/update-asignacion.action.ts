@@ -57,33 +57,33 @@ export async function updateAsignacionAction(
     supabase.from('aulas').select('id, capacidad, tipo').in('id', aulaIds),
   ]);
 
-  const grupoMap = new Map<string, { cursoId: string; numEstudiantes: number }>();
+  const grupoMap: Record<string, { cursoId: string; numEstudiantes: number }> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    grupoMap.set(g.id, { cursoId: g.curso_id, numEstudiantes: g.num_estudiantes });
+    grupoMap[g.id] = { cursoId: g.curso_id, numEstudiantes: g.num_estudiantes };
   });
 
-  const cursoMap = new Map<string, { ciclo: string; requiereLaboratorio: boolean }>();
+  const cursoMap: Record<string, { ciclo: string; requiereLaboratorio: boolean }> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoMap.set(c.id, { ciclo: c.ciclo, requiereLaboratorio: c.requiere_laboratorio });
+    cursoMap[c.id] = { ciclo: c.ciclo, requiereLaboratorio: c.requiere_laboratorio };
   });
 
-  const aulaMap = new Map<string, { capacidad: number; tipo: string }>();
+  const aulaMap: Record<string, { capacidad: number; tipo: string }> = {};
   (aulasRes.data ?? []).forEach((a) => {
-    aulaMap.set(a.id, { capacidad: a.capacidad, tipo: a.tipo });
+    aulaMap[a.id] = { capacidad: a.capacidad, tipo: a.tipo };
   });
 
   function buildContext(asignacionId: string, aulaIdOverride?: string): EnrichedAsignacionContext | null {
     const asig = allAsignaciones.find((a) => a.id === asignacionId);
     if (!asig) return null;
 
-    const grupo = grupoMap.get(asig.grupoId);
+    const grupo = grupoMap[asig.grupoId];
     if (!grupo) return null;
 
-    const curso = cursoMap.get(grupo.cursoId);
+    const curso = cursoMap[grupo.cursoId];
     if (!curso) return null;
 
     const effectiveAulaId = aulaIdOverride ?? asig.aulaId;
-    const aula = aulaMap.get(effectiveAulaId);
+    const aula = aulaMap[effectiveAulaId];
 
     return {
       grupoId: asig.grupoId,
@@ -95,10 +95,10 @@ export async function updateAsignacionAction(
     };
   }
 
-  const allContexts = new Map<string, EnrichedAsignacionContext>();
+  const allContexts: Record<string, EnrichedAsignacionContext> = {};
   for (const a of allAsignaciones) {
     const ctx = buildContext(a.id);
-    if (ctx) allContexts.set(a.id, ctx);
+    if (ctx) allContexts[a.id] = ctx;
   }
 
   const useCase = new UpdateAsignacionUseCase(repo);

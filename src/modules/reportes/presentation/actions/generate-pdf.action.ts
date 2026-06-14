@@ -79,29 +79,29 @@ export async function generatePdfAction(
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const docenteNames = new Map<string, string>();
-  (docentesRes.data ?? []).forEach((d) => docenteNames.set(d.id, `${d.apellidos}, ${d.nombres}`));
+  const docenteNames: Record<string, string> = {};
+  (docentesRes.data ?? []).forEach((d) => docenteNames[d.id] = `${d.apellidos}, ${d.nombres}`);
 
-  const cursoIdToName = new Map<string, string>();
-  const cursoIdToCiclo = new Map<string, string>();
+  const cursoIdToName: Record<string, string> = {};
+  const cursoIdToCiclo: Record<string, string> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoIdToName.set(c.id, c.nombre);
-    cursoIdToCiclo.set(c.id, c.ciclo);
+    cursoIdToName[c.id] = c.nombre;
+    cursoIdToCiclo[c.id] = c.ciclo;
   });
 
-  const cursoNames = new Map<string, string>();
-  const grupoCiclos = new Map<string, string>();
-  const grupoCursoId = new Map<string, string>();
+  const cursoNames: Record<string, string> = {};
+  const grupoCiclos: Record<string, string> = {};
+  const grupoCursoId: Record<string, string> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    const cursoNombre = cursoIdToName.get(g.curso_id);
-    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
-    const ciclo = cursoIdToCiclo.get(g.curso_id);
-    if (ciclo) grupoCiclos.set(g.id, ciclo);
-    grupoCursoId.set(g.id, g.curso_id);
+    const cursoNombre = cursoIdToName[g.curso_id];
+    cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
+    const ciclo = cursoIdToCiclo[g.curso_id];
+    if (ciclo) grupoCiclos[g.id] = ciclo;
+    grupoCursoId[g.id] = g.curso_id;
   });
 
-  const aulaNames = new Map<string, string>();
-  (aulasRes.data ?? []).forEach((a) => aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`));
+  const aulaNames: Record<string, string> = {};
+  (aulasRes.data ?? []).forEach((a) => aulaNames[a.id] = `${a.codigo} - ${a.nombre}`);
 
   let asignaciones: PdfAsignacion[] = rawAsignaciones.map((a) => ({
     grupoId: a.grupo_id,
@@ -115,14 +115,14 @@ export async function generatePdfAction(
   let filterLabel = 'Horario completo';
 
   if (filterType === 'ciclo' && filterId) {
-    asignaciones = asignaciones.filter((a) => grupoCiclos.get(a.grupoId) === filterId);
+    asignaciones = asignaciones.filter((a) => grupoCiclos[a.grupoId] === filterId);
     filterLabel = `Ciclo ${filterId}`;
   } else if (filterType === 'docente' && filterId) {
     asignaciones = asignaciones.filter((a) => a.docenteId === filterId);
-    filterLabel = `Docente: ${docenteNames.get(filterId) ?? filterId}`;
+    filterLabel = `Docente: ${docenteNames[filterId] ?? filterId}`;
   } else if (filterType === 'aula' && filterId) {
     asignaciones = asignaciones.filter((a) => a.aulaId === filterId);
-    filterLabel = `Aula: ${aulaNames.get(filterId) ?? filterId}`;
+    filterLabel = `Aula: ${aulaNames[filterId] ?? filterId}`;
   }
 
   if (asignaciones.length === 0) {

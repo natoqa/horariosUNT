@@ -209,19 +209,19 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const cursoIdToName = new Map<string, string>();
-  const cursoIdToCiclo = new Map<string, string>();
+  const cursoIdToName: Record<string, string> = {};
+  const cursoIdToCiclo: Record<string, string> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoIdToName.set(c.id, c.nombre);
-    cursoIdToCiclo.set(c.id, c.ciclo);
+    cursoIdToName[c.id] = c.nombre;
+    cursoIdToCiclo[c.id] = c.ciclo;
   });
 
   const cursoNames: Record<string, string> = {};
   const grupoCiclos: Record<string, string> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    const cursoNombre = cursoIdToName.get(g.curso_id);
+    const cursoNombre = cursoIdToName[g.curso_id];
     cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
-    const ciclo = cursoIdToCiclo.get(g.curso_id);
+    const ciclo = cursoIdToCiclo[g.curso_id];
     if (ciclo) grupoCiclos[g.id] = ciclo;
   });
 

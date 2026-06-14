@@ -4,7 +4,7 @@ import { createClient } from '@/shared/lib/supabase/server';
 import { SupabaseCargaNoLectivaRepository } from '../../infrastructure/supabase-carga-no-lectiva.repository';
 import { getActivePeriodoAction } from '@/modules/disponibilidad/presentation/actions/get-periodo-estado.action';
 
-async function calcularCargaElectivaPorDocente(periodoId: string): Promise<Map<string, { totalHoras: number; cursos: Array<{ codigo: string; nombre: string; horas: number }> }>> {
+async function calcularCargaElectivaPorDocente(periodoId: string): Promise<Record<string, { totalHoras: number; cursos: Array<{ codigo: string; nombre: string; horas: number }> }>> {
   const supabase = await createClient();
   
   const { data: grupos, error: gruposError } = await supabase
@@ -14,24 +14,24 @@ async function calcularCargaElectivaPorDocente(periodoId: string): Promise<Map<s
     .not('docente_id', 'is', null);
 
   if (gruposError || !grupos) {
-    return new Map();
+    return {};
   }
 
-  const cargaElectivaMap = new Map<string, { totalHoras: number; cursos: Array<{ codigo: string; nombre: string; horas: number }> }>();
+  const cargaElectivaMap: Record<string, { totalHoras: number; cursos: Array<{ codigo: string; nombre: string; horas: number }> }> = {};
 
   grupos.forEach((grupo: any) => {
     const docenteId = grupo.docente_id;
     const curso = grupo.cursos;
     const horasTotales = (curso.horas_teoricas || 0) + (curso.horas_practicas || 0);
     
-    const current = cargaElectivaMap.get(docenteId) || { totalHoras: 0, cursos: [] };
+    const current = cargaElectivaMap[docenteId] || { totalHoras: 0, cursos: [] };
     current.totalHoras += horasTotales;
     current.cursos.push({
       codigo: curso.codigo,
       nombre: curso.nombre,
       horas: horasTotales,
     });
-    cargaElectivaMap.set(docenteId, current);
+    cargaElectivaMap[docenteId] = current;
   });
 
   return cargaElectivaMap;
@@ -97,18 +97,18 @@ export async function getCargasNoLectivaAction() {
       .select('id, carga_maxima')
       .in('id', docenteIds);
 
-    const docentesMap = new Map();
+    const docentesMap: Record<string, { cargaMaxima: number }> = {};
     if (docentesData) {
       docentesData.forEach((d: any) => {
-        docentesMap.set(d.id, {
+        docentesMap[d.id] = {
           cargaMaxima: d.carga_maxima,
-        });
+        };
       });
     }
 
     response.cargas = cargas.map((c: any) => {
-      const docenteInfo = docentesMap.get(c.docenteId);
-      const cargaInfo = cargaElectivaMap.get(c.docenteId) || { totalHoras: 0, cursos: [] };
+      const docenteInfo = docentesMap[c.docenteId];
+      const cargaInfo = cargaElectivaMap[c.docenteId] || { totalHoras: 0, cursos: [] };
       return {
         ...c,
         id: c.id,

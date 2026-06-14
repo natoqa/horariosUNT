@@ -226,15 +226,15 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       .select('id, nombres, apellidos, correo')
       .in('id', docenteIds);
 
-    const docentesMap = new Map<string, { id: string; nombres: string; apellidos: string; correo: string }>();
+    const docentesMap: Record<string, { id: string; nombres: string; apellidos: string; correo: string }> = {};
     if (docentesData) {
       for (const docente of docentesData) {
-        docentesMap.set(docente.id, docente as { id: string; nombres: string; apellidos: string; correo: string });
+        docentesMap[docente.id] = docente as { id: string; nombres: string; apellidos: string; correo: string };
       }
     }
 
     return rows.map((row) => {
-      const docente = docentesMap.get(row.docente_id);
+      const docente = docentesMap[row.docente_id];
       return {
         ...this.mapCarga(row),
         docenteNombre: docente ? `${docente.nombres} ${docente.apellidos}`.trim() : 'Docente desconocido',

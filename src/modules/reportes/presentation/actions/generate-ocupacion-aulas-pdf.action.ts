@@ -91,23 +91,23 @@ export async function generateOcupacionAulasPdfAction(
   const grupos = gruposRes.data ?? [];
   const cursos = cursosRes.data ?? [];
 
-  const docenteNameMap = new Map<string, string>();
-  docentes.forEach((d) => docenteNameMap.set(d.id, `${d.apellidos}, ${d.nombres}`));
+  const docenteNameMap: Record<string, string> = {};
+  docentes.forEach((d) => docenteNameMap[d.id] = `${d.apellidos}, ${d.nombres}`);
 
-  const cursoNameMap = new Map<string, string>();
-  cursos.forEach((c) => cursoNameMap.set(c.id, c.nombre));
+  const cursoNameMap: Record<string, string> = {};
+  cursos.forEach((c) => cursoNameMap[c.id] = c.nombre);
 
-  const grupoToCursoName = new Map<string, string>();
+  const grupoToCursoName: Record<string, string> = {};
   grupos.forEach((g) => {
-    const cursoNombre = cursoNameMap.get(g.curso_id) ?? '';
-    grupoToCursoName.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
+    const cursoNombre = cursoNameMap[g.curso_id] ?? '';
+    grupoToCursoName[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
   });
 
   const slots: OcupacionAulaPdfSlot[] = asignaciones.map((a) => ({
     dia: a.dia as DiaSemana,
     bloque: a.bloque as BloqueHorario,
-    curso: grupoToCursoName.get(a.grupo_id) ?? '',
-    docente: docenteNameMap.get(a.docente_id) ?? '',
+    curso: grupoToCursoName[a.grupo_id] ?? '',
+    docente: docenteNameMap[a.docente_id] ?? '',
   }));
 
   const aulaName = `${aula.codigo} - ${aula.nombre}`;

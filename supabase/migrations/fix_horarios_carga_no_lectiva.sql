@@ -8,7 +8,7 @@ ADD COLUMN IF NOT EXISTS dia text;
 
 -- Comentarios sobre las columnas
 COMMENT ON COLUMN actividades_no_lectivas.bloque IS 'Bloque horario de la actividad (ej: "07:00 - 08:00", "08:00 - 09:00")';
-COMMENT ON COLUMN actividades_no_lectiva.dia IS 'Día de la semana de la actividad (ej: "Lunes", "Martes")';
+COMMENT ON COLUMN actividades_no_lectivas.dia IS 'Día de la semana de la actividad (ej: "Lunes", "Martes")';
 
 -- 2. Corregir política RLS de horarios para usar mayúsculas
 DROP POLICY IF EXISTS "Todos pueden ver horarios publicados, director y secretaria ven" ON horarios;

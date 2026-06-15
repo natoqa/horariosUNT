@@ -6,7 +6,7 @@ import { getCursosAction } from '../actions/get-cursos.action';
 import { CursoEditDialog } from './curso-edit-dialog';
 import { GrupoManager } from './grupo-manager';
 import { Input } from '@/shared/components/ui/input';
-import { BookOpen, Pencil, Search, Layers } from 'lucide-react';
+import { BookOpen, Pencil, Search, Layers, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 
 export interface CursoTableRef {
@@ -38,6 +38,37 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const [filterEstado, setFilterEstado] = useState('');
   const [editingCurso, setEditingCurso] = useState<Curso | null>(null);
   const [managingGrupos, setManagingGrupos] = useState<Curso | null>(null);
+  const [expandedCiclos, setExpandedCiclos] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (cursos.length > 0) {
+      const ciclos = new Set(cursos.map(c => c.ciclo));
+      setExpandedCiclos(ciclos);
+    }
+  }, [cursos]);
+
+  const toggleCiclo = (ciclo: string) => {
+    const next = new Set(expandedCiclos);
+    if (next.has(ciclo)) next.delete(ciclo);
+    else next.add(ciclo);
+    setExpandedCiclos(next);
+  };
+
+  const groupedCursos = cursos.reduce((acc, curso) => {
+    if (!acc[curso.ciclo]) acc[curso.ciclo] = [];
+    acc[curso.ciclo].push(curso);
+    return acc;
+  }, {} as Record<string, Curso[]>);
+
+  const CICLO_ORDER: Record<string, number> = {
+    'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
+    'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10,
+    'Electivo': 11, 'Sin Ciclo': 12
+  };
+
+  const sortedCiclos = Object.keys(groupedCursos).sort((a, b) => {
+    return (CICLO_ORDER[a] || 99) - (CICLO_ORDER[b] || 99);
+  });
 
   const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
 
@@ -168,55 +199,77 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
                 <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Acciones</th>
               </tr>
             </thead>
-            <tbody>
-              {cursos.map((curso) => (
-                <tr key={curso.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-6 py-3.5 font-mono text-xs font-bold text-muted-foreground uppercase">{curso.codigo}</td>
-                  <td className="px-6 py-3.5 font-medium text-foreground">{curso.nombre}</td>
-                  <td className="px-6 py-3.5 font-semibold text-muted-foreground text-xs">Ciclo {curso.ciclo}</td>
-                  <td className="px-6 py-3.5 text-muted-foreground text-xs">{curso.tipo}</td>
-                  <td className="px-6 py-3.5 text-muted-foreground text-xs">
-                    {curso.horasTeoricas}h Teo / {curso.horasPracticas}h Prac
-                  </td>
-                  <td className="px-6 py-3.5 font-medium text-muted-foreground text-xs">{curso.creditos}</td>
-                  <td className="px-6 py-3.5">
-                    {curso.requiereLaboratorio ? (
-                      <div>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-50 border border-blue-100 text-[10px] font-bold text-blue-700">
-                          Requerido
+            {sortedCiclos.map(ciclo => {
+              const isExpanded = expandedCiclos.has(ciclo);
+              const cicloCursos = groupedCursos[ciclo];
+              
+              return (
+                <tbody key={ciclo}>
+                  <tr 
+                    className="bg-muted/40 border-b border-border cursor-pointer hover:bg-muted/60 transition-colors"
+                    onClick={() => toggleCiclo(ciclo)}
+                  >
+                    <td colSpan={9} className="px-6 py-2">
+                      <div className="flex items-center gap-2 font-semibold text-foreground">
+                        {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                        Ciclo {ciclo}
+                        <span className="text-xs text-muted-foreground ml-2 font-normal">
+                          ({cicloCursos.length} {cicloCursos.length === 1 ? 'curso' : 'cursos'})
                         </span>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{curso.tipoLaboratorio}</p>
                       </div>
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground">No</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <CursoStatusBadge estado={curso.estado} />
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-1">
-                      {isAllowed && (
-                        <button
-                          onClick={() => setEditingCurso(curso)}
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                          title="Editar curso"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setManagingGrupos(curso)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Gestionar secciones (Grupos)"
-                      >
-                        <Layers className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+                    </td>
+                  </tr>
+                  
+                  {isExpanded && cicloCursos.map((curso) => (
+                    <tr key={curso.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                      <td className="px-6 py-3.5 font-mono text-xs font-bold text-muted-foreground uppercase">{curso.codigo}</td>
+                      <td className="px-6 py-3.5 font-medium text-foreground">{curso.nombre}</td>
+                      <td className="px-6 py-3.5 font-semibold text-muted-foreground text-xs">Ciclo {curso.ciclo}</td>
+                      <td className="px-6 py-3.5 text-muted-foreground text-xs">{curso.tipo}</td>
+                      <td className="px-6 py-3.5 text-muted-foreground text-xs">
+                        {curso.horasTeoricas}h Teo / {curso.horasPracticas}h Prac
+                      </td>
+                      <td className="px-6 py-3.5 font-medium text-muted-foreground text-xs">{curso.creditos}</td>
+                      <td className="px-6 py-3.5">
+                        {curso.requiereLaboratorio ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-50 border border-blue-100 text-[10px] font-bold text-blue-700">
+                              Requerido
+                            </span>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{curso.tipoLaboratorio}</p>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">No</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3.5">
+                        <CursoStatusBadge estado={curso.estado} />
+                      </td>
+                      <td className="px-6 py-3.5">
+                        <div className="flex items-center gap-1">
+                          {isAllowed && (
+                            <button
+                              onClick={() => setEditingCurso(curso)}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              title="Editar curso"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setManagingGrupos(curso)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                            title="Gestionar secciones (Grupos)"
+                          >
+                            <Layers className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              );
+            })}
           </table>
         </div>
       )}

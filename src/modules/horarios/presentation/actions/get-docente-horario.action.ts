@@ -125,7 +125,7 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     // Get all assignments for this horario (without docente filter first to debug)
     const { data: allAsignaciones } = await supabase
       .from('asignaciones')
-      .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo, created_at')
+      .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo_sesion, created_at')
       .eq('horario_id', horarioData.id);
 
     debugInfo.totalAsignaciones = allAsignaciones?.length || 0;
@@ -148,7 +148,7 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
         aulaId: a.aula_id,
         dia: a.dia,
         bloque: a.bloque,
-        tipo: a.tipo,
+        tipo: a.tipo_sesion?.toLowerCase().startsWith('pr') ? 'practico' : 'teorico',
         createdAt: a.created_at,
       }));
     }

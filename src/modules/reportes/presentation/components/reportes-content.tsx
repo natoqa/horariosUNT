@@ -18,6 +18,7 @@ interface PeriodoOption {
   id: string;
   name: string;
   state: string;
+  tipoCiclo: string;
 }
 
 export function ReportesContent() {
@@ -41,7 +42,7 @@ export function ReportesContent() {
 
     const { data, error } = await supabase
       .from('periodos')
-      .select('id, name, state')
+      .select('id, name, state, tipo_ciclo')
       .in('state', ['Aprobado', 'Publicado', 'Cerrado'])
       .order('created_at', { ascending: false });
 
@@ -60,6 +61,7 @@ export function ReportesContent() {
       id: p.id,
       name: p.name,
       state: p.state,
+      tipoCiclo: p.tipo_ciclo,
     }));
 
     setPeriodos(options);
@@ -222,6 +224,7 @@ export function ReportesContent() {
             <PdfFilterPanel
               filterType={filterType}
               filterId={filterId}
+              tipoCiclo={periodos.find(p => p.id === selectedPeriodoId)?.tipoCiclo}
               onFilterTypeChange={setFilterType}
               onFilterIdChange={setFilterId}
             />

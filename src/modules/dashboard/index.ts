@@ -1,0 +1,12 @@
+export type { DashboardDirectorDTO, DashboardSecretariaDTO, DashboardDocenteDTO, Alerta, AsignacionSemanal } from './application/dtos/dashboard.dto';
+export type { IDashboardRepository } from './domain/repositories/dashboard.repository';
+export { SupabaseDashboardRepository } from './infrastructure/supabase-dashboard.repository';
+export { GetDashboardDirectorUseCase } from './application/use-cases/get-dashboard-director.use-case';
+export { GetDashboardSecretariaUseCase } from './application/use-cases/get-dashboard-secretaria.use-case';
+export { GetDashboardDocenteUseCase } from './application/use-cases/get-dashboard-docente.use-case';
+export { DashboardDirector } from './presentation/components/dashboard-director';
+export { DashboardSecretaria } from './presentation/components/dashboard-secretaria';
+export { DashboardDocente } from './presentation/components/dashboard-docente';
+export { getDashboardDirectorAction } from './presentation/actions/get-dashboard-director.action';
+export { getDashboardSecretariaAction } from './presentation/actions/get-dashboard-secretaria.action';
+export { getDashboardDocenteAction } from './presentation/actions/get-dashboard-docente.action';

@@ -34,6 +34,15 @@ export function DocenteHorarioView() {
   const [cursoNames, setCursoNames] = useState<Record<string, string>>({});
   const [aulaNames, setAulaNames] = useState<Record<string, string>>({});
   const [grupoCiclos, setGrupoCiclos] = useState<Record<string, string>>({});
+  const [actividadesNoLectivas, setActividadesNoLectivas] = useState<Array<{
+    id: string;
+    tipo: string;
+    horas: number;
+    detalles: string;
+    dia?: string;
+    bloque?: string;
+  }>>([]);
+  const [horarioEstado, setHorarioEstado] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
@@ -42,6 +51,10 @@ export function DocenteHorarioView() {
     setErrorMessage(null);
 
     const result = await getDocenteHorarioAction();
+
+    if (result.debug) {
+      console.log('[DocenteHorario Debug]', result.debug);
+    }
 
     if (result.message || !result.data) {
       if (result.message?.includes('No hay') || result.message?.includes('No tienes')) {
@@ -58,6 +71,7 @@ export function DocenteHorarioView() {
     setCursoNames(result.data.cursoNames);
     setAulaNames(result.data.aulaNames);
     setGrupoCiclos(result.data.grupoCiclos);
+    setActividadesNoLectivas(result.data.actividadesNoLectivas);
 
     if (result.data.asignaciones.length === 0) {
       setState('empty');
@@ -113,10 +127,107 @@ export function DocenteHorarioView() {
     assignmentMap.set(key, existing);
   }
 
+  // Build actividad map for the grid
+  const actividadMap = new Map<string, Array<{
+    id: string;
+    tipo: string;
+    horas: number;
+    detalles: string;
+    dia?: string;
+    bloque?: string;
+  }>>();
+  for (const act of actividadesNoLectivas) {
+    if (act.dia && act.bloque) {
+      const key = `${act.dia}||${act.bloque}`;
+      const existing = actividadMap.get(key) ?? [];
+      existing.push(act);
+      actividadMap.set(key, existing);
+    }
+  }
+
   // Determine which days to show in the grid
   const daysToShow = selectedDay
     ? DIAS_SEMANA.filter((d) => d === selectedDay)
     : DIAS_SEMANA;
+
+  // Calculate stats
+  const totalSesiones = asignaciones.length;
+  const cursosUnicos = new Set(asignaciones.map((a) => a.grupoId)).size;
+
+  // Check for pending assignments (assignments without dia/bloque)
+  const pendingAssignments = asignaciones.filter((a) => !a.dia || !a.bloque);
+  const hasPendingAssignments = pendingAssignments.length > 0;
+
+  // Show pending assignments list if no horario or if there are pending assignments
+  if (horarioEstado === 'Pendiente' || hasPendingAssignments) {
+    return (
+      <div className="space-y-6">
+        {/* Info bar */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Período: <span className="font-semibold text-foreground">{periodoName}</span>
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {cursosUnicos} curso{cursosUnicos !== 1 ? 's' : ''} · {totalSesiones} asignacion{totalSesiones !== 1 ? 'es' : ''}
+            </p>
+          </div>
+        </div>
+
+        {/* Pending assignments */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            {horarioEstado === 'Pendiente' ? 'Horario no generado' : 'Asignaciones pendientes de horario'}
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            {horarioEstado === 'Pendiente'
+              ? 'El horario aún no ha sido generado. Tus asignaciones manuales se muestran a continuación:'
+              : 'Las siguientes asignaciones aún no tienen horario asignado:'}
+          </p>
+          <div className="space-y-3">
+            {pendingAssignments.map((a) => (
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                <div>
+                  <p className="text-sm font-medium text-foreground">{cursoNames[a.grupoId] || 'Curso'}</p>
+                  <p className="text-xs text-muted-foreground">Sin horario asignado</p>
+                </div>
+                <span className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  Pendiente
+                </span>
+              </div>
+            ))}
+            {pendingAssignments.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No hay asignaciones pendientes
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Actividades no lectivas */}
+        {actividadesNoLectivas.length > 0 && (
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4">
+              Actividades No Lectivas
+            </h3>
+            <div className="space-y-3">
+              {actividadesNoLectivas.map((act) => (
+                <div key={act.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-50 border border-orange-200">
+                  <div>
+                    <p className="text-sm font-medium text-orange-900">{act.tipo}</p>
+                    <p className="text-xs text-orange-700">{act.detalles}</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800">
+                    {act.horas}h
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (authLoading || state === 'loading') {
     return (
@@ -138,21 +249,6 @@ export function DocenteHorarioView() {
       </div>
     );
   }
-
-  if (state === 'empty') {
-    return (
-      <div className="rounded-xl border border-border bg-card p-12 text-center space-y-3">
-        <CalendarDays className="w-10 h-10 text-muted-foreground mx-auto" />
-        <p className="text-sm font-medium text-foreground">Sin asignaciones</p>
-        <p className="text-xs text-muted-foreground">
-          {errorMessage ?? 'No tienes asignaciones en el horario actual.'}
-        </p>
-      </div>
-    );
-  }
-
-  const totalSesiones = asignaciones.length;
-  const cursosUnicos = new Set(asignaciones.map((a) => a.grupoId)).size;
 
   return (
     <div className="space-y-6">
@@ -234,10 +330,11 @@ export function DocenteHorarioView() {
                   {daysToShow.map((dia) => {
                     const key = `${dia}||${bloque}`;
                     const cellAssignments = assignmentMap.get(key) ?? [];
+                    const cellActividades = actividadMap.get(key) ?? [];
 
                     return (
                       <td key={dia} className="p-1 border-r border-border align-top last:border-r-0">
-                        {cellAssignments.length > 0 ? (
+                        {(cellAssignments.length > 0 || cellActividades.length > 0) ? (
                           <div className="space-y-1">
                             {cellAssignments.map((a) => {
                               const ciclo = grupoCiclos[a.grupoId] ?? '';
@@ -257,6 +354,19 @@ export function DocenteHorarioView() {
                                 </div>
                               );
                             })}
+                            {cellActividades.map((act) => (
+                              <div
+                                key={act.id}
+                                className="rounded border px-1.5 py-1 bg-orange-50 border-orange-200 text-orange-800"
+                              >
+                                <p className="font-semibold text-[10px] leading-tight truncate">
+                                  {act.tipo}
+                                </p>
+                                <p className="text-[9px] leading-tight truncate opacity-80">
+                                  {act.horas}h · No lectiva
+                                </p>
+                              </div>
+                            ))}
                           </div>
                         ) : (
                           <div className="h-12" />

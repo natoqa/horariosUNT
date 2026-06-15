@@ -83,26 +83,26 @@ export async function getDirectorResumenAction(): Promise<DirectorResumenResult>
   }
 
   // Build a map: docenteId -> { count, lastUpdated }
-  const disponibilidadMap = new Map<string, { count: number; lastUpdated: string | null }>();
+  const disponibilidadMap: Record<string, { count: number; lastUpdated: string | null }> = {};
   if (disponibilidadData) {
     for (const row of disponibilidadData) {
-      const existing = disponibilidadMap.get(row.docente_id);
+      const existing = disponibilidadMap[row.docente_id];
       if (existing) {
         existing.count += 1;
         if (row.updated_at && (!existing.lastUpdated || row.updated_at > existing.lastUpdated)) {
           existing.lastUpdated = row.updated_at;
         }
       } else {
-        disponibilidadMap.set(row.docente_id, {
+        disponibilidadMap[row.docente_id] = {
           count: 1,
           lastUpdated: row.updated_at || null,
-        });
+        };
       }
     }
   }
 
   const docentes: DocenteResumen[] = docentesData.map((d) => {
-    const disp = disponibilidadMap.get(d.id);
+    const disp = disponibilidadMap[d.id];
     return {
       id: d.id,
       nombres: d.nombres,

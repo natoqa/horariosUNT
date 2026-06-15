@@ -10,6 +10,8 @@ import { Aula, AulaRestriccion } from '@/modules/aulas';
 import { Disponibilidad } from '@/modules/disponibilidad';
 import { Horario, Asignacion, GenerationSummary } from '../../domain/entities/horario.entity';
 import { UnassignedUnit } from '../../domain/services/schedule-generator.service';
+import { getCiclosByTipo } from '@/modules/periodos/domain/entities/periodo.entity';
+import { distribuirActividadesNoLectivas } from '@/modules/carga-no-lectiva/domain/services/actividades-no-lectiva-distributor.service';
 
 export interface GenerateHorarioActionResult {
   horario?: Horario;
@@ -39,6 +41,16 @@ export async function generateHorarioAction(
   }
 
   try {
+    // Obtener información del período para determinar ciclos
+    const { data: periodo } = await supabase
+      .from('periodos')
+      .select('tipo_ciclo')
+      .eq('id', periodoId)
+      .single();
+
+    const tipoCiclo = periodo?.tipo_ciclo || 'Impar';
+    const ciclosPermitidos = getCiclosByTipo(tipoCiclo);
+
     const [docentesRes, cursosRes, gruposRes, aulasRes, restriccionesRes, disponibilidadRes] =
       await Promise.all([
         supabase.from('docentes').select('*'),
@@ -62,27 +74,73 @@ export async function generateHorarioAction(
       return { message: 'No hay aulas registradas en el sistema.' };
     }
 
+    // Validación de carga no lectiva para docentes asignados
+    const docentesAsignados = Array.from(new Set(
+      gruposRes.data
+        .filter((g) => g.docente_id)
+        .map((g) => g.docente_id)
+    ));
+
+    if (docentesAsignados.length === 0) {
+      return { message: 'No hay docentes asignados a los grupos. Asigne docentes a los grupos antes de generar horarios.' };
+    }
+
+    const { data: cargasNoLectivas } = await supabase
+      .from('cargas_no_lectivas')
+      .select('docente_id, total_horas, estado, director_aprobado, secretaria_aprobado')
+      .eq('periodo_id', periodoId);
+
+    const docentesConCarga = new Set(cargasNoLectivas?.map((c) => c.docente_id) || []);
+    const docentesSinCarga = docentesAsignados.filter((id) => !docentesConCarga.has(id));
+
+    if (docentesSinCarga.length > 0) {
+      return { 
+        message: `Faltan ${docentesSinCarga.length} docente(s) asignado(s) que no han registrado su carga no lectiva. Todos los docentes asignados deben registrar su carga no lectiva antes de generar horarios.` 
+      };
+    }
+
+    const docentesConCargaAprobada = cargasNoLectivas?.filter(
+      (c) => c.director_aprobado && c.secretaria_aprobado
+    ).map((c) => c.docente_id) || [];
+
+    const docentesSinAprobacion = [...docentesAsignados].filter(
+      (id) => !docentesConCargaAprobada.includes(id)
+    );
+
+    if (docentesSinAprobacion.length > 0) {
+      return { 
+        message: `Faltan ${docentesSinAprobacion.length} docente(s) asignado(s) cuya carga no lectiva no ha sido aprobada por el director y la secretaria. Todas las cargas deben estar aprobadas antes de generar horarios.` 
+      };
+    }
+
     const docentes: Docente[] = (docentesRes.data ?? []).map((d) => ({
       id: d.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni,
       correo: d.correo, telefono: d.telefono, categoria: d.categoria,
       regimen: d.regimen, condicion: d.condicion, escuela: d.escuela,
-      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, estado: d.estado,
+      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, cargaElectiva: d.carga_electiva || 0, estado: d.estado,
       createdAt: d.created_at, updatedAt: d.updated_at,
     }));
 
-    const cursos: Curso[] = (cursosRes.data ?? []).map((c) => ({
-      id: c.id, codigo: c.codigo, nombre: c.nombre, ciclo: c.ciclo,
-      tipo: c.tipo, horasTeoricas: c.horas_teoricas, horasPracticas: c.horas_practicas,
-      creditos: c.creditos, requiereLaboratorio: c.requiere_laboratorio,
-      tipoLaboratorio: c.tipo_laboratorio, estado: c.estado,
-      createdAt: c.created_at, updatedAt: c.updated_at,
-    }));
+    const cursos: Curso[] = (cursosRes.data ?? [])
+      .filter((c) => ciclosPermitidos.includes(c.ciclo))
+      .map((c) => ({
+        id: c.id, codigo: c.codigo, nombre: c.nombre, ciclo: c.ciclo,
+        tipo: c.tipo, horasTeoricas: c.horas_teoricas, horasPracticas: c.horas_practicas,
+        creditos: c.creditos, requiereLaboratorio: c.requiere_laboratorio,
+        tipoLaboratorio: c.tipo_laboratorio, estado: c.estado,
+        createdAt: c.created_at, updatedAt: c.updated_at,
+      }));
 
-    const grupos: Grupo[] = (gruposRes.data ?? []).map((g) => ({
-      id: g.id, cursoId: g.curso_id, periodoId: g.periodo_id,
-      docenteId: g.docente_id ?? null, nombre: g.nombre, numEstudiantes: g.num_estudiantes,
-      createdAt: g.created_at, updatedAt: g.updated_at,
-    }));
+    const grupos: Grupo[] = (gruposRes.data ?? [])
+      .filter((g) => {
+        const curso = cursosRes.data?.find((c) => c.id === g.curso_id);
+        return curso && ciclosPermitidos.includes(curso.ciclo);
+      })
+      .map((g) => ({
+        id: g.id, cursoId: g.curso_id, periodoId: g.periodo_id,
+        docenteId: g.docente_id ?? null, nombre: g.nombre, numEstudiantes: g.num_estudiantes,
+        createdAt: g.created_at, updatedAt: g.updated_at,
+      }));
 
     const aulas: Aula[] = (aulasRes.data ?? []).map((a) => ({
       id: a.id, codigo: a.codigo, nombre: a.nombre, pabellon: a.pabellon,
@@ -145,6 +203,82 @@ export async function generateHorarioAction(
       summary: result.generationResult.summary,
       unassignedCount: result.generationResult.unassigned?.length,
     });
+
+    // Distribuir aleatoriamente las actividades no lectivas después de generar el horario
+    console.log('[SERVER ACTION] Distribuyendo actividades no lectivas...');
+    const { data: actividadesNoLectivas } = await supabase
+      .from('actividades_no_lectivas')
+      .select('id, tipo, horas, detalles, dia, bloque, docente_id')
+      .eq('periodo_id', periodoId);
+
+    if (actividadesNoLectivas && actividadesNoLectivas.length > 0) {
+      // Agrupar actividades por docente
+      const actividadesPorDocente: Record<string, any[]> = {};
+      for (const actividad of actividadesNoLectivas) {
+        const docenteId = actividad.docente_id;
+        if (!actividadesPorDocente[docenteId]) {
+          actividadesPorDocente[docenteId] = [];
+        }
+        actividadesPorDocente[docenteId].push(actividad);
+      }
+
+      // Distribuir actividades para cada docente
+      const instanciasParaInsertar: any[] = [];
+      const actividadesOriginalesParaEliminar: string[] = [];
+
+      for (const docenteId in actividadesPorDocente) {
+        const actividades = actividadesPorDocente[docenteId];
+        const distribucionResult = distribuirActividadesNoLectivas(
+          actividades,
+          result.asignaciones || [],
+          docenteId,
+        );
+
+        if (distribucionResult.success && distribucionResult.actividadesInstances) {
+          console.log(`[SERVER ACTION] Distribución para docente ${docenteId}:`, distribucionResult.message);
+          
+          // Preparar instancias para insertar
+          for (const instancia of distribucionResult.actividadesInstances) {
+            instanciasParaInsertar.push({
+              docente_id: docenteId,
+              periodo_id: periodoId,
+              tipo: instancia.tipo,
+              horas: instancia.horas,
+              detalles: instancia.detalles,
+              dia: instancia.dia,
+              bloque: instancia.bloque,
+            });
+          }
+
+          // Marcar actividades originales para eliminar
+          actividadesOriginalesParaEliminar.push(...actividades.map(a => a.id));
+        }
+      }
+
+      // Insertar nuevas instancias solo si hay instancias para insertar
+      if (instanciasParaInsertar.length > 0) {
+        const { error: insertError } = await supabase
+          .from('actividades_no_lectivas')
+          .insert(instanciasParaInsertar);
+        
+        if (insertError) {
+          console.error('[SERVER ACTION] Error al insertar instancias:', insertError);
+        } else {
+          console.log(`[SERVER ACTION] Se insertaron ${instanciasParaInsertar.length} instancias de actividades no lectivas.`);
+          
+          // Solo eliminar actividades originales si la inserción fue exitosa
+          if (actividadesOriginalesParaEliminar.length > 0) {
+            await supabase
+              .from('actividades_no_lectivas')
+              .delete()
+              .in('id', actividadesOriginalesParaEliminar);
+            console.log(`[SERVER ACTION] Se eliminaron ${actividadesOriginalesParaEliminar.length} actividades originales.`);
+          }
+        }
+      } else {
+        console.log('[SERVER ACTION] No hay instancias para insertar, se preservan las actividades originales.');
+      }
+    }
 
     revalidatePath('/director/horarios');
     return {

@@ -69,6 +69,13 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     .eq('horario_id', horarioData.id)
     .eq('docente_id', docenteData.id);
 
+  // Get actividades no lectivas for the docente
+  const { data: actividadesNoLectivas } = await supabase
+    .from('actividades_no_lectivas')
+    .select('tipo, horas, detalles, dia, bloque')
+    .eq('docente_id', docenteData.id)
+    .eq('periodo_id', periodoData.id);
+
   if (!rawAsignaciones || rawAsignaciones.length === 0) {
     return { message: 'No tienes asignaciones en el horario actual.' };
   }
@@ -80,25 +87,25 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const cursoIdToName = new Map<string, string>();
-  const cursoIdToCiclo = new Map<string, string>();
+  const cursoIdToName: Record<string, string> = {};
+  const cursoIdToCiclo: Record<string, string> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoIdToName.set(c.id, c.nombre);
-    cursoIdToCiclo.set(c.id, c.ciclo);
+    cursoIdToName[c.id] = c.nombre;
+    cursoIdToCiclo[c.id] = c.ciclo;
   });
 
-  const cursoNames = new Map<string, string>();
-  const grupoCiclos = new Map<string, string>();
+  const cursoNames: Record<string, string> = {};
+  const grupoCiclos: Record<string, string> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    const cursoNombre = cursoIdToName.get(g.curso_id);
-    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
-    const ciclo = cursoIdToCiclo.get(g.curso_id);
-    if (ciclo) grupoCiclos.set(g.id, ciclo);
+    const cursoNombre = cursoIdToName[g.curso_id];
+    cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
+    const ciclo = cursoIdToCiclo[g.curso_id];
+    if (ciclo) grupoCiclos[g.id] = ciclo;
   });
 
-  const aulaNames = new Map<string, string>();
+  const aulaNames: Record<string, string> = {};
   (aulasRes.data ?? []).forEach((a) => {
-    aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`);
+    aulaNames[a.id] = `${a.codigo} - ${a.nombre}`;
   });
 
   const docenteName = docenteData
@@ -113,6 +120,14 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     tipo: a.tipo,
   }));
 
+  const actividadesNoLectivasData = (actividadesNoLectivas ?? []).map((act) => ({
+    tipo: act.tipo,
+    horas: act.horas,
+    detalles: act.detalles,
+    dia: act.dia,
+    bloque: act.bloque,
+  }));
+
   const nameMaps: DocentePdfNameMaps = {
     cursos: cursoNames,
     aulas: aulaNames,
@@ -120,7 +135,7 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
   };
 
   const useCase = new GenerateDocentePdfUseCase();
-  const pdfBytes = await useCase.execute(asignaciones, nameMaps, periodoData.name, docenteName);
+  const pdfBytes = await useCase.execute(asignaciones, nameMaps, periodoData.name, docenteName, actividadesNoLectivasData);
 
   const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
   const fileName = `mi-horario-${periodoData.name.replace(/\s+/g, '-')}.pdf`;

@@ -58,11 +58,15 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     // Delete existing horarios for this periodo
     await supabase.from('horarios').delete().eq('periodo_id', periodoId);
 
+    const estadoToSave = 'Borrador';
+    console.log('[HorarioRepository] Guardando horario con estado:', estadoToSave);
+    console.log('[HorarioRepository] Tipo de estado:', typeof estadoToSave);
+
     const { data, error } = await supabase
       .from('horarios')
       .insert({
         periodo_id: periodoId,
-        estado: 'Borrador',
+        estado: estadoToSave,
         fecha_generacion: new Date().toISOString(),
         resumen: resumen,
       })
@@ -70,6 +74,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       .single();
 
     if (error || !data) {
+      console.error('[HorarioRepository] Error al guardar horario:', error);
       throw new Error(error?.message || 'Error al guardar horario.');
     }
     return this.mapToHorario(data as HorarioRow);
@@ -169,9 +174,17 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
 
   async updateEstado(id: string, estado: HorarioEstado): Promise<Horario> {
     const supabase = await createClient();
+    // Mapear a mayúsculas para cumplir con el constraint de la base de datos
+    const estadoMap: Record<string, string> = {
+      'borrador': 'Borrador',
+      'aprobado': 'Aprobado',
+      'publicado': 'Publicado',
+    };
+    const estadoToSave = estadoMap[estado] || estado;
+
     const { data, error } = await supabase
       .from('horarios')
-      .update({ estado })
+      .update({ estado: estadoToSave })
       .eq('id', id)
       .select()
       .single();

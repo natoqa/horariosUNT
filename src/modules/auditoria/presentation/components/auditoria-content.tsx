@@ -4,8 +4,11 @@ import { AuditoriaFilters } from './auditoria-filters';
 import { AuditoriaTable } from './auditoria-table';
 import { AuditLog } from '../../domain/entities/audit-log.entity';
 import { getAuditLogsAction } from '../actions/get-audit-logs.action';
+import { exportAuditoriaExcelAction } from '../actions/export-auditoria-excel.action';
 import { useEffect, useState, startTransition } from 'react';
-import { AlertCircle, ClipboardList } from 'lucide-react';
+import { AlertCircle, ClipboardList, Download } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { toast } from 'sonner';
 
 interface FiltersState {
   userEmail: string;
@@ -26,6 +29,7 @@ export function AuditoriaContent() {
     startDate: '',
     endDate: '',
   });
+  const [exporting, setExporting] = useState(false);
 
   const fetchLogs = (filters: FiltersState) => {
     setLoading(true);
@@ -48,6 +52,33 @@ export function AuditoriaContent() {
 
   const handleFilterChange = (filters: FiltersState) => {
     setActiveFilters(filters);
+  };
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const res = await exportAuditoriaExcelAction(activeFilters);
+      if (res.message) {
+        toast.error(res.message);
+      } else if (res.data) {
+        const blob = new Blob([res.data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `auditoria_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('Registro de auditoría exportado exitosamente');
+      }
+    } catch (error) {
+      toast.error('Error al exportar el registro de auditoría');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -79,7 +110,21 @@ export function AuditoriaContent() {
           </p>
         </div>
       ) : (
-        <AuditoriaTable logs={logs} />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              disabled={exporting}
+              className="gap-1.5"
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'Exportando...' : 'Exportar Excel'}
+            </Button>
+          </div>
+          <AuditoriaTable logs={logs} />
+        </div>
       )}
     </div>
   );

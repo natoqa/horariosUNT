@@ -73,37 +73,39 @@ export async function generateCargaDocentePdfAction(
   const grupos = gruposRes.data ?? [];
   const cursos = cursosRes.data ?? [];
 
-  const cursoNameMap = new Map<string, string>();
-  cursos.forEach((c) => cursoNameMap.set(c.id, c.nombre));
+  const cursoNameMap: Record<string, string> = {};
+  cursos.forEach((c) => cursoNameMap[c.id] = c.nombre);
 
-  const grupoToCursoName = new Map<string, string>();
-  const grupoToGrupoName = new Map<string, string>();
+  const grupoToCursoName: Record<string, string> = {};
+  const grupoToGrupoName: Record<string, string> = {};
   grupos.forEach((g) => {
-    grupoToCursoName.set(g.id, cursoNameMap.get(g.curso_id) ?? '');
-    grupoToGrupoName.set(g.id, g.nombre);
+    grupoToCursoName[g.id] = cursoNameMap[g.curso_id] ?? '';
+    grupoToGrupoName[g.id] = g.nombre;
   });
 
-  const horasPorDocente = new Map<string, number>();
-  const cursosPorDocente = new Map<string, Set<string>>();
+  const horasPorDocente: Record<string, number> = {};
+  const cursosPorDocente: Record<string, string[]> = {};
   for (const a of asignaciones) {
-    horasPorDocente.set(a.docente_id, (horasPorDocente.get(a.docente_id) ?? 0) + 1);
+    horasPorDocente[a.docente_id] = (horasPorDocente[a.docente_id] ?? 0) + 1;
 
-    const cursoNombre = grupoToCursoName.get(a.grupo_id) ?? '';
-    const grupoNombre = grupoToGrupoName.get(a.grupo_id) ?? '';
+    const cursoNombre = grupoToCursoName[a.grupo_id] ?? '';
+    const grupoNombre = grupoToGrupoName[a.grupo_id] ?? '';
     const label = cursoNombre ? `${cursoNombre} (${grupoNombre})` : grupoNombre;
 
-    if (!cursosPorDocente.has(a.docente_id)) {
-      cursosPorDocente.set(a.docente_id, new Set());
+    if (!cursosPorDocente[a.docente_id]) {
+      cursosPorDocente[a.docente_id] = [];
     }
-    cursosPorDocente.get(a.docente_id)!.add(label);
+    if (!cursosPorDocente[a.docente_id].includes(label)) {
+      cursosPorDocente[a.docente_id].push(label);
+    }
   }
 
   const rows: CargaDocentePdfRow[] = docentes.map((d) => {
-    const horas = horasPorDocente.get(d.id) ?? 0;
+    const horas = horasPorDocente[d.id] ?? 0;
     const maximas = d.carga_maxima ?? 0;
     const porcentaje = maximas > 0 ? Math.round((horas / maximas) * 100) : 0;
-    const cursosSet = cursosPorDocente.get(d.id);
-    const cursosStr = cursosSet ? Array.from(cursosSet).join(', ') : '';
+    const cursosArr = cursosPorDocente[d.id] || [];
+    const cursosStr = cursosArr.join(', ');
 
     return {
       nombre: `${d.apellidos}, ${d.nombres}`,

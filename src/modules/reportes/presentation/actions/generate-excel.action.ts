@@ -84,11 +84,11 @@ export async function generateExcelAction(
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const docenteNames = new Map<string, string>();
+  const docenteNames: Record<string, string> = {};
   const docenteInfos: ExcelDocenteInfo[] = [];
   (docentesRes.data ?? []).forEach((d) => {
     const nombre = `${d.apellidos}, ${d.nombres}`;
-    docenteNames.set(d.id, nombre);
+    docenteNames[d.id] = nombre;
     docenteInfos.push({
       id: d.id,
       nombre,
@@ -98,27 +98,27 @@ export async function generateExcelAction(
     });
   });
 
-  const cursoIdToName = new Map<string, string>();
-  const cursoIdToCiclo = new Map<string, string>();
+  const cursoIdToName: Record<string, string> = {};
+  const cursoIdToCiclo: Record<string, string> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoIdToName.set(c.id, c.nombre);
-    cursoIdToCiclo.set(c.id, c.ciclo);
+    cursoIdToName[c.id] = c.nombre;
+    cursoIdToCiclo[c.id] = c.ciclo;
   });
 
-  const cursoNames = new Map<string, string>();
-  const grupoCiclos = new Map<string, string>();
+  const cursoNames: Record<string, string> = {};
+  const grupoCiclos: Record<string, string> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    const cursoNombre = cursoIdToName.get(g.curso_id);
-    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
-    const ciclo = cursoIdToCiclo.get(g.curso_id);
-    if (ciclo) grupoCiclos.set(g.id, ciclo);
+    const cursoNombre = cursoIdToName[g.curso_id];
+    cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
+    const ciclo = cursoIdToCiclo[g.curso_id];
+    if (ciclo) grupoCiclos[g.id] = ciclo;
   });
 
-  const aulaNames = new Map<string, string>();
+  const aulaNames: Record<string, string> = {};
   const aulaInfos: ExcelAulaInfo[] = [];
   (aulasRes.data ?? []).forEach((a) => {
     const nombre = `${a.codigo} - ${a.nombre}`;
-    aulaNames.set(a.id, nombre);
+    aulaNames[a.id] = nombre;
     aulaInfos.push({ id: a.id, nombre });
   });
 

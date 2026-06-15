@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Loader2, Download, Sheet, Building2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { DIAS_SEMANA, BLOQUES_HORARIOS } from '@/shared/constants/time-blocks';
@@ -76,9 +76,9 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
     }
   }, [state, loadResumen]);
 
-  useState(() => {
+  useEffect(() => {
     handleLoadIfNeeded();
-  });
+  }, [handleLoadIfNeeded]);
 
   const handleBack = () => {
     setSelectedAulaId(null);

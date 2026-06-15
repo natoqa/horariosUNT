@@ -33,6 +33,8 @@ export interface ActividadNoLectiva {
   tipo: ActividadNoLectivaTipo;
   horas: number;
   detalles: string;
+  dia?: string;
+  bloque?: string;
   createdAt: string;
   updatedAt: string;
 }

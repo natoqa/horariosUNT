@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Loader2, Download, Sheet, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { getCargaDocenteAction, CargaDocenteRow } from '../actions/get-carga-docente.action';
@@ -47,9 +47,9 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
     }
   }, [state, loadData]);
 
-  useState(() => {
+  useEffect(() => {
     handleLoadIfNeeded();
-  });
+  }, [handleLoadIfNeeded]);
 
   const handleDownloadPdf = async () => {
     setState('generating-pdf');

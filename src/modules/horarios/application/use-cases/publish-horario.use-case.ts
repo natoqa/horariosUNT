@@ -17,11 +17,11 @@ export class PublishHorarioUseCase {
       return { success: false, message: 'Horario no encontrado.' };
     }
 
-    if (horario.estado !== 'aprobado') {
+    if (horario.estado !== 'Aprobado') {
       return { success: false, message: `El horario debe estar en estado "Aprobado" para publicar. Estado actual: "${horario.estado}".` };
     }
 
-    await this.horarioRepository.updateEstado(validated.horarioId, 'publicado');
+    await this.horarioRepository.updateEstado(validated.horarioId, 'Publicado');
 
     // TODO: Enviar notificación a docentes cuando el módulo de notificaciones esté implementado (RF-041)
 

@@ -1,12 +1,12 @@
 import { DiaSemana, BloqueHorario } from '@/shared/constants/time-blocks';
 
-export const HORARIO_ESTADOS = ['borrador', 'aprobado', 'publicado'] as const;
+export const HORARIO_ESTADOS = ['Borrador', 'Aprobado', 'Publicado'] as const;
 export type HorarioEstado = typeof HORARIO_ESTADOS[number];
 
 export const HORARIO_ESTADO_LABELS: Record<HorarioEstado, string> = {
-  borrador: 'Borrador',
-  aprobado: 'Aprobado',
-  publicado: 'Publicado',
+  Borrador: 'Borrador',
+  Aprobado: 'Aprobado',
+  Publicado: 'Publicado',
 };
 
 export const ASIGNACION_TIPOS = ['teorico', 'practico'] as const;
@@ -43,8 +43,8 @@ export interface Asignacion {
   grupoId: string;
   docenteId: string;
   aulaId: string;
-  dia: DiaSemana;
-  bloque: BloqueHorario;
+  dia: DiaSemana | 'Pendiente';
+  bloque: BloqueHorario | 'Pendiente';
   tipo: AsignacionTipo;
   createdAt: string;
 }

@@ -51,37 +51,37 @@ export async function approveHorarioAction(
     supabase.from('aulas').select('id, capacidad, tipo').in('id', aulaIds),
   ]);
 
-  const grupoMap = new Map<string, { cursoId: string; numEstudiantes: number }>();
+  const grupoMap: Record<string, { cursoId: string; numEstudiantes: number }> = {};
   (gruposRes.data ?? []).forEach((g) => {
-    grupoMap.set(g.id, { cursoId: g.curso_id, numEstudiantes: g.num_estudiantes });
+    grupoMap[g.id] = { cursoId: g.curso_id, numEstudiantes: g.num_estudiantes };
   });
 
-  const cursoMap = new Map<string, { ciclo: string; requiereLaboratorio: boolean }>();
+  const cursoMap: Record<string, { ciclo: string; requiereLaboratorio: boolean }> = {};
   (cursosRes.data ?? []).forEach((c) => {
-    cursoMap.set(c.id, { ciclo: c.ciclo, requiereLaboratorio: c.requiere_laboratorio });
+    cursoMap[c.id] = { ciclo: c.ciclo, requiereLaboratorio: c.requiere_laboratorio };
   });
 
-  const aulaMap = new Map<string, { capacidad: number; tipo: string }>();
+  const aulaMap: Record<string, { capacidad: number; tipo: string }> = {};
   (aulasRes.data ?? []).forEach((a) => {
-    aulaMap.set(a.id, { capacidad: a.capacidad, tipo: a.tipo });
+    aulaMap[a.id] = { capacidad: a.capacidad, tipo: a.tipo };
   });
 
-  const contextMap = new Map<string, EnrichedAsignacionForApproval>();
+  const contextMap: Record<string, EnrichedAsignacionForApproval> = {};
   for (const a of asignaciones) {
-    const grupo = grupoMap.get(a.grupoId);
+    const grupo = grupoMap[a.grupoId];
     if (!grupo) continue;
-    const curso = cursoMap.get(grupo.cursoId);
+    const curso = cursoMap[grupo.cursoId];
     if (!curso) continue;
-    const aula = aulaMap.get(a.aulaId);
+    const aula = aulaMap[a.aulaId];
 
-    contextMap.set(a.id, {
+    contextMap[a.id] = {
       grupoId: a.grupoId,
       ciclo: curso.ciclo,
       aulaCapacidad: aula?.capacidad ?? 0,
       numEstudiantes: grupo.numEstudiantes,
       aulaType: aula?.tipo ?? '',
       requiereLaboratorio: curso.requiereLaboratorio,
-    });
+    };
   }
 
   const useCase = new ApproveHorarioUseCase(horarioRepo);

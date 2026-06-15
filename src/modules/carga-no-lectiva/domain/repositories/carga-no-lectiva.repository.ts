@@ -4,6 +4,8 @@ export interface ActividadNoLectivaInput {
   tipo: ActividadNoLectivaTipo;
   horas: number;
   detalles: string;
+  dia?: string;
+  bloque?: string;
 }
 
 export interface ICargaNoLectivaRepository {

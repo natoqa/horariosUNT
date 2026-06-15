@@ -4,7 +4,7 @@ import { ACTIVIDADES_NO_LECTIVAS } from '../../domain/entities/carga-no-lectiva.
 const actividadSchema = z.object({
   tipo: z.enum(ACTIVIDADES_NO_LECTIVAS),
   horas: z.coerce.number().min(0),
-  detalles: z.string().min(1, 'Debe describir los detalles de la actividad.'),
+  detalles: z.string().min(1, 'El campo "Detalles" es obligatorio. Por favor, describa brevemente la actividad.'),
 });
 
 export const saveActividadesCargaNoLectivaSchema = z.object({

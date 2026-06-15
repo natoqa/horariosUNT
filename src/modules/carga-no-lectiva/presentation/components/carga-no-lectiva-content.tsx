@@ -28,6 +28,11 @@ interface CargaNoLectivaData {
   periodoId: string;
   periodoName: string;
   actividades: ActividadFormRow[];
+  docente?: {
+    cargaMaxima: number;
+    cargaElectiva: number;
+    cursos: Array<{ codigo: string; nombre: string; horas: number }>;
+  };
   carga: {
     id: string;
     totalHoras: number;
@@ -67,6 +72,34 @@ export function CargaNoLectivaContent() {
     );
   }, [actividades, data?.carga?.horasLectivasAsignadas, horasLectivasNoAsignadas]);
 
+  const horasDisponiblesNoLectivas = data?.docente 
+    ? Math.max(0, data.docente.cargaMaxima - data.docente.cargaElectiva)
+    : 0;
+
+  const actividadHoras = useMemo(() => {
+    return actividades.reduce((sum, actividad) => sum + Number(actividad.horas), 0);
+  }, [actividades]);
+
+  const horasValidation = useMemo(() => {
+    const totalNoLectivas = actividadHoras;
+    if (totalNoLectivas > horasDisponiblesNoLectivas) {
+      return {
+        type: 'error' as const,
+        message: `Has excedido las horas disponibles para carga no lectiva. Máximo: ${horasDisponiblesNoLectivas}h, Actual: ${totalNoLectivas}h`,
+      };
+    }
+    if (totalNoLectivas < horasDisponiblesNoLectivas) {
+      return {
+        type: 'warning' as const,
+        message: `Faltan ${horasDisponiblesNoLectivas - totalNoLectivas} horas para completar la carga no lectiva requerida (${horasDisponiblesNoLectivas}h).`,
+      };
+    }
+    return {
+      type: 'success' as const,
+      message: 'Has completado exactamente las horas requeridas para carga no lectiva.',
+    };
+  }, [actividadHoras, horasDisponiblesNoLectivas]);
+
   const allActivitiesRegistered = actividades.every((actividad) => actividad.detalles.trim().length > 0);
   const isApproved = data?.carga?.estado === 'Aprobado';
   const canRegisterTotal = allActivitiesRegistered && totalHoras > 0 && lectivaDeclarada && !isApproved;
@@ -90,6 +123,7 @@ export function CargaNoLectivaContent() {
           periodoId: result.data.periodoId,
           periodoName: result.data.periodoName,
           actividades: loadedActividades,
+          docente: result.data.docente,
           carga: result.data.carga
             ? {
                 id: result.data.carga.id,
@@ -170,9 +204,9 @@ export function CargaNoLectivaContent() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Declaración de carga no lectiva</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Carga Horaria</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Registra todas las actividades no lectivas antes de enviar la carga total para aprobación.
+            Registra tu carga horaria: carga electiva (cursos asignados) y carga no lectiva.
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-white px-4 py-3 text-right">
@@ -180,6 +214,25 @@ export function CargaNoLectivaContent() {
           <p className="text-base font-semibold text-foreground">{data?.periodoName}</p>
         </div>
       </div>
+
+      {data?.docente && (
+        <div className="rounded-2xl border border-border bg-slate-50 px-4 py-4 text-sm text-foreground">
+          <p className="font-semibold text-foreground">Información de carga horaria</p>
+          <p className="mt-2">Carga máxima: <span className="font-semibold">{data.docente.cargaMaxima} horas</span></p>
+          <p className="mt-1">Carga electiva: <span className="font-semibold">{data.docente.cargaElectiva} horas</span></p>
+          <p className="mt-1">Disponible para carga no lectiva: <span className="font-semibold text-primary">{Math.max(0, data.docente.cargaMaxima - data.docente.cargaElectiva)} horas</span></p>
+          {data.docente.cursos && data.docente.cursos.length > 0 && (
+            <div className="mt-3">
+              <p className="font-semibold text-foreground mb-2">Cursos Asignados:</p>
+              <div className="space-y-1">
+                {data.docente.cursos.map((curso, idx) => (
+                  <p key={idx} className="text-muted-foreground">• {curso.codigo} - {curso.nombre} ({curso.horas}h)</p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {data?.carga && (
         <div className="rounded-2xl border border-border bg-slate-50 px-4 py-4 text-sm text-foreground">
@@ -326,6 +379,19 @@ export function CargaNoLectivaContent() {
           </div>
           <div className="rounded-2xl bg-slate-100 px-3 py-2 text-sm font-medium text-foreground">Total: {totalHoras} horas</div>
         </div>
+
+        {horasValidation.type !== 'success' && (
+          <div className={`mt-4 rounded-md px-4 py-3 ${
+            horasValidation.type === 'error' 
+              ? 'bg-destructive/10 border border-destructive/20 text-destructive' 
+              : 'bg-amber-50 border border-amber-200 text-amber-700'
+          }`}>
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 mt-0.5" />
+              <p className="text-sm">{horasValidation.message}</p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-border bg-slate-50 p-4">

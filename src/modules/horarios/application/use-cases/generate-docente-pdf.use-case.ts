@@ -40,6 +40,13 @@ export class GenerateDocentePdfUseCase {
     nameMaps: DocentePdfNameMaps,
     periodoName: string,
     docenteName: string,
+    actividadesNoLectivas?: Array<{
+      tipo: string;
+      horas: number;
+      detalles: string;
+      dia?: string;
+      bloque?: string;
+    }>,
   ): Promise<Uint8Array> {
     const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -51,7 +58,7 @@ export class GenerateDocentePdfUseCase {
     let yPos = height - 40;
     yPos = this.drawHeader(page, fontBold, font, width, yPos, periodoName, docenteName);
     yPos -= 10;
-    this.drawGrid(page, font, fontBold, asignaciones, nameMaps, width, yPos);
+    this.drawGrid(page, font, fontBold, asignaciones, nameMaps, width, yPos, actividadesNoLectivas);
     this.drawFooter(page, font, width, periodoName);
 
     return pdfDoc.save();
@@ -121,6 +128,13 @@ export class GenerateDocentePdfUseCase {
     nameMaps: DocentePdfNameMaps,
     pageWidth: number,
     startY: number,
+    actividadesNoLectivas?: Array<{
+      tipo: string;
+      horas: number;
+      detalles: string;
+      dia?: string;
+      bloque?: string;
+    }>,
   ): void {
     const marginLeft = 50;
     const marginRight = 50;
@@ -206,6 +220,10 @@ export class GenerateDocentePdfUseCase {
           (a) => a.dia === dia && a.bloque === bloque,
         );
 
+        const cellActividades = actividadesNoLectivas?.filter(
+          (act: { dia?: string; bloque?: string }) => act.dia === dia && act.bloque === bloque,
+        ) ?? [];
+
         for (const asig of cellAsignaciones) {
           const cell = this.buildCellData(asig, nameMaps);
           const cicloColor = CICLO_RGB[cell.ciclo] ?? { r: 0.97, g: 0.97, b: 0.97 };
@@ -235,6 +253,38 @@ export class GenerateDocentePdfUseCase {
             size: 5.5,
             font,
             color: rgb(0.3, 0.3, 0.3),
+          });
+        }
+
+        for (const act of cellActividades) {
+          const offset = cellAsignaciones.length * 20;
+          const yOffset = rowY - 12 - offset;
+
+          if (yOffset < rowY - rowHeight + 5) continue;
+
+          page.drawRectangle({
+            x: cellX + 1,
+            y: yOffset - 12,
+            width: dayColWidth - 2,
+            height: 14,
+            color: rgb(1.0, 0.96, 0.93),
+          });
+
+          const truncatedTipo = this.truncate(act.tipo, 18);
+          page.drawText(truncatedTipo, {
+            x: cellX + 3,
+            y: yOffset - 8,
+            size: 5.5,
+            font: fontBold,
+            color: rgb(0.8, 0.4, 0.1),
+          });
+
+          page.drawText(`${act.horas}h · No lectiva`, {
+            x: cellX + 3,
+            y: yOffset - 14,
+            size: 5,
+            font,
+            color: rgb(0.6, 0.3, 0.1),
           });
         }
       }

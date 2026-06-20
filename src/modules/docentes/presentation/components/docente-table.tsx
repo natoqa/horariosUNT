@@ -35,7 +35,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const isDirector = user?.role === 'director';
+  const isDirector = user?.role === 'director' || user?.role === 'secretaria';
 
   const loadDocentes = useCallback(async () => {
     setLoading(true);

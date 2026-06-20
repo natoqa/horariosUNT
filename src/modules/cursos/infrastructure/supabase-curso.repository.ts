@@ -15,6 +15,7 @@ interface CursoRow {
   requiere_laboratorio: boolean;
   tipo_laboratorio: string | null;
   estado: string;
+  plan_estudio_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +69,9 @@ export class SupabaseCursoRepository implements ICursoRepository {
     if (filters?.estado) {
       query = query.eq('estado', filters.estado);
     }
+    if (filters?.planEstudioId) {
+      query = query.eq('plan_estudio_id', filters.planEstudioId);
+    }
 
     // Ordenar de manera natural: primero por ciclo (I, II, III... pero como son strings, ordenamos de alguna forma o simplemente por ciclo y nombre)
     // El ciclo en DB es VARCHAR: 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
@@ -107,6 +111,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
         requiere_laboratorio: curso.requiereLaboratorio,
         tipo_laboratorio: curso.tipoLaboratorio,
         estado: curso.estado,
+        plan_estudio_id: curso.planEstudioId,
       })
       .select()
       .single();
@@ -133,6 +138,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
     if (updateData.requiereLaboratorio !== undefined) dbData.requiere_laboratorio = updateData.requiereLaboratorio;
     if (updateData.tipoLaboratorio !== undefined) dbData.tipo_laboratorio = updateData.tipoLaboratorio;
     if (updateData.estado !== undefined) dbData.estado = updateData.estado;
+    if (updateData.planEstudioId !== undefined) dbData.plan_estudio_id = updateData.planEstudioId;
 
     const { data, error } = await supabase
       .from('cursos')
@@ -219,6 +225,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
       requiereLaboratorio: row.requiere_laboratorio,
       tipoLaboratorio: row.tipo_laboratorio,
       estado: row.estado as Curso['estado'],
+      planEstudioId: row.plan_estudio_id,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

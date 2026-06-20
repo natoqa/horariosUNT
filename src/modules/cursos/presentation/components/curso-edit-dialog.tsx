@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Curso } from '../../domain/entities/curso.entity';
 import { updateCursoAction } from '../actions/update-curso.action';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { X } from 'lucide-react';
+import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
+import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
 
 interface CursoEditDialogProps {
   curso: Curso;
@@ -19,6 +21,17 @@ export function CursoEditDialog({ curso, onClose, onSuccess }: CursoEditDialogPr
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [requiereLab, setRequiereLab] = useState(curso.requiereLaboratorio);
+  const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
+
+  useEffect(() => {
+    const loadPlanesEstudio = async () => {
+      const result = await getPlanesEstudioAction();
+      if (result.data) {
+        setPlanesEstudio(result.data);
+      }
+    };
+    loadPlanesEstudio();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,6 +76,25 @@ export function CursoEditDialog({ curso, onClose, onSuccess }: CursoEditDialogPr
             <Input name="nombre" defaultValue={curso.nombre} className="h-10" />
             {fieldErrors.nombre && (
               <p className="text-xs text-destructive">{fieldErrors.nombre[0]}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">Plan de Estudios</Label>
+            <select
+              name="planEstudioId"
+              defaultValue={curso.planEstudioId || ''}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="">Sin plan de estudios</option>
+              {planesEstudio.map((plan) => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.nombre} ({plan.anio})
+                </option>
+              ))}
+            </select>
+            {fieldErrors.planEstudioId && (
+              <p className="text-xs text-destructive">{fieldErrors.planEstudioId[0]}</p>
             )}
           </div>
 

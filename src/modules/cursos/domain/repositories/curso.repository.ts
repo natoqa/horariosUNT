@@ -7,6 +7,7 @@ export interface CursoFilters {
   tipoCiclo?: 'Impar' | 'Par';
   tipo?: string;
   estado?: string;
+  planEstudioId?: string;
 }
 
 export interface ICursoRepository {

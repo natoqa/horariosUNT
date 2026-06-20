@@ -34,6 +34,12 @@ export const updateCursoSchema = z.object({
     .nullable()
     .or(z.literal('')),
   estado: z.enum(['Activo', 'Inactivo']),
+  planEstudioId: z
+    .string()
+    .uuid('ID de plan de estudios inválido')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
 }).refine(
   (data) => {
     if (data.requiereLaboratorio && !data.tipoLaboratorio) {

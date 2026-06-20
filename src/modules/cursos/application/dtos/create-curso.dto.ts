@@ -38,6 +38,12 @@ export const createCursoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal('')),
+  planEstudioId: z
+    .string()
+    .uuid('ID de plan de estudios inválido')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
 }).refine(
   (data) => {
     if (data.requiereLaboratorio && !data.tipoLaboratorio) {

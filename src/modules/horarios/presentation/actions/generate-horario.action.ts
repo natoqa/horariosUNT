@@ -23,6 +23,7 @@ export interface GenerateHorarioActionResult {
 
 export async function generateHorarioAction(
   periodoId: string,
+  planEstudioId?: string,
 ): Promise<GenerateHorarioActionResult> {
   console.log('[SERVER ACTION] generateHorarioAction called with periodoId:', periodoId);
   const supabase = await createClient();
@@ -51,10 +52,15 @@ export async function generateHorarioAction(
     const tipoCiclo = periodo?.tipo_ciclo || 'Impar';
     const ciclosPermitidos = getCiclosByTipo(tipoCiclo);
 
+    let cursosQuery = supabase.from('cursos').select('*');
+    if (planEstudioId) {
+      cursosQuery = cursosQuery.eq('plan_estudio_id', planEstudioId);
+    }
+
     const [docentesRes, cursosRes, gruposRes, aulasRes, restriccionesRes, disponibilidadRes] =
       await Promise.all([
         supabase.from('docentes').select('*'),
-        supabase.from('cursos').select('*'),
+        cursosQuery,
         supabase.from('grupos').select('*').eq('periodo_id', periodoId),
         supabase.from('aulas').select('*'),
         supabase.from('aula_restricciones').select('*'),
@@ -128,6 +134,7 @@ export async function generateHorarioAction(
         tipo: c.tipo, horasTeoricas: c.horas_teoricas, horasPracticas: c.horas_practicas,
         creditos: c.creditos, requiereLaboratorio: c.requiere_laboratorio,
         tipoLaboratorio: c.tipo_laboratorio, estado: c.estado,
+        planEstudioId: c.plan_estudio_id,
         createdAt: c.created_at, updatedAt: c.updated_at,
       }));
 

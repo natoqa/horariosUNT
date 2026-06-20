@@ -10,6 +10,7 @@ export interface Curso {
   requiereLaboratorio: boolean;
   tipoLaboratorio: string | null;
   estado: 'Activo' | 'Inactivo';
+  planEstudioId: string | null;
   createdAt: string;
   updatedAt: string;
 }

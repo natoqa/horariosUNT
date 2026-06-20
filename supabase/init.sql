@@ -260,6 +260,87 @@ CREATE POLICY "Director puede eliminar cursos"
   );
 
 -- =============================================
+-- TABLA: planes_estudio
+-- Módulo: planes de estudio (Stefano)
+-- =============================================
+CREATE TABLE public.planes_estudio (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre TEXT NOT NULL,
+  anio INTEGER NOT NULL,
+  pdf_url TEXT,
+  estado TEXT NOT NULL DEFAULT 'Activo' CHECK (estado IN ('Activo', 'Inactivo')),
+  fecha_publicacion DATE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_updated_at_planes_estudio
+  BEFORE UPDATE ON public.planes_estudio
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+-- Comentarios
+COMMENT ON TABLE planes_estudio IS 'Planes de estudio de la escuela (ej: 2018, 2022)';
+COMMENT ON COLUMN planes_estudio.nombre IS 'Nombre del plan de estudios (ej: "Plan de Estudios 2018")';
+COMMENT ON COLUMN planes_estudio.anio IS 'Año del plan de estudios';
+COMMENT ON COLUMN planes_estudio.pdf_url IS 'URL del PDF del plan de estudios';
+COMMENT ON COLUMN planes_estudio.estado IS 'Estado del plan (Activo/Inactivo)';
+COMMENT ON COLUMN planes_estudio.fecha_publicacion IS 'Fecha de publicación del plan';
+
+-- Agregar columna plan_estudio_id a cursos
+ALTER TABLE cursos 
+ADD COLUMN plan_estudio_id UUID REFERENCES public.planes_estudio(id);
+
+COMMENT ON COLUMN cursos.plan_estudio_id IS 'ID del plan de estudios al que pertenece el curso';
+
+-- Crear índices
+CREATE INDEX idx_planes_estudio_anio ON public.planes_estudio(anio);
+CREATE INDEX idx_cursos_plan_estudio ON public.cursos(plan_estudio_id);
+
+ALTER TABLE public.planes_estudio ENABLE ROW LEVEL SECURITY;
+
+-- Política para que todos puedan ver planes activos
+CREATE POLICY "Todos pueden ver planes activos"
+ON public.planes_estudio FOR SELECT
+TO public
+USING (estado = 'Activo');
+
+-- Política para que director y secretaria puedan ver todos los planes
+CREATE POLICY "Director y secretaria pueden ver todos los planes"
+ON public.planes_estudio FOR SELECT
+TO public
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['director'::text, 'secretaria'::text])
+);
+
+-- Política para que director pueda insertar planes
+CREATE POLICY "Director puede insertar planes"
+ON public.planes_estudio FOR INSERT
+TO public
+WITH CHECK (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
+);
+
+-- Política para que director pueda actualizar planes
+CREATE POLICY "Director puede actualizar planes"
+ON public.planes_estudio FOR UPDATE
+TO public
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
+)
+WITH CHECK (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
+);
+
+-- Política para que director pueda eliminar planes
+CREATE POLICY "Director puede eliminar planes"
+ON public.planes_estudio FOR DELETE
+TO public
+USING (
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
+);
+
+-- =============================================
 -- TABLA: periodos
 -- Módulo: periodos (Andy)
 -- =============================================

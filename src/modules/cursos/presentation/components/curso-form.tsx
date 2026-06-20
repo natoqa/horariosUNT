@@ -5,6 +5,8 @@ import { createCursoAction, CursoActionState } from '../actions/create-curso.act
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
+import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
+import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
 
 interface CursoFormProps {
   onSuccess?: () => void;
@@ -20,6 +22,7 @@ export function CursoForm({ onSuccess }: CursoFormProps) {
   const [tipoCurso, setTipoCurso] = useState('');
   const [horasTeoricas, setHorasTeoricas] = useState('');
   const [horasPracticas, setHorasPracticas] = useState('');
+  const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -35,6 +38,16 @@ export function CursoForm({ onSuccess }: CursoFormProps) {
       return () => clearTimeout(timer);
     }
   }, [state, onSuccess]);
+
+  useEffect(() => {
+    const loadPlanesEstudio = async () => {
+      const result = await getPlanesEstudioAction();
+      if (result.data) {
+        setPlanesEstudio(result.data);
+      }
+    };
+    loadPlanesEstudio();
+  }, []);
 
   const handleTipoChange = (value: string) => {
     setTipoCurso(value);
@@ -77,6 +90,23 @@ export function CursoForm({ onSuccess }: CursoFormProps) {
             <p className="text-xs text-destructive">{state.errors.nombre[0]}</p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground">Plan de Estudios</Label>
+        <select
+          name="planEstudioId"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          defaultValue=""
+        >
+          <option value="" disabled>Seleccionar...</option>
+          {planesEstudio.map((plan) => (
+            <option key={plan.id} value={plan.id}>
+              {plan.nombre} ({plan.anio})
+            </option>
+          ))}
+        </select>
+        <p className="text-[10px] text-muted-foreground">Seleccione el plan de estudios al que pertenece este curso</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

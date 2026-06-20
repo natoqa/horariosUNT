@@ -67,11 +67,11 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         },
         {
           title: 'Periodos',
-          href: '/director/periodos',
+          href: `/${role}/periodos`,
           icon: CalendarDays,
-          roles: ['director'],
+          roles: ['director', 'secretaria'],
           children: [
-            { title: 'Todos los periodos', href: '/director/periodos', roles: ['director'] },
+            { title: 'Todos los periodos', href: `/${role}/periodos`, roles: ['director', 'secretaria'] },
           ],
         },
         {
@@ -88,6 +88,12 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           title: 'Cursos',
           href: `/${role}/cursos`,
           icon: BookOpen,
+          roles: ['director', 'secretaria'],
+        },
+        {
+          title: 'Planes de Estudio',
+          href: `/${role}/planes-estudio`,
+          icon: FileText,
           roles: ['director', 'secretaria'],
         },
         {
@@ -146,7 +152,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           title: 'Configuracion',
           href: `/${role}/configuracion`,
           icon: Settings,
-          roles: ['director'],
+          roles: ['director', 'secretaria'],
         },
       ],
     },

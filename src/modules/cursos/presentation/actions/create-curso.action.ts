@@ -38,6 +38,7 @@ export async function createCursoAction(
     creditos: formData.get('creditos') as string,
     requiereLaboratorio: formData.get('requiereLaboratorio') as string,
     tipoLaboratorio: formData.get('tipoLaboratorio') as string,
+    planEstudioId: formData.get('planEstudioId') as string,
   };
 
   const validated = createCursoSchema.safeParse(raw);

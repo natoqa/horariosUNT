@@ -8,6 +8,8 @@ import { GrupoManager } from './grupo-manager';
 import { Input } from '@/shared/components/ui/input';
 import { BookOpen, Pencil, Search, Layers } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
+import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
+import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
 
 export interface CursoTableRef {
   refresh: () => void;
@@ -36,6 +38,8 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const [filterCiclo, setFilterCiclo] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+  const [filterPlanEstudio, setFilterPlanEstudio] = useState('');
+  const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
   const [editingCurso, setEditingCurso] = useState<Curso | null>(null);
   const [managingGrupos, setManagingGrupos] = useState<Curso | null>(null);
 
@@ -50,6 +54,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       ciclo: filterCiclo || undefined,
       tipo: filterTipo || undefined,
       estado: filterEstado || undefined,
+      planEstudioId: filterPlanEstudio || undefined,
     });
     if (result.data) {
       setCursos(result.data);
@@ -57,7 +62,14 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       setError(result.message || 'Error al cargar cursos.');
     }
     setLoading(false);
-  }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado]);
+  }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado, filterPlanEstudio]);
+
+  const loadPlanesEstudio = useCallback(async () => {
+    const result = await getPlanesEstudioAction();
+    if (result.data) {
+      setPlanesEstudio(result.data);
+    }
+  }, []);
 
   useImperativeHandle(ref, () => ({ refresh: loadCursos }));
 
@@ -67,6 +79,10 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
     }, 0);
     return () => clearTimeout(timer);
   }, [loadCursos]);
+
+  useEffect(() => {
+    loadPlanesEstudio();
+  }, [loadPlanesEstudio]);
 
   return (
     <>
@@ -126,6 +142,18 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
           <option value="">Todos los estados</option>
           <option value="Activo">Activo</option>
           <option value="Inactivo">Inactivo</option>
+        </select>
+        <select
+          value={filterPlanEstudio}
+          onChange={(e) => setFilterPlanEstudio(e.target.value)}
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="">Todos los planes</option>
+          {planesEstudio.map((plan) => (
+            <option key={plan.id} value={plan.id}>
+              {plan.nombre} ({plan.anio})
+            </option>
+          ))}
         </select>
       </div>
 

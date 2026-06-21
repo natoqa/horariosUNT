@@ -21,7 +21,7 @@ interface AsignacionRow {
   aula_id: string;
   dia: string;
   bloque: string;
-  tipo: string;
+  tipo_sesion: string;
   created_at: string;
 }
 
@@ -86,6 +86,11 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
   ): Promise<Asignacion[]> {
     const supabase = await createClient();
 
+    const TIPO_MAP: Record<string, string> = {
+      'teorico': 'Teórica',
+      'practico': 'Práctica',
+    };
+
     const rows = asignaciones.map((a) => ({
       horario_id: horarioId,
       grupo_id: a.grupoId,
@@ -93,7 +98,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       aula_id: a.aulaId,
       dia: a.dia,
       bloque: a.bloque,
-      tipo: a.tipo,
+      tipo_sesion: TIPO_MAP[a.tipo] ?? 'Teórica',
     }));
 
     const { data, error } = await supabase
@@ -211,6 +216,8 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
   }
 
   private mapToAsignacion(row: AsignacionRow): Asignacion {
+    const raw = (row.tipo_sesion ?? '').toLowerCase();
+    const tipo: Asignacion['tipo'] = raw.startsWith('pr') ? 'practico' : 'teorico';
     return {
       id: row.id,
       horarioId: row.horario_id,
@@ -219,7 +226,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       aulaId: row.aula_id,
       dia: row.dia as Asignacion['dia'],
       bloque: row.bloque as Asignacion['bloque'],
-      tipo: row.tipo as Asignacion['tipo'],
+      tipo,
       createdAt: row.created_at,
     };
   }

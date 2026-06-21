@@ -186,6 +186,16 @@ export async function generateHorarioAction(
       return { message: 'No hay aulas activas. Active al menos un aula para generar horarios.' };
     }
 
+    console.log('[GEN] Data loaded:', {
+      docentes: docentes.length,
+      cursos: cursos.length,
+      grupos: grupos.length,
+      aulas: aulas.length,
+      disponibilidades: disponibilidades.length,
+      gruposConDocente: grupos.filter((g) => g.docenteId).length,
+      disponibilidadEstados: [...new Set(disponibilidades.map((d) => d.estado))],
+    });
+
     const repo = new SupabaseHorarioRepository();
     const useCase = new GenerateHorarioUseCase(repo);
 

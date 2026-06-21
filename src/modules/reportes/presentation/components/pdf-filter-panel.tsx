@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Label } from '@/shared/components/ui/label';
 import { REPORT_FILTER_TYPES, ReportFilterType, CICLOS } from '../../domain/entities/report-config.entity';
+import { CICLOS_IMPAR, CICLOS_PAR } from '@/modules/periodos/domain/entities/periodo.entity';
 import { createClient } from '@/shared/lib/supabase/client';
 
 interface SelectOption {
@@ -20,6 +21,7 @@ const FILTER_LABELS: Record<ReportFilterType, string> = {
 interface PdfFilterPanelProps {
   filterType: ReportFilterType;
   filterId: string;
+  tipoCiclo?: string;
   onFilterTypeChange: (type: ReportFilterType) => void;
   onFilterIdChange: (id: string) => void;
 }
@@ -27,6 +29,7 @@ interface PdfFilterPanelProps {
 export function PdfFilterPanel({
   filterType,
   filterId,
+  tipoCiclo,
   onFilterTypeChange,
   onFilterIdChange,
 }: PdfFilterPanelProps) {
@@ -103,7 +106,7 @@ export function PdfFilterPanel({
         <div className="space-y-2">
           <Label className="text-xs font-medium text-muted-foreground">Ciclo</Label>
           <div className="flex flex-wrap gap-2">
-            {CICLOS.map((c) => (
+            {(tipoCiclo === 'Impar' ? CICLOS_IMPAR : tipoCiclo === 'Par' ? CICLOS_PAR : CICLOS).map((c) => (
               <button
                 key={c}
                 type="button"

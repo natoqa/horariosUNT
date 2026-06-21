@@ -59,16 +59,17 @@ export function validateHardConstraints(
     });
   }
 
-  // RN-010: Capacidad aula >= estudiantes
-  if (candidate.aulaCapacidad < candidate.numEstudiantes) {
+  // RN-010: Capacidad aula >= estudiantes (skip for lab practice — students split into sub-groups)
+  const isLabPractice = candidate.requiereLaboratorio && candidate.tipo === 'practico';
+  if (candidate.aulaCapacidad < candidate.numEstudiantes && !isLabPractice) {
     violations.push({
       rule: 'RN-010',
       message: `Aula capacidad ${candidate.aulaCapacidad} < ${candidate.numEstudiantes} estudiantes`,
     });
   }
 
-  // RN-011/012: Tipo aula compatible
-  if (candidate.requiereLaboratorio && candidate.aulaType === 'Aula Teórica') {
+  // RN-011/012: Tipo aula compatible (only for practice sessions)
+  if (candidate.requiereLaboratorio && candidate.tipo === 'practico' && candidate.aulaType === 'Aula Teórica') {
     violations.push({
       rule: 'RN-011',
       message: 'Curso requiere laboratorio pero aula es teórica',

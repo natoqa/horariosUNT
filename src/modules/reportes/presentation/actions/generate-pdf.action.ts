@@ -65,7 +65,7 @@ export async function generatePdfAction(
 
   const { data: rawAsignaciones } = await supabase
     .from('asignaciones')
-    .select('id, grupo_id, docente_id, aula_id, dia, bloque, tipo')
+    .select('id, grupo_id, docente_id, aula_id, dia, bloque, tipo_sesion')
     .eq('horario_id', horario.id);
 
   if (!rawAsignaciones || rawAsignaciones.length === 0) {
@@ -73,35 +73,43 @@ export async function generatePdfAction(
   }
 
   const [docentesRes, cursosRes, aulasRes, gruposRes] = await Promise.all([
-    supabase.from('docentes').select('id, nombres, apellidos'),
-    supabase.from('cursos').select('id, nombre, ciclo'),
+    supabase.from('docentes').select('id, nombres, apellidos, escuela'),
+    supabase.from('cursos').select('id, nombre, ciclo, creditos, horas_teoricas, horas_practicas'),
     supabase.from('aulas').select('id, nombre, codigo'),
     supabase.from('grupos').select('id, curso_id, nombre'),
   ]);
 
-  const docenteNames: Record<string, string> = {};
-  (docentesRes.data ?? []).forEach((d) => docenteNames[d.id] = `${d.apellidos}, ${d.nombres}`);
+  const docenteNames = new Map<string, string>();
+  const docenteEscuelas = new Map<string, string>();
+  (docentesRes.data ?? []).forEach((d) => {
+    docenteNames.set(d.id, `${d.apellidos}, ${d.nombres}`);
+    docenteEscuelas.set(d.id, d.escuela ?? '');
+  });
 
   const cursoIdToName: Record<string, string> = {};
   const cursoIdToCiclo: Record<string, string> = {};
+  const cursoCreditos = new Map<string, number>();
+  const cursoHoras = new Map<string, number>();
   (cursosRes.data ?? []).forEach((c) => {
     cursoIdToName[c.id] = c.nombre;
     cursoIdToCiclo[c.id] = c.ciclo;
+    cursoCreditos.set(c.id, c.creditos ?? 0);
+    cursoHoras.set(c.id, (c.horas_teoricas ?? 0) + (c.horas_practicas ?? 0));
   });
 
-  const cursoNames: Record<string, string> = {};
-  const grupoCiclos: Record<string, string> = {};
-  const grupoCursoId: Record<string, string> = {};
+  const cursoNames = new Map<string, string>();
+  const grupoCiclos = new Map<string, string>();
+  const grupoCursoId = new Map<string, string>();
   (gruposRes.data ?? []).forEach((g) => {
     const cursoNombre = cursoIdToName[g.curso_id];
-    cursoNames[g.id] = cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre;
+    cursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
     const ciclo = cursoIdToCiclo[g.curso_id];
-    if (ciclo) grupoCiclos[g.id] = ciclo;
-    grupoCursoId[g.id] = g.curso_id;
+    if (ciclo) grupoCiclos.set(g.id, ciclo);
+    grupoCursoId.set(g.id, g.curso_id);
   });
 
-  const aulaNames: Record<string, string> = {};
-  (aulasRes.data ?? []).forEach((a) => aulaNames[a.id] = `${a.codigo} - ${a.nombre}`);
+  const aulaNames = new Map<string, string>();
+  (aulasRes.data ?? []).forEach((a) => aulaNames.set(a.id, `${a.codigo} - ${a.nombre}`));
 
   let asignaciones: PdfAsignacion[] = rawAsignaciones.map((a) => ({
     grupoId: a.grupo_id,
@@ -109,20 +117,20 @@ export async function generatePdfAction(
     aulaId: a.aula_id,
     dia: a.dia,
     bloque: a.bloque,
-    tipo: a.tipo,
+    tipo: a.tipo_sesion,
   }));
 
   let filterLabel = 'Horario completo';
 
   if (filterType === 'ciclo' && filterId) {
-    asignaciones = asignaciones.filter((a) => grupoCiclos[a.grupoId] === filterId);
+    asignaciones = asignaciones.filter((a) => grupoCiclos.get(a.grupoId) === filterId);
     filterLabel = `Ciclo ${filterId}`;
   } else if (filterType === 'docente' && filterId) {
     asignaciones = asignaciones.filter((a) => a.docenteId === filterId);
-    filterLabel = `Docente: ${docenteNames[filterId] ?? filterId}`;
+    filterLabel = `Docente: ${docenteNames.get(filterId) ?? filterId}`;
   } else if (filterType === 'aula' && filterId) {
     asignaciones = asignaciones.filter((a) => a.aulaId === filterId);
-    filterLabel = `Aula: ${aulaNames[filterId] ?? filterId}`;
+    filterLabel = `Aula: ${aulaNames.get(filterId) ?? filterId}`;
   }
 
   if (asignaciones.length === 0) {
@@ -130,10 +138,14 @@ export async function generatePdfAction(
   }
 
   const nameMaps: PdfNameMaps = {
-    docentes: new Map(Object.entries(docenteNames)),
-    cursos: new Map(Object.entries(cursoNames)),
-    aulas: new Map(Object.entries(aulaNames)),
-    grupoCiclos: new Map(Object.entries(grupoCiclos)),
+    docentes: docenteNames,
+    cursos: cursoNames,
+    aulas: aulaNames,
+    grupoCiclos,
+    docenteEscuelas,
+    cursoCreditos,
+    cursoHoras,
+    grupoCursoId,
   };
 
   const config: ReportConfig = {

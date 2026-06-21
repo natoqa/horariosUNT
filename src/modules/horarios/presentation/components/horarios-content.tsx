@@ -44,6 +44,7 @@ export function HorariosContent() {
   const [cursoNames, setCursoNames] = useState<Map<string, string>>(new Map());
   const [aulaNames, setAulaNames] = useState<Map<string, string>>(new Map());
   const [grupoCiclos, setGrupoCiclos] = useState<Map<string, string>>(new Map());
+  const [grupoCursoIds, setGrupoCursoIds] = useState<Map<string, string>>(new Map());
 
   const loadData = useCallback(async () => {
     setState('loading');
@@ -104,17 +105,20 @@ export function HorariosContent() {
       cursoIdToCiclo.set(c.id, c.ciclo);
     });
 
-    // Map grupo ID to curso name and ciclo
+    // Map grupo ID to curso name, ciclo, and cursoId
     const gCursoNames = new Map<string, string>();
     const gCiclos = new Map<string, string>();
+    const gCursoIds = new Map<string, string>();
     (gruposRes.data ?? []).forEach((g) => {
       const cursoNombre = cNames.get(g.curso_id);
       gCursoNames.set(g.id, cursoNombre ? `${cursoNombre} (${g.nombre})` : g.nombre);
+      gCursoIds.set(g.id, g.curso_id);
       const ciclo = cursoIdToCiclo.get(g.curso_id);
       if (ciclo) gCiclos.set(g.id, ciclo);
     });
     setCursoNames(gCursoNames);
     setGrupoCiclos(gCiclos);
+    setGrupoCursoIds(gCursoIds);
 
     const aNames = new Map<string, string>();
     (aulasRes.data ?? []).forEach((a) => aNames.set(a.id, `${a.codigo} - ${a.nombre}`));
@@ -290,6 +294,8 @@ export function HorariosContent() {
             cursoNames={cursoNames}
             aulaNames={aulaNames}
             grupoCiclos={grupoCiclos}
+            grupoCursoIds={grupoCursoIds}
+            tipoCiclo={periodo?.tipoCiclo}
             editable={
               (periodo?.state === 'Generación' && horario?.estado === 'Borrador') ||
               (periodo?.state === 'Publicado' && horario?.estado === 'Publicado' && (user?.role === 'director' || user?.role === 'secretaria'))

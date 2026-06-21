@@ -7,6 +7,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { AlertCircle, Clock, Users, MapPin } from 'lucide-react';
 import { DIAS_SEMANA, BLOQUES_HORARIOS, type DiaSemana, type BloqueHorario } from '@/shared/constants/time-blocks';
 import { getAsignacionesPorCicloAction } from '../actions/get-asignaciones-por-ciclo.action';
+import { getActivePeriodoAction } from '@/modules/disponibilidad/presentation/actions/get-periodo-estado.action';
 import { toast } from 'sonner';
 
 interface Asignacion {
@@ -26,9 +27,20 @@ const CICLOS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export function HorarioPorCiclo() {
   const [selectedCiclo, setSelectedCiclo] = useState<number>(1);
+  const [tipoCiclo, setTipoCiclo] = useState<string>('Impar');
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [conflictos, setConflictos] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    getActivePeriodoAction().then(res => {
+      if (res.data?.tipoCiclo) {
+        const isImpar = res.data.tipoCiclo === 'Impar';
+        setTipoCiclo(res.data.tipoCiclo);
+        setSelectedCiclo(isImpar ? 1 : 2);
+      }
+    });
+  }, []);
 
   const fetchAsignaciones = async (ciclo: number) => {
     setLoading(true);
@@ -121,7 +133,7 @@ export function HorarioPorCiclo() {
             <SelectValue placeholder="Seleccionar ciclo" />
           </SelectTrigger>
           <SelectContent>
-            {CICLOS.map((ciclo) => (
+            {CICLOS.filter(c => tipoCiclo === 'Impar' ? c % 2 !== 0 : c % 2 === 0).map((ciclo) => (
               <SelectItem key={ciclo} value={ciclo.toString()}>
                 Ciclo {ciclo}
               </SelectItem>

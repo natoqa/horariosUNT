@@ -13,7 +13,26 @@
       "Bash(xargs -I {} basename {})",
       "PowerShell(npx shadcn@latest add dialog table select badge tabs alert --yes 2>&1)",
       "PowerShell(New-Item *)",
-      "PowerShell(npx tsc --noEmit 2>&1)"
+      "PowerShell(npx tsc --noEmit 2>&1)",
+      "Bash(pip install *)",
+      "PowerShell(pip install *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(& \"C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe\" -m pip install pdfplumber 2>&1 | Select-Object -Last 5)",
+      "PowerShell(& \"C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe\" C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\parse-horario.py)",
+      "PowerShell(& \"C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe\" C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\parse-horario-v2.py)",
+      "PowerShell(& 'C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe' 'C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\gen-seed-sql.py')",
+      "Bash(grep -E \"\\\\.\\(sql|ts|js\\)$\")",
+      "Bash(grep -E \"\\\\.\\(ts|sql\\)$\")",
+      "PowerShell(& 'C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe' 'C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\parse-cursos-docentes.py')",
+      "PowerShell(& 'C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe' 'C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\gen-cursos-docentes-sql.py')",
+      "PowerShell(& 'C:\\\\Users\\\\User\\\\python-sdk\\\\python3.13.2\\\\python.exe' 'C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\scripts\\\\gen-cursos-docentes-sql.py' 2>&1 | Out-String)",
+      "Bash(Get-ChildItem -Recurse -Path \"C:\\\\Users\\\\User\\\\Desktop\\\\horarios_unt\\\\src\\\\app\\\\director\" -Filter \"*.tsx\")",
+      "Bash(xargs wc -l)",
+      "Bash(grep -E \"\\\\.\\(sql|ts\\)$\")",
+      "PowerShell(npx tsc --noEmit --pretty 2>&1 | Select-Object -First 30)",
+      "PowerShell(npx tsc --noEmit --pretty 2>&1 | Select-Object -First 40)",
+      "PowerShell(npx tsc --noEmit --pretty 2>&1 | Select-Object -First 20)",
+      "PowerShell(Get-Process *)"
     ]
   }
 }

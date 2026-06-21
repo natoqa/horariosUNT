@@ -1,6 +1,6 @@
 import { createClient } from '@/shared/lib/supabase/server';
-import { INotificacionRepository } from '../../domain/repositories/notificacion.repository';
-import { Notificacion } from '../../domain/entities/notificacion.entity';
+import { INotificacionRepository } from '../domain/repositories/notificacion.repository';
+import { Notificacion } from '../domain/entities/notificacion.entity';
 
 export class SupabaseNotificacionRepository implements INotificacionRepository {
   async findAll(): Promise<Notificacion[]> {

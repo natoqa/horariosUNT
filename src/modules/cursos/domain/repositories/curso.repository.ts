@@ -7,6 +7,7 @@ export interface CursoFilters {
   tipoCiclo?: 'Impar' | 'Par';
   tipo?: string;
   estado?: string;
+  planEstudioId?: string;
 }
 
 export interface ICursoRepository {
@@ -14,7 +15,9 @@ export interface ICursoRepository {
   findAll(filters?: CursoFilters): Promise<Curso[]>;
   findByCodigo(codigo: string): Promise<Curso | null>;
   save(curso: Omit<Curso, 'id' | 'createdAt' | 'updatedAt'>): Promise<Curso>;
+  saveBatch(cursos: Omit<Curso, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<Curso[]>;
   update(id: string, data: Partial<Omit<Curso, 'id' | 'codigo' | 'createdAt' | 'updatedAt'>>): Promise<Curso>;
+  delete(id: string): Promise<void>;
   
   // Grupos
   findGruposByPeriodo(periodoId: string): Promise<Grupo[]>;

@@ -34,6 +34,7 @@ export async function updateCursoAction(
     requiereLaboratorio: formData.get('requiereLaboratorio') as string,
     tipoLaboratorio: formData.get('tipoLaboratorio') as string,
     estado: formData.get('estado') as string,
+    planEstudioId: formData.get('planEstudioId') as string,
   };
 
   const validated = updateCursoSchema.safeParse(raw);

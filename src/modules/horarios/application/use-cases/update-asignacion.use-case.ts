@@ -45,6 +45,22 @@ export class UpdateAsignacionUseCase {
     const newDia = validated.dia ?? current.dia;
     const newBloque = validated.bloque ?? current.bloque;
 
+    // Skip validation if day or block is "Pendiente"
+    if (newDia === 'Pendiente' || newBloque === 'Pendiente') {
+      const updateData: Partial<Pick<Asignacion, 'docenteId' | 'aulaId' | 'dia' | 'bloque'>> = {};
+      if (validated.docenteId) updateData.docenteId = validated.docenteId;
+      if (validated.aulaId) updateData.aulaId = validated.aulaId;
+      if (validated.dia) updateData.dia = validated.dia;
+      if (validated.bloque) updateData.bloque = validated.bloque;
+
+      const updated = await this.horarioRepository.updateAsignacion(
+        validated.asignacionId,
+        updateData,
+      );
+
+      return { success: true, asignacion: updated };
+    }
+
     const context = await contextLookup(validated.asignacionId, validated.aulaId);
     if (!context) {
       return { success: false, message: 'No se pudo obtener el contexto de la asignación.' };
@@ -54,8 +70,8 @@ export class UpdateAsignacionUseCase {
       grupoId: context.grupoId,
       docenteId: newDocenteId,
       aulaId: newAulaId,
-      dia: newDia,
-      bloque: newBloque,
+      dia: newDia as any, // Safe since we checked for 'Pendiente'
+      bloque: newBloque as any, // Safe since we checked for 'Pendiente'
       tipo: current.tipo,
       ciclo: context.ciclo,
       aulaCapacidad: context.aulaCapacidad,
@@ -64,15 +80,15 @@ export class UpdateAsignacionUseCase {
       requiereLaboratorio: context.requiereLaboratorio,
     };
 
-    const otherAsignaciones = allAsignaciones.filter((a) => a.id !== current.id);
+    const otherAsignaciones = allAsignaciones.filter((a) => a.id !== current.id && a.dia !== 'Pendiente' && a.bloque !== 'Pendiente');
     const existing: PartialAssignment[] = otherAsignaciones.map((a) => {
       const ctx = allContexts.get(a.id);
       return {
         grupoId: a.grupoId,
         docenteId: a.docenteId,
         aulaId: a.aulaId,
-        dia: a.dia,
-        bloque: a.bloque,
+        dia: a.dia as any,
+        bloque: a.bloque as any,
         tipo: a.tipo,
         ciclo: ctx?.ciclo ?? '',
         aulaCapacidad: ctx?.aulaCapacidad ?? 0,

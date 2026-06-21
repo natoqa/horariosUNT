@@ -349,7 +349,7 @@ export class GenerateHorarioPdfUseCase {
     ];
     const rowHeight = 24;
     let yPos = 0;
-    let page: PDFPage;
+    let page: PDFPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
     const addNewPage = () => {
       page = pdfDoc.addPage([pageWidth, pageHeight]);

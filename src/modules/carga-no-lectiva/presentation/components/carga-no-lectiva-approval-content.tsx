@@ -12,6 +12,7 @@ import { UserRole } from '@/shared/types/roles';
 
 interface CargaRow {
   id: string;
+  docenteId?: string;
   docenteNombre: string;
   docenteEmail?: string;
   totalHoras: number;
@@ -25,6 +26,7 @@ interface CargaRow {
   cargaElectiva?: number;
   horasDisponiblesNoLectivas?: number;
   cursos?: Array<{ codigo: string; nombre: string; horas: number }>;
+  actividades?: Array<{ tipo: string; horas: number; detalles: string }>;
 }
 
 interface DocenteRow {
@@ -48,6 +50,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
   const [cargas, setCargas] = useState<CargaRow[]>([]);
   const [docentes, setDocentes] = useState<DocenteRow[]>([]);
   const [periodoId, setPeriodoId] = useState<string>('');
+  const [actividades, setActividades] = useState<Record<string, Array<{ tipo: string; horas: number; detalles: string }>>>({});
 
   const [approvalState, approvalAction, approving] = useActionState(approveCargaNoLectivaAction as any, undefined as any);
   const [assignState, assignAction, assigning] = useActionState(saveCargaLectivaAsignacionAction as any, undefined as any);
@@ -72,11 +75,15 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
           cargaElectiva: docente.cargaElectiva,
           cursos: docente.cursos,
           horasDisponiblesNoLectivas: Math.max(0, docente.cargaMaxima - docente.cargaElectiva),
+          actividades: actividades[docente.id] || [],
         };
       });
     }
-    return cargas;
-  }, [role, docentes, cargas]);
+    return cargas.map((carga) => ({
+      ...carga,
+      actividades: (carga.docenteId && actividades[carga.docenteId]) || [],
+    }));
+  }, [role, docentes, cargas, actividades]);
 
   const loadData = async () => {
     setLoading(true);
@@ -90,6 +97,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
         setCargas(result.data.cargas || []);
         setDocentes(result.data.docentes || []);
         setPeriodoId(result.data.periodoId ?? '');
+        setActividades(result.data.actividades || {});
       }
     } catch (error) {
       setErrorMessage('Error al cargar las cargas no lectivas.');
@@ -175,7 +183,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                   </div>
                 </div>
 
-                <div className="p-5 grid gap-6 md:grid-cols-2">
+                <div className="p-5 grid gap-6 md:grid-cols-3">
                   <div className="space-y-4">
                     <h4 className="text-sm font-semibold text-foreground">Carga Horaria</h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
@@ -211,6 +219,22 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">Sin cursos asignados</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-foreground">Actividades No Lectivas</h4>
+                    {row.actividades && row.actividades.length > 0 ? (
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {row.actividades.map((actividad: any, idx: number) => (
+                          <div key={idx} className="rounded-lg bg-purple-50 p-2 text-sm">
+                            <p className="font-medium text-foreground">{actividad.tipo}</p>
+                            <p className="text-xs text-muted-foreground">{actividad.horas} horas - {actividad.detalles}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Sin actividades no lectivas registradas</p>
                     )}
                   </div>
                 </div>

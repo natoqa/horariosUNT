@@ -17,6 +17,8 @@ import { HorarioApprovalPanel } from './horario-approval-panel';
 import { validateGenerationAction } from '../actions/validate-generation.action';
 import { generateHorarioAction } from '../actions/generate-horario.action';
 import { getHorarioAction } from '../actions/get-horario.action';
+import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
+import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
 
 type ContentState = 'loading' | 'error' | 'empty' | 'ready' | 'generating' | 'result';
 
@@ -32,6 +34,8 @@ export function HorariosContent() {
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [summary, setSummary] = useState<GenerationSummary | null>(null);
   const [unassigned, setUnassigned] = useState<UnassignedUnit[]>([]);
+  const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
+  const [selectedPlanEstudio, setSelectedPlanEstudio] = useState<string>('');
 
   const [editingAsignacion, setEditingAsignacion] = useState<Asignacion | null>(null);
 
@@ -74,6 +78,12 @@ export function HorariosContent() {
       updatedAt: periodoData.updated_at,
     };
     setPeriodo(currentPeriodo);
+
+    // Load planes de estudio
+    const planesResult = await getPlanesEstudioAction();
+    if (planesResult.data) {
+      setPlanesEstudio(planesResult.data);
+    }
 
     // Load name maps for the grid display
     const [docentesRes, cursosRes, aulasRes, gruposRes] = await Promise.all([
@@ -125,14 +135,14 @@ export function HorariosContent() {
 
     // Run pre-validation
     if (currentPeriodo.state === 'Generación') {
-      const validationResult = await validateGenerationAction(currentPeriodo.id);
+      const validationResult = await validateGenerationAction(currentPeriodo.id, false, selectedPlanEstudio || undefined);
       if (validationResult.data) {
         setPreCheck(validationResult.data);
       }
     }
 
     setState('ready');
-  }, []);
+  }, [selectedPlanEstudio]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -154,7 +164,7 @@ export function HorariosContent() {
       setGeneratingPhase((prev) => (prev < 9 ? prev + 1 : prev));
     }, 800);
 
-    const result = await generateHorarioAction(periodo.id);
+    const result = await generateHorarioAction(periodo.id, selectedPlanEstudio || undefined);
 
     clearInterval(interval);
     setGeneratingPhase(9);
@@ -202,7 +212,7 @@ export function HorariosContent() {
     );
   }
 
-  const canGenerate = periodo?.state === 'Generación' && preCheck?.valid === true && user?.role === 'director';
+  const canGenerate = periodo?.state === 'Generación' && preCheck?.valid === true && (user?.role === 'director' || user?.role === 'secretaria');
 
   return (
     <div className="space-y-6">
@@ -219,6 +229,24 @@ export function HorariosContent() {
             Regenerar
           </Button>
         )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <label className="text-xs font-medium text-muted-foreground">Plan de Estudios</label>
+          <select
+            value={selectedPlanEstudio}
+            onChange={(e) => setSelectedPlanEstudio(e.target.value)}
+            className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="">Todos los planes</option>
+            {planesEstudio.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.nombre} ({plan.anio})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {state === 'generating' && (
@@ -251,7 +279,7 @@ export function HorariosContent() {
             <GenerationSummaryPanel summary={summary} unassigned={unassigned} />
           )}
 
-          {horario && user?.role === 'director' && (
+          {horario && (user?.role === 'director' || user?.role === 'secretaria') && (
             <HorarioApprovalPanel
               horarioId={horario.id}
               horarioEstado={horario.estado}
@@ -270,7 +298,7 @@ export function HorariosContent() {
             tipoCiclo={periodo?.tipoCiclo}
             editable={
               (periodo?.state === 'Generación' && horario?.estado === 'Borrador') ||
-              (periodo?.state === 'Publicado' && horario?.estado === 'Publicado' && user?.role === 'director')
+              (periodo?.state === 'Publicado' && horario?.estado === 'Publicado' && (user?.role === 'director' || user?.role === 'secretaria'))
             }
             onSelectAsignacion={(a) => setEditingAsignacion(a)}
           />

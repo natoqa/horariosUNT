@@ -3,11 +3,15 @@
 import { useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Curso } from '../../domain/entities/curso.entity';
 import { getCursosAction } from '../actions/get-cursos.action';
+import { deleteCursoAction } from '../actions/delete-curso.action';
 import { CursoEditDialog } from './curso-edit-dialog';
 import { GrupoManager } from './grupo-manager';
 import { Input } from '@/shared/components/ui/input';
 import { BookOpen, Pencil, Search, Layers, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
+import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
+import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
+import { toast } from 'sonner';
 
 export interface CursoTableRef {
   refresh: () => void;
@@ -36,6 +40,8 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const [filterCiclo, setFilterCiclo] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+  const [filterPlanEstudio, setFilterPlanEstudio] = useState('');
+  const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
   const [editingCurso, setEditingCurso] = useState<Curso | null>(null);
   const [managingGrupos, setManagingGrupos] = useState<Curso | null>(null);
   const [expandedCiclos, setExpandedCiclos] = useState<Set<string>>(new Set());
@@ -73,6 +79,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
 
   const loadCursos = useCallback(async () => {
+    console.log('loadCursos() llamado');
     setLoading(true);
     setError(null);
     const result = await getCursosAction({
@@ -81,14 +88,42 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       ciclo: filterCiclo || undefined,
       tipo: filterTipo || undefined,
       estado: filterEstado || undefined,
+      planEstudioId: filterPlanEstudio || undefined,
     });
+    console.log('Resultado de getCursosAction:', result);
     if (result.data) {
+      console.log('Cursos recibidos:', result.data.length);
       setCursos(result.data);
     } else {
       setError(result.message || 'Error al cargar cursos.');
     }
     setLoading(false);
-  }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado]);
+    console.log('loadCursos() completado, cursos en estado:', result.data?.length);
+  }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado, filterPlanEstudio]);
+
+  const loadPlanesEstudio = useCallback(async () => {
+    const result = await getPlanesEstudioAction();
+    if (result.data) {
+      setPlanesEstudio(result.data);
+    }
+  }, []);
+
+  const handleDelete = async (id: string, codigo: string, nombre: string) => {
+    if (!confirm(`¿Está seguro de eliminar el curso "${codigo} - ${nombre}"?`)) return;
+    
+    console.log('Eliminando curso:', id, codigo, nombre);
+    const result = await deleteCursoAction(id);
+    console.log('Resultado de eliminación:', result);
+    
+    if (result.success) {
+      toast.success('Curso eliminado exitosamente');
+      console.log('Llamando a loadCursos()...');
+      await loadCursos();
+      console.log('loadCursos() completado');
+    } else {
+      toast.error(result.error || 'Error al eliminar curso');
+    }
+  };
 
   useImperativeHandle(ref, () => ({ refresh: loadCursos }));
 
@@ -98,6 +133,10 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
     }, 0);
     return () => clearTimeout(timer);
   }, [loadCursos]);
+
+  useEffect(() => {
+    loadPlanesEstudio();
+  }, [loadPlanesEstudio]);
 
   return (
     <>
@@ -157,6 +196,18 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
           <option value="">Todos los estados</option>
           <option value="Activo">Activo</option>
           <option value="Inactivo">Inactivo</option>
+        </select>
+        <select
+          value={filterPlanEstudio}
+          onChange={(e) => setFilterPlanEstudio(e.target.value)}
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+        >
+          <option value="">Todos los planes</option>
+          {planesEstudio.map((plan) => (
+            <option key={plan.id} value={plan.id}>
+              {plan.nombre} ({plan.anio})
+            </option>
+          ))}
         </select>
       </div>
 

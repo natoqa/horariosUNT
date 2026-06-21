@@ -53,6 +53,11 @@ export function HorarioPorCiclo() {
         return;
       }
 
+      if (!result.data) {
+        setAsignaciones([]);
+        return;
+      }
+
       const formattedAsignaciones: Asignacion[] = result.data.map((a: any) => ({
         id: a.id,
         curso_codigo: a.curso_codigo,
@@ -122,7 +127,7 @@ export function HorarioPorCiclo() {
         </div>
         <Select
           value={selectedCiclo.toString()}
-          onValueChange={(val) => setSelectedCiclo(parseInt(val))}
+          onValueChange={(val) => setSelectedCiclo(val ? parseInt(val) : 0)}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Seleccionar ciclo" />

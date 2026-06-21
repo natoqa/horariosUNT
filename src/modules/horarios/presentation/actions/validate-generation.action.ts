@@ -11,6 +11,7 @@ import { Disponibilidad } from '@/modules/disponibilidad';
 export async function validateGenerationAction(
   periodoId: string,
   forceWithoutFullAvailability: boolean = false,
+  planEstudioId?: string,
 ): Promise<{ data?: PreValidationResult; message?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -25,11 +26,16 @@ export async function validateGenerationAction(
   }
 
   try {
+    let cursosQuery = supabase.from('cursos').select('*').eq('estado', 'Activo');
+    if (planEstudioId) {
+      cursosQuery = cursosQuery.eq('plan_estudio_id', planEstudioId);
+    }
+
     const [periodoRes, docentesRes, cursosRes, gruposRes, aulasRes, disponibilidadRes] =
       await Promise.all([
         supabase.from('periodos').select('*').eq('id', periodoId).single(),
         supabase.from('docentes').select('*').eq('estado', 'Activo'),
-        supabase.from('cursos').select('*').eq('estado', 'Activo'),
+        cursosQuery,
         supabase.from('grupos').select('*').eq('periodo_id', periodoId),
         supabase.from('aulas').select('*').eq('estado', 'Activa'),
         supabase.from('disponibilidad').select('*').eq('periodo_id', periodoId),
@@ -55,7 +61,7 @@ export async function validateGenerationAction(
       id: d.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni,
       correo: d.correo, telefono: d.telefono, categoria: d.categoria,
       regimen: d.regimen, condicion: d.condicion, escuela: d.escuela,
-      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, estado: d.estado,
+      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, cargaElectiva: d.carga_electiva || 0, estado: d.estado,
       createdAt: d.created_at, updatedAt: d.updated_at,
     }));
 
@@ -64,6 +70,7 @@ export async function validateGenerationAction(
       tipo: c.tipo, horasTeoricas: c.horas_teoricas, horasPracticas: c.horas_practicas,
       creditos: c.creditos, requiereLaboratorio: c.requiere_laboratorio,
       tipoLaboratorio: c.tipo_laboratorio, estado: c.estado,
+      planEstudioId: c.plan_estudio_id,
       createdAt: c.created_at, updatedAt: c.updated_at,
     }));
 

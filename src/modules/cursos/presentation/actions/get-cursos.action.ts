@@ -31,9 +31,11 @@ export async function getCursosAction(
 
   try {
     const cursos = await useCase.execute(filters);
+    console.log('getCursosAction - Cursos obtenidos del repositorio:', cursos.length);
     return { data: cursos };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error al cargar cursos.';
+    console.error('getCursosAction - Error:', error);
     return { message };
   }
 }

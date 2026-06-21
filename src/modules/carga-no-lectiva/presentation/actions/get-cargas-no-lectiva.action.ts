@@ -41,34 +41,68 @@ export async function getCargasNoLectivaAction() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  console.log('getCargasNoLectivaAction - user:', user);
+
   if (!user) {
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
   const role = user.user_metadata?.role;
+  console.log('getCargasNoLectivaAction - role:', role);
+
   if (role !== 'director' && role !== 'secretaria') {
     return { message: 'Solo director o secretaria pueden ver este módulo.' };
   }
 
   const periodoResult = await getActivePeriodoAction();
+  console.log('getCargasNoLectivaAction - periodoResult:', periodoResult);
+
   if (periodoResult.message || !periodoResult.data) {
     return { message: periodoResult.message || 'No hay un período activo.' };
   }
 
   const repo = new SupabaseCargaNoLectivaRepository();
   const cargas = await repo.listCargasByPeriodo(periodoResult.data.id);
+  console.log('getCargasNoLectivaAction - cargas:', cargas);
 
   const cargaElectivaMap = await calcularCargaElectivaPorDocente(periodoResult.data.id);
+  console.log('getCargasNoLectivaAction - cargaElectivaMap:', cargaElectivaMap);
+
+  // Obtener actividades no lectivas de todos los docentes
+  const { data: actividadesData, error: actividadesError } = await supabase
+    .from('actividades_no_lectivas')
+    .select('docente_id, tipo, horas, detalles')
+    .eq('periodo_id', periodoResult.data.id);
+
+  console.log('getCargasNoLectivaAction - actividadesData:', actividadesData);
+  console.log('getCargasNoLectivaAction - actividadesError:', actividadesError);
+
+  // Agrupar actividades por docente
+  const actividadesPorDocente: Record<string, Array<{ tipo: string; horas: number; detalles: string }>> = {};
+  if (actividadesData && !actividadesError) {
+    actividadesData.forEach((actividad: any) => {
+      if (!actividadesPorDocente[actividad.docente_id]) {
+        actividadesPorDocente[actividad.docente_id] = [];
+      }
+      actividadesPorDocente[actividad.docente_id].push({
+        tipo: actividad.tipo,
+        horas: actividad.horas,
+        detalles: actividad.detalles,
+      });
+    });
+  }
 
   const response: {
     periodoId: string;
     periodoName: string;
     cargas: any;
     docentes?: Array<{ id: string; nombres: string; apellidos: string; correo: string; cargaMaxima: number; cargaElectiva: number; cursos: Array<{ codigo: string; nombre: string; horas: number }> }>;
+    actividades?: Record<string, Array<{ tipo: string; horas: number; detalles: string }>>;
   } = {
     periodoId: periodoResult.data.id,
     periodoName: periodoResult.data.name,
     cargas,
+    actividades: actividadesPorDocente,
   };
 
   if (role === 'secretaria') {
@@ -76,9 +110,12 @@ export async function getCargasNoLectivaAction() {
       .from('docentes')
       .select('id, nombres, apellidos, correo, carga_maxima');
 
+    console.log('getCargasNoLectivaAction - docentesData:', docentesData);
+    console.log('getCargasNoLectivaAction - docentesError:', docentesError);
+
     if (!docentesError && docentesData) {
       response.docentes = docentesData.map((d: any) => {
-        const cargaInfo = cargaElectivaMap.get(d.id) || { totalHoras: 0, cursos: [] };
+        const cargaInfo = cargaElectivaMap[d.id] || { totalHoras: 0, cursos: [] };
         return {
           id: d.id,
           nombres: d.nombres,
@@ -89,6 +126,8 @@ export async function getCargasNoLectivaAction() {
           cursos: cargaInfo.cursos,
         };
       });
+    } else {
+      console.log('getCargasNoLectivaAction - Error loading docentes for secretaria');
     }
   } else if (role === 'director') {
     const docenteIds = cargas.map((c: any) => c.docenteId);

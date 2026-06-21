@@ -33,12 +33,12 @@ export async function getCargaNoLectivaAction() {
 
   const { data: grupos } = await supabase
     .from('grupos')
-    .select('docente_id, cursos!inner(codigo, nombre, horas_teoricas, horas_practicas)')
+    .select('docente_id, cursos!inner(codigo, nombre, horas_teoricas, horas_practicas, ciclo, tipo)')
     .eq('periodo_id', periodoResult.data.id)
     .eq('docente_id', docenteData.id);
 
   let cargaElectivaCalculada = 0;
-  const cursos: Array<{ codigo: string; nombre: string; horas: number }> = [];
+  const cursos: Array<{ codigo: string; nombre: string; horas: number; ciclo: string; tipo: string }> = [];
   if (grupos) {
     grupos.forEach((grupo: any) => {
       const curso = grupo.cursos;
@@ -48,6 +48,8 @@ export async function getCargaNoLectivaAction() {
         codigo: curso.codigo,
         nombre: curso.nombre,
         horas: horasTotales,
+        ciclo: curso.ciclo,
+        tipo: curso.tipo,
       });
     });
   }

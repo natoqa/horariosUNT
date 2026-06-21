@@ -24,7 +24,7 @@ export class ApproveHorarioUseCase {
   async execute(
     dto: ApproveHorarioDTO,
     asignaciones: Asignacion[],
-    contextMap: Map<string, EnrichedAsignacionForApproval>,
+    contextMap: Record<string, EnrichedAsignacionForApproval>,
   ): Promise<ApproveHorarioResult> {
     const validated = approveHorarioSchema.parse(dto);
 
@@ -49,21 +49,26 @@ export class ApproveHorarioUseCase {
 
   private validateAllAsignaciones(
     asignaciones: Asignacion[],
-    contextMap: Map<string, EnrichedAsignacionForApproval>,
+    contextMap: Record<string, EnrichedAsignacionForApproval>,
   ): Violation[] {
     const violations: Violation[] = [];
     const seen = new Set<string>();
 
-    for (const asignacion of asignaciones) {
-      const ctx = contextMap.get(asignacion.id);
+    // Filter out assignments with "Pendiente" days or blocks
+    const validAsignaciones = asignaciones.filter(
+      (a) => a.dia !== 'Pendiente' && a.bloque !== 'Pendiente'
+    );
+
+    for (const asignacion of validAsignaciones) {
+      const ctx = contextMap[asignacion.id];
       if (!ctx) continue;
 
       const candidate: PartialAssignment = {
         grupoId: asignacion.grupoId,
         docenteId: asignacion.docenteId,
         aulaId: asignacion.aulaId,
-        dia: asignacion.dia,
-        bloque: asignacion.bloque,
+        dia: asignacion.dia as any, // Safe since we filtered out 'Pendiente'
+        bloque: asignacion.bloque as any, // Safe since we filtered out 'Pendiente'
         tipo: asignacion.tipo,
         ciclo: ctx.ciclo,
         aulaCapacidad: ctx.aulaCapacidad,
@@ -72,17 +77,17 @@ export class ApproveHorarioUseCase {
         requiereLaboratorio: ctx.requiereLaboratorio,
       };
 
-      const others = asignaciones
+      const others = validAsignaciones
         .filter((a) => a.id !== asignacion.id)
         .map((a) => {
-          const c = contextMap.get(a.id);
+          const c = contextMap[a.id];
           if (!c) return null;
           return {
             grupoId: a.grupoId,
             docenteId: a.docenteId,
             aulaId: a.aulaId,
-            dia: a.dia,
-            bloque: a.bloque,
+            dia: a.dia as any,
+            bloque: a.bloque as any,
             tipo: a.tipo,
             ciclo: c.ciclo,
             aulaCapacidad: c.aulaCapacidad,

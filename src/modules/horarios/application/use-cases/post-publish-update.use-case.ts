@@ -38,7 +38,7 @@ export class PostPublishUpdateUseCase {
       return { success: false, message: 'No se pudo determinar el horario de la asignación.' };
     }
 
-    if (horario.estado !== 'publicado') {
+    if (horario.estado !== 'Publicado') {
       return { success: false, message: 'Esta acción solo aplica a horarios publicados.' };
     }
 

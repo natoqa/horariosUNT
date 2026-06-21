@@ -132,10 +132,10 @@ export async function generateExcelAction(
   }));
 
   const nameMaps: ExcelNameMaps = {
-    docentes: docenteNames,
-    cursos: cursoNames,
-    aulas: aulaNames,
-    grupoCiclos,
+    docentes: new Map(Object.entries(docenteNames)),
+    cursos: new Map(Object.entries(cursoNames)),
+    aulas: new Map(Object.entries(aulaNames)),
+    grupoCiclos: new Map(Object.entries(grupoCiclos)),
   };
 
   const useCase = new GenerateHorarioExcelUseCase();

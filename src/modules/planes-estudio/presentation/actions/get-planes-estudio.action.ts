@@ -6,6 +6,7 @@ export async function getPlanesEstudioAction() {
   try {
     const useCase = new GetPlanesEstudioUseCase();
     const planes = await useCase.execute();
+    console.log('Planes obtenidos:', planes);
     return { data: planes, error: null };
   } catch (error) {
     console.error('Error al obtener planes de estudio:', error);

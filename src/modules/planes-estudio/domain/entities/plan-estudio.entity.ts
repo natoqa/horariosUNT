@@ -7,6 +7,8 @@ export interface PlanEstudio {
   fechaPublicacion: string | null;
   createdAt: string;
   updatedAt: string;
+  cursosCount?: number;
+  docentesCount?: number;
 }
 
 export const PLAN_ESTADO_LABELS: Record<PlanEstudio['estado'], string> = {

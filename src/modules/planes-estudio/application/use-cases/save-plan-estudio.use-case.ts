@@ -10,11 +10,14 @@ export class SavePlanEstudioUseCase {
   }
 
   async execute(data: SavePlanEstudioInput) {
+    // Normalizar el estado para asegurar que coincida con el constraint de la base de datos
+    const estadoNormalizado = (data.estado?.trim() || 'Activo') as 'Activo' | 'Inactivo';
+    
     return this.repository.create({
       nombre: data.nombre,
       anio: data.anio,
       pdfUrl: data.pdfUrl || null,
-      estado: data.estado,
+      estado: estadoNormalizado,
       fechaPublicacion: data.fechaPublicacion || null,
     });
   }

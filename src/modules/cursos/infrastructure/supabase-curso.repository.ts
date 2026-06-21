@@ -46,7 +46,10 @@ export class SupabaseCursoRepository implements ICursoRepository {
 
   async findAll(filters?: CursoFilters): Promise<Curso[]> {
     const supabase = await createClient();
-    let query = supabase.from('cursos').select('*');
+    let query = supabase.from('cursos').select(`
+      *,
+      planes_estudio!inner(estado)
+    `);
 
     if (filters?.search) {
       query = query.or(
@@ -73,10 +76,16 @@ export class SupabaseCursoRepository implements ICursoRepository {
       query = query.eq('plan_estudio_id', filters.planEstudioId);
     }
 
+    // Filtrar solo cursos de planes activos
+    query = query.filter('planes_estudio.estado', 'eq', 'Activo');
+
     // Ordenar de manera natural: primero por ciclo (I, II, III... pero como son strings, ordenamos de alguna forma o simplemente por ciclo y nombre)
     // El ciclo en DB es VARCHAR: 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
     // Como ordenamiento alfabético de números romanos no es ideal, los recuperamos y los ordenaremos si es necesario, o por código:
     const { data, error } = await query.order('codigo', { ascending: true });
+
+    console.log('Supabase findAll - Cursos devueltos:', data?.length);
+    console.log('Supabase findAll - Error:', error);
 
     if (error || !data) return [];
     return (data as CursoRow[]).map(this.mapToCurso);
@@ -122,6 +131,36 @@ export class SupabaseCursoRepository implements ICursoRepository {
     return this.mapToCurso(data as CursoRow);
   }
 
+  async saveBatch(
+    cursos: Omit<Curso, 'id' | 'createdAt' | 'updatedAt'>[],
+  ): Promise<Curso[]> {
+    const supabase = await createClient();
+    
+    const cursosData = cursos.map(curso => ({
+      codigo: curso.codigo,
+      nombre: curso.nombre,
+      ciclo: curso.ciclo,
+      tipo: curso.tipo,
+      horas_teoricas: curso.horasTeoricas,
+      horas_practicas: curso.horasPracticas,
+      creditos: curso.creditos,
+      requiere_laboratorio: curso.requiereLaboratorio,
+      tipo_laboratorio: curso.tipoLaboratorio,
+      estado: curso.estado,
+      plan_estudio_id: curso.planEstudioId,
+    }));
+
+    const { data, error } = await supabase
+      .from('cursos')
+      .insert(cursosData)
+      .select();
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Error al registrar los cursos.');
+    }
+    return (data as CursoRow[]).map(this.mapToCurso);
+  }
+
   async update(
     id: string,
     updateData: Partial<Omit<Curso, 'id' | 'codigo' | 'createdAt' | 'updatedAt'>>,
@@ -151,6 +190,21 @@ export class SupabaseCursoRepository implements ICursoRepository {
       throw new Error(error?.message || 'Error al actualizar el curso.');
     }
     return this.mapToCurso(data as CursoRow);
+  }
+
+  async delete(id: string): Promise<void> {
+    const supabase = await createClient();
+    console.log('Supabase delete - Intentando eliminar curso con ID:', id);
+    const { error } = await supabase
+      .from('cursos')
+      .delete()
+      .eq('id', id);
+
+    console.log('Supabase delete - Error:', error);
+
+    if (error) {
+      throw new Error(error.message || 'Error al eliminar el curso.');
+    }
   }
 
   // Métodos para Grupos (secciones)

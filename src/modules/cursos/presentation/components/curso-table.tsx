@@ -3,13 +3,15 @@
 import { useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Curso } from '../../domain/entities/curso.entity';
 import { getCursosAction } from '../actions/get-cursos.action';
+import { deleteCursoAction } from '../actions/delete-curso.action';
 import { CursoEditDialog } from './curso-edit-dialog';
 import { GrupoManager } from './grupo-manager';
 import { Input } from '@/shared/components/ui/input';
-import { BookOpen, Pencil, Search, Layers } from 'lucide-react';
+import { BookOpen, Pencil, Search, Layers, Trash2 } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
 import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
+import { toast } from 'sonner';
 
 export interface CursoTableRef {
   refresh: () => void;
@@ -46,6 +48,7 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
   const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
 
   const loadCursos = useCallback(async () => {
+    console.log('loadCursos() llamado');
     setLoading(true);
     setError(null);
     const result = await getCursosAction({
@@ -56,12 +59,15 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       estado: filterEstado || undefined,
       planEstudioId: filterPlanEstudio || undefined,
     });
+    console.log('Resultado de getCursosAction:', result);
     if (result.data) {
+      console.log('Cursos recibidos:', result.data.length);
       setCursos(result.data);
     } else {
       setError(result.message || 'Error al cargar cursos.');
     }
     setLoading(false);
+    console.log('loadCursos() completado, cursos en estado:', result.data?.length);
   }, [search, filterTipoCiclo, filterCiclo, filterTipo, filterEstado, filterPlanEstudio]);
 
   const loadPlanesEstudio = useCallback(async () => {
@@ -70,6 +76,23 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
       setPlanesEstudio(result.data);
     }
   }, []);
+
+  const handleDelete = async (id: string, codigo: string, nombre: string) => {
+    if (!confirm(`¿Está seguro de eliminar el curso "${codigo} - ${nombre}"?`)) return;
+    
+    console.log('Eliminando curso:', id, codigo, nombre);
+    const result = await deleteCursoAction(id);
+    console.log('Resultado de eliminación:', result);
+    
+    if (result.success) {
+      toast.success('Curso eliminado exitosamente');
+      console.log('Llamando a loadCursos()...');
+      await loadCursos();
+      console.log('loadCursos() completado');
+    } else {
+      toast.error(result.error || 'Error al eliminar curso');
+    }
+  };
 
   useImperativeHandle(ref, () => ({ refresh: loadCursos }));
 
@@ -231,6 +254,15 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
                           title="Editar curso"
                         >
                           <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
+                      {isAllowed && (
+                        <button
+                          onClick={() => handleDelete(curso.id, curso.codigo, curso.nombre)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Eliminar curso"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       )}
                       <button

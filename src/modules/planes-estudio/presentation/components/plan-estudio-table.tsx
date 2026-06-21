@@ -6,7 +6,7 @@ import { getPlanesEstudioAction } from '../actions/get-planes-estudio.action';
 import { deletePlanEstudioAction } from '../actions/delete-plan-estudio.action';
 import { PLAN_ESTADO_LABELS } from '../../domain/entities/plan-estudio.entity';
 import { Button } from '@/shared/components/ui/button';
-import { Trash2, FileText, Calendar } from 'lucide-react';
+import { Trash2, FileText, Calendar, Power, PowerOff, Edit } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { toast } from 'sonner';
 
@@ -14,7 +14,11 @@ export interface PlanEstudioTableRef {
   refresh: () => void;
 }
 
-export const PlanEstudioTable = forwardRef<PlanEstudioTableRef>(function PlanEstudioTable(_, ref) {
+export interface PlanEstudioTableProps {
+  onEdit?: (plan: PlanEstudio) => void;
+}
+
+export const PlanEstudioTable = forwardRef<PlanEstudioTableRef, PlanEstudioTableProps>(function PlanEstudioTable({ onEdit }, ref) {
   const { user } = useAuth();
   const [planes, setPlanes] = useState<PlanEstudio[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +56,30 @@ export const PlanEstudioTable = forwardRef<PlanEstudioTableRef>(function PlanEst
     }
   };
 
+  const handleToggleEstado = async (id: string, currentEstado: string) => {
+    const newEstado = currentEstado === 'Activo' ? 'Inactivo' : 'Activo';
+    const action = newEstado === 'Activo' ? 'activar' : 'desactivar';
+    
+    if (!confirm(`¿Está seguro de ${action} el plan?`)) return;
+    
+    try {
+      const { updatePlanEstudioAction } = await import('../actions/update-plan-estudio.action');
+      const result = await updatePlanEstudioAction(id, { estado: newEstado });
+      if (result.success) {
+        toast.success(`Plan ${action}do exitosamente`);
+        loadPlanes();
+      } else {
+        toast.error(result.error || `Error al ${action} plan`);
+      }
+    } catch (error) {
+      toast.error('Error al cambiar estado del plan');
+    }
+  };
+
+  const handleEdit = (plan: PlanEstudio) => {
+    onEdit?.(plan);
+  };
+
   return (
     <>
       {loading ? (
@@ -84,9 +112,9 @@ export const PlanEstudioTable = forwardRef<PlanEstudioTableRef>(function PlanEst
               <tr className="border-b border-border bg-muted/30">
                 <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nombre</th>
                 <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Año</th>
+                <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cursos</th>
+                <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Docentes</th>
                 <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Estado</th>
-                <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Fecha Publicación</th>
-                <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">PDF</th>
                 <th className="h-10 px-6 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">Acciones</th>
               </tr>
             </thead>
@@ -95,6 +123,8 @@ export const PlanEstudioTable = forwardRef<PlanEstudioTableRef>(function PlanEst
                 <tr key={plan.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="px-6 py-3.5 font-medium text-foreground">{plan.nombre}</td>
                   <td className="px-6 py-3.5 text-muted-foreground text-xs">{plan.anio}</td>
+                  <td className="px-6 py-3.5 text-muted-foreground text-xs font-semibold">{plan.cursosCount || 0}</td>
+                  <td className="px-6 py-3.5 text-muted-foreground text-xs font-semibold">{plan.docentesCount || 0}</td>
                   <td className="px-6 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold ${
                       plan.estado === 'Activo' 
@@ -104,33 +134,35 @@ export const PlanEstudioTable = forwardRef<PlanEstudioTableRef>(function PlanEst
                       {PLAN_ESTADO_LABELS[plan.estado]}
                     </span>
                   </td>
-                  <td className="px-6 py-3.5 text-muted-foreground text-xs">
-                    {plan.fechaPublicacion ? new Date(plan.fechaPublicacion).toLocaleDateString('es-PE') : '-'}
-                  </td>
-                  <td className="px-6 py-3.5">
-                    {plan.pdfUrl ? (
-                      <a
-                        href={plan.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      >
-                        <FileText className="w-3 h-3" />
-                        Ver PDF
-                      </a>
-                    ) : (
-                      <span className="text-[10px] text-muted-foreground">No disponible</span>
-                    )}
-                  </td>
                   <td className="px-6 py-3.5">
                     {isAllowed && (
-                      <button
-                        onClick={() => handleDelete(plan.id, plan.nombre)}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                        title="Eliminar plan de estudios"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(plan)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors"
+                          title="Editar plan de estudios"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleToggleEstado(plan.id, plan.estado)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors"
+                          title={plan.estado === 'Activo' ? 'Desactivar plan' : 'Activar plan'}
+                        >
+                          {plan.estado === 'Activo' ? (
+                            <PowerOff className="w-4 h-4" />
+                          ) : (
+                            <Power className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(plan.id, plan.nombre)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Eliminar plan de estudios"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>

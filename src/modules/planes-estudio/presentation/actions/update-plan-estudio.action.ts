@@ -4,17 +4,31 @@ import { revalidatePath } from 'next/cache';
 import { UpdatePlanEstudioUseCase } from '../../application/use-cases/update-plan-estudio.use-case';
 import { savePlanEstudioSchema } from '../../application/dtos/save-plan-estudio.dto';
 
-export async function updatePlanEstudioAction(id: string, formData: FormData) {
+export async function updatePlanEstudioAction(id: string, data: FormData | { estado?: string; nombre?: string; anio?: number; pdfUrl?: string; fechaPublicacion?: string }) {
   try {
-    const nombre = formData.get('nombre')?.toString() ?? '';
-    const anio = formData.get('anio')?.toString() ?? '';
-    const pdfUrl = formData.get('pdfUrl')?.toString() ?? '';
-    const estado = formData.get('estado')?.toString() ?? 'Activo';
-    const fechaPublicacion = formData.get('fechaPublicacion')?.toString() ?? '';
+    let nombre: string;
+    let anio: string;
+    let pdfUrl: string;
+    let estado: string;
+    let fechaPublicacion: string;
+
+    if (data instanceof FormData) {
+      nombre = data.get('nombre')?.toString() ?? '';
+      anio = data.get('anio')?.toString() ?? '';
+      pdfUrl = data.get('pdfUrl')?.toString() ?? '';
+      estado = data.get('estado')?.toString() ?? 'Activo';
+      fechaPublicacion = data.get('fechaPublicacion')?.toString() ?? '';
+    } else {
+      nombre = data.nombre ?? 'Plan de Estudio';
+      anio = data.anio?.toString() ?? '';
+      pdfUrl = data.pdfUrl ?? '';
+      estado = data.estado ?? 'Activo';
+      fechaPublicacion = data.fechaPublicacion ?? '';
+    }
 
     const validatedData = savePlanEstudioSchema.parse({
       nombre,
-      anio,
+      anio: parseInt(anio),
       pdfUrl: pdfUrl || undefined,
       estado,
       fechaPublicacion: fechaPublicacion || undefined,
@@ -24,6 +38,7 @@ export async function updatePlanEstudioAction(id: string, formData: FormData) {
     await useCase.execute(id, validatedData);
 
     revalidatePath('/director/planes-estudio');
+    revalidatePath('/secretaria/planes-estudio');
     return { success: true, error: null };
   } catch (error) {
     console.error('Error al actualizar plan de estudios:', error);

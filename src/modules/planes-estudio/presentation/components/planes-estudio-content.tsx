@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { PlanEstudioForm } from './plan-estudio-form';
 import { PlanEstudioTable, PlanEstudioTableRef } from './plan-estudio-table';
+import { PlanEstudio } from '../../domain/entities/plan-estudio.entity';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
@@ -16,8 +17,19 @@ export function PlanesEstudioContent() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [archivo, setArchivo] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<PlanEstudio | null>(null);
 
   const isAllowed = user?.role === 'director' || user?.role === 'secretaria';
+
+  const handleOpenDialog = (plan: PlanEstudio | null = null) => {
+    setEditingPlan(plan);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setEditingPlan(null);
+  };
 
   const handleDescargarPlantilla = async (formato: 'excel' | 'csv') => {
     try {
@@ -80,20 +92,23 @@ export function PlanesEstudioContent() {
           <h2 className="text-sm font-semibold text-foreground">Planes de estudio registrados</h2>
           {isAllowed && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setDialogOpen(true)}>
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => handleOpenDialog()}>
                 <Plus className="w-3 h-3 mr-1" />
                 Registrar Plan
               </Button>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Registrar Plan de Estudio</DialogTitle>
+                    <DialogTitle>{editingPlan ? 'Editar Plan de Estudio' : 'Registrar Plan de Estudio'}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <PlanEstudioForm onSuccess={() => {
-                      setDialogOpen(false);
-                      tableRef.current?.refresh();
-                    }} />
+                    <PlanEstudioForm 
+                      initialPlan={editingPlan}
+                      onSuccess={() => {
+                        handleCloseDialog();
+                        tableRef.current?.refresh();
+                      }} 
+                    />
                   </div>
                 </DialogContent>
               </Dialog>
@@ -118,7 +133,7 @@ export function PlanesEstudioContent() {
             </div>
           )}
         </div>
-        <PlanEstudioTable ref={tableRef} />
+        <PlanEstudioTable ref={tableRef} onEdit={handleOpenDialog} />
       </div>
     </>
   );

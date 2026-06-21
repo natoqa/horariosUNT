@@ -1,4 +1,4 @@
-import * as pdf from 'pdf-parse';
+import * as pdfjsLib from 'pdfjs-dist';
 
 export interface CursoExtraido {
   codigo: string;
@@ -13,8 +13,22 @@ export interface CursoExtraido {
 export class PdfParserService {
   async extraerCursosDesdePdf(pdfBuffer: Buffer): Promise<CursoExtraido[]> {
     try {
-      const data = await pdf(pdfBuffer);
-      const texto = data.text;
+      // Configurar worker de PDF.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+      // Cargar el documento PDF
+      const loadingTask = pdfjsLib.getDocument({ data: pdfBuffer });
+      const pdfDocument = await loadingTask.promise;
+
+      let texto = '';
+
+      // Extraer texto de todas las páginas
+      for (let i = 1; i <= pdfDocument.numPages; i++) {
+        const page = await pdfDocument.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        texto += pageText + '\n';
+      }
       
       const cursos: CursoExtraido[] = [];
       const lineas = texto.split('\n').filter(linea => linea.trim());
@@ -93,6 +107,12 @@ export class PdfParserService {
       '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX', '10': 'X'
     };
     
-    return romanos[cicloNormalizado] || 'I';
+    const convertido = romanos[cicloNormalizado];
+    if (convertido && ciclosValidos.includes(convertido)) {
+      return convertido;
+    }
+    
+    // Si no es válido, retornar 'I' por defecto
+    return 'I';
   }
 }

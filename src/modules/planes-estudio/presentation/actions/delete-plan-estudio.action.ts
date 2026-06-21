@@ -9,6 +9,7 @@ export async function deletePlanEstudioAction(id: string) {
     await useCase.execute(id);
 
     revalidatePath('/director/planes-estudio');
+    revalidatePath('/secretaria/planes-estudio');
     return { success: true, error: null };
   } catch (error) {
     console.error('Error al eliminar plan de estudios:', error);

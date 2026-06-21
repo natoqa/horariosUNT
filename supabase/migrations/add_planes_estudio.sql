@@ -84,9 +84,27 @@ COMMENT ON COLUMN planes_estudio.pdf_url IS 'URL del PDF del plan de estudios';
 COMMENT ON COLUMN planes_estudio.estado IS 'Estado del plan (Activo/Inactivo)';
 COMMENT ON COLUMN planes_estudio.fecha_publicacion IS 'Fecha de publicación del plan';
 
--- 3. Agregar columna plan_estudio_id a cursos
+-- 3. Agregar columna plan_estudio_id a cursos con cascade delete
+-- Primero eliminar la foreign key existente si no tiene cascade
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'cursos_plan_estudio_id_fkey' 
+    AND table_name = 'cursos'
+  ) THEN
+    ALTER TABLE cursos DROP CONSTRAINT cursos_plan_estudio_id_fkey;
+  END IF;
+END $$;
+
+-- Agregar la columna si no existe
 ALTER TABLE cursos 
-ADD COLUMN IF NOT EXISTS plan_estudio_id UUID REFERENCES planes_estudio(id);
+ADD COLUMN IF NOT EXISTS plan_estudio_id UUID;
+
+-- Crear la foreign key con cascade delete
+ALTER TABLE cursos 
+ADD CONSTRAINT cursos_plan_estudio_id_fkey 
+FOREIGN KEY (plan_estudio_id) REFERENCES planes_estudio(id) ON DELETE CASCADE;
 
 COMMENT ON COLUMN cursos.plan_estudio_id IS 'ID del plan de estudios al que pertenece el curso';
 
@@ -134,13 +152,13 @@ WITH CHECK (
   ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
 );
 
--- Política para que director pueda eliminar planes
-DROP POLICY IF EXISTS "Director puede eliminar planes" ON planes_estudio;
-CREATE POLICY "Director puede eliminar planes"
+-- Política para que director y secretaria puedan eliminar planes
+DROP POLICY IF EXISTS "Director y secretaria pueden eliminar planes" ON planes_estudio;
+CREATE POLICY "Director y secretaria pueden eliminar planes"
 ON planes_estudio FOR DELETE
 TO public
 USING (
-  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
+  ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = ANY (ARRAY['director'::text, 'secretaria'::text])
 );
 
 -- 6. Actualizar cursos existentes para asignarlos a un plan por defecto

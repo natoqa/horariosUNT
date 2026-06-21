@@ -24,7 +24,7 @@ export class ApproveHorarioUseCase {
   async execute(
     dto: ApproveHorarioDTO,
     asignaciones: Asignacion[],
-    contextMap: Map<string, EnrichedAsignacionForApproval>,
+    contextMap: Record<string, EnrichedAsignacionForApproval>,
   ): Promise<ApproveHorarioResult> {
     const validated = approveHorarioSchema.parse(dto);
 
@@ -49,13 +49,13 @@ export class ApproveHorarioUseCase {
 
   private validateAllAsignaciones(
     asignaciones: Asignacion[],
-    contextMap: Map<string, EnrichedAsignacionForApproval>,
+    contextMap: Record<string, EnrichedAsignacionForApproval>,
   ): Violation[] {
     const violations: Violation[] = [];
     const seen = new Set<string>();
 
     for (const asignacion of asignaciones) {
-      const ctx = contextMap.get(asignacion.id);
+      const ctx = contextMap[asignacion.id];
       if (!ctx) continue;
 
       const candidate: PartialAssignment = {
@@ -75,7 +75,7 @@ export class ApproveHorarioUseCase {
       const others = asignaciones
         .filter((a) => a.id !== asignacion.id)
         .map((a) => {
-          const c = contextMap.get(a.id);
+          const c = contextMap[a.id];
           if (!c) return null;
           return {
             grupoId: a.grupoId,

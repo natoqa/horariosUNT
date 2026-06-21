@@ -127,7 +127,13 @@ export class CsvParserService {
       '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX', '10': 'X'
     };
     
-    return romanos[str] || 'I';
+    const convertido = romanos[str];
+    if (convertido && ciclosValidos.includes(convertido)) {
+      return convertido;
+    }
+    
+    // Si no es válido, retornar 'I' por defecto
+    return 'I';
   }
   
   private extraerNumero(valor: string): number {

@@ -32,7 +32,7 @@ interface CargaNoLectivaData {
   docente?: {
     cargaMaxima: number;
     cargaElectiva: number;
-    cursos: Array<{ codigo: string; nombre: string; horas: number }>;
+    cursos: Array<{ codigo: string; nombre: string; horas: number; ciclo: string; tipo: string }>;
   };
   carga: {
     id: string;
@@ -208,8 +208,8 @@ export function CargaNoLectivaContent() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Carga Horaria</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {user?.role === 'docente' 
-              ? 'Resumen de tu carga horaria actual'
+            {user?.role === 'docente'
+              ? 'Gestiona tu carga horaria: carga lectiva y no lectiva'
               : 'Registra tu carga horaria: carga electiva (cursos asignados) y carga no lectiva.'
             }
           </p>
@@ -220,40 +220,129 @@ export function CargaNoLectivaContent() {
         </div>
       </div>
 
-      {data?.docente && (
-        <div className="rounded-2xl border border-border bg-slate-50 px-4 py-4 text-sm text-foreground">
-          <p className="font-semibold text-foreground">Información de carga horaria</p>
-          <p className="mt-2">Carga máxima: <span className="font-semibold">{data.docente.cargaMaxima} horas</span></p>
-          <p className="mt-1">Carga electiva: <span className="font-semibold">{data.docente.cargaElectiva} horas</span></p>
-          <p className="mt-1">Disponible para carga no lectiva: <span className="font-semibold text-primary">{Math.max(0, data.docente.cargaMaxima - data.docente.cargaElectiva)} horas</span></p>
-          {data.docente.cursos && data.docente.cursos.length > 0 && (
-            <div className="mt-3">
-              <p className="font-semibold text-foreground mb-2">Cursos Asignados:</p>
-              <div className="space-y-1">
-                {data.docente.cursos.map((curso, idx) => (
-                  <p key={idx} className="text-muted-foreground">• {curso.codigo} - {curso.nombre} ({curso.horas}h)</p>
-                ))}
+      {data?.carga && (
+        <div className="rounded-2xl border border-border bg-gradient-to-r from-slate-50 to-white px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-foreground mb-3">Estado de Aprobación</h2>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${data.carga.directorAprobado ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Director</p>
+                    <p className="text-xs text-muted-foreground">{data.carga.directorAprobado ? 'Aprobado' : 'Pendiente de aprobación'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${data.carga.secretariaAprobado ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Secretaria</p>
+                    <p className="text-xs text-muted-foreground">{data.carga.secretariaAprobado ? 'Aprobado' : 'Pendiente de aprobación'}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+            <div className="text-right">
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                data.carga.estado === 'Aprobado'
+                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                  : data.carga.estado === 'En revisión'
+                  ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                  : 'bg-slate-100 text-slate-600 border border-slate-200'
+              }`}>
+                {data.carga.estado}
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">Total: {data.carga.totalHoras} horas</p>
+            </div>
+          </div>
         </div>
       )}
 
-      {data?.carga && (
-        <div className="rounded-2xl border border-border bg-slate-50 px-4 py-4 text-sm text-foreground">
-          <p className="font-semibold text-foreground">Estado actual</p>
-          <p className="mt-2">Total no lectivo: <span className="font-semibold">{data.carga.totalHoras} horas</span></p>
-          <p className="mt-1">Situación: <span className="font-medium">{data.carga.estado}</span></p>
-          <p className="mt-1">Director: <span className={data.carga.directorAprobado ? 'text-emerald-700' : 'text-muted-foreground'}>{data.carga.directorAprobado ? 'Aprobado' : 'Pendiente'}</span></p>
-          <p className="mt-1">Secretaria: <span className={data.carga.secretariaAprobado ? 'text-emerald-700' : 'text-muted-foreground'}>{data.carga.secretariaAprobado ? 'Aprobado' : 'Pendiente'}</span></p>
+      {data?.docente && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-blue-50 to-white px-5 py-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Carga Lectiva</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Carga máxima</span>
+                <span className="text-sm font-semibold text-foreground">{data.docente.cargaMaxima} h</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Cursos asignados</span>
+                <span className="text-sm font-semibold text-emerald-700">{data.docente.cargaElectiva} h</span>
+              </div>
+              {data.docente.cursos && data.docente.cursos.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-2">Cursos asignados:</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {data.docente.cursos.map((curso, idx) => (
+                      <div key={idx} className="rounded-lg bg-white p-2 text-xs border border-border">
+                        <p className="font-medium text-foreground">{curso.codigo} - {curso.nombre}</p>
+                        <div className="mt-1 flex gap-3 text-muted-foreground">
+                          <span>Ciclo: {curso.ciclo}</span>
+                          <span>Tipo: {curso.tipo}</span>
+                          <span>Horas: {curso.horas}h</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-gradient-to-br from-purple-50 to-white px-5 py-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Carga No Lectiva</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Disponible</span>
+                <span className="text-sm font-semibold text-primary">{Math.max(0, data.docente.cargaMaxima - data.docente.cargaElectiva)} h</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Registrado</span>
+                <span className="text-sm font-semibold text-purple-700">{data.carga?.totalHoras || 0} h</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Pendiente</span>
+                <span className="text-sm font-semibold text-amber-700">{Math.max(0, (data.docente.cargaMaxima - data.docente.cargaElectiva) - (data.carga?.totalHoras || 0))} h</span>
+              </div>
+            </div>
+            {data.actividades && data.actividades.length > 0 && data.actividades.some(a => a.horas > 0 || a.detalles) && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">Actividades registradas:</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {data.actividades.filter(a => a.horas > 0 || a.detalles).map((actividad, idx) => (
+                    <div key={idx} className="rounded-lg bg-white p-2 text-xs border border-border">
+                      <div className="flex justify-between items-start">
+                        <p className="font-medium text-foreground">{actividad.tipo}</p>
+                        <span className="text-purple-700 font-semibold">{actividad.horas}h</span>
+                      </div>
+                      {actividad.detalles && (
+                        <p className="mt-1 text-muted-foreground">{actividad.detalles}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {user?.role === 'docente' && (
         <div className="flex justify-end">
           <Button onClick={() => setDialogOpen(true)} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Registrar Carga No Lectiva
+            {data?.carga ? (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Editar Carga Horaria
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Registrar Carga Horaria
+              </>
+            )}
           </Button>
         </div>
       )}
@@ -477,7 +566,7 @@ export function CargaNoLectivaContent() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Registrar Carga No Lectiva</DialogTitle>
+            <DialogTitle>{data?.carga ? 'Editar Carga Horaria' : 'Registrar Carga Horaria'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 mt-4">
             <form action={lectivaAction} className="space-y-4 rounded-3xl border border-border bg-white p-5 shadow-sm">

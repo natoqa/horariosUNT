@@ -61,7 +61,7 @@ export function AuditoriaContent() {
       if (res.message) {
         toast.error(res.message);
       } else if (res.data) {
-        const blob = new Blob([res.data], {
+        const blob = new Blob([new Uint8Array(res.data)], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
         const url = URL.createObjectURL(blob);

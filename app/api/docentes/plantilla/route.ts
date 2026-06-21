@@ -11,7 +11,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
   
-  return new NextResponse(result.buffer, {
+  if (!result.buffer) {
+    return NextResponse.json({ error: 'No se generó el buffer del archivo' }, { status: 500 });
+  }
+
+  return new NextResponse(new Uint8Array(result.buffer), {
     headers: {
       'Content-Type': result.mimeType,
       'Content-Disposition': `attachment; filename="${result.filename}"`,

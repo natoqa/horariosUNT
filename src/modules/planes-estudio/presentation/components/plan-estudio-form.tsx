@@ -94,7 +94,7 @@ export function PlanEstudioForm({ onSuccess, initialPlan }: PlanEstudioFormProps
               // Mostrar detalles de errores en consola para debugging
             }
           } else {
-            const mensaje = result.cursosCreados > 0
+            const mensaje = (result.cursosCreados ?? 0) > 0
               ? `Plan de estudios registrado exitosamente. ${result.cursosCreados} cursos extraídos del archivo.`
               : 'Plan de estudios registrado exitosamente.';
             toast.success(mensaje);

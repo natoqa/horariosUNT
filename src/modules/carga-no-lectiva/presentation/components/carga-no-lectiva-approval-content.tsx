@@ -12,6 +12,7 @@ import { UserRole } from '@/shared/types/roles';
 
 interface CargaRow {
   id: string;
+  docenteId?: string;
   docenteNombre: string;
   docenteEmail?: string;
   totalHoras: number;
@@ -80,7 +81,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
     }
     return cargas.map((carga) => ({
       ...carga,
-      actividades: actividades[carga.docenteId] || [],
+      actividades: (carga.docenteId && actividades[carga.docenteId]) || [],
     }));
   }, [role, docentes, cargas, actividades]);
 
@@ -225,7 +226,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                     <h4 className="text-sm font-semibold text-foreground">Actividades No Lectivas</h4>
                     {row.actividades && row.actividades.length > 0 ? (
                       <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {row.actividades.map((actividad, idx) => (
+                        {row.actividades.map((actividad: any, idx: number) => (
                           <div key={idx} className="rounded-lg bg-purple-50 p-2 text-sm">
                             <p className="font-medium text-foreground">{actividad.tipo}</p>
                             <p className="text-xs text-muted-foreground">{actividad.horas} horas - {actividad.detalles}</p>

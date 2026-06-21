@@ -112,7 +112,7 @@ export async function postPublishUpdateAction(
     validated.data,
     async (asignacionId, newAulaId) => buildContext(asignacionId, newAulaId),
     allAsignaciones,
-    allContexts,
+    new Map(Object.entries(allContexts)),
     {
       userId: user.id,
       userEmail: user.email ?? '',

@@ -129,9 +129,9 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
   }));
 
   const nameMaps: DocentePdfNameMaps = {
-    cursos: cursoNames,
-    aulas: aulaNames,
-    grupoCiclos,
+    cursos: new Map(Object.entries(cursoNames)),
+    aulas: new Map(Object.entries(aulaNames)),
+    grupoCiclos: new Map(Object.entries(grupoCiclos)),
   };
 
   const useCase = new GenerateDocentePdfUseCase();

@@ -54,7 +54,12 @@ export class ApproveHorarioUseCase {
     const violations: Violation[] = [];
     const seen = new Set<string>();
 
-    for (const asignacion of asignaciones) {
+    // Filter out assignments with "Pendiente" days or blocks
+    const validAsignaciones = asignaciones.filter(
+      (a) => a.dia !== 'Pendiente' && a.bloque !== 'Pendiente'
+    );
+
+    for (const asignacion of validAsignaciones) {
       const ctx = contextMap[asignacion.id];
       if (!ctx) continue;
 
@@ -62,8 +67,8 @@ export class ApproveHorarioUseCase {
         grupoId: asignacion.grupoId,
         docenteId: asignacion.docenteId,
         aulaId: asignacion.aulaId,
-        dia: asignacion.dia,
-        bloque: asignacion.bloque,
+        dia: asignacion.dia as any, // Safe since we filtered out 'Pendiente'
+        bloque: asignacion.bloque as any, // Safe since we filtered out 'Pendiente'
         tipo: asignacion.tipo,
         ciclo: ctx.ciclo,
         aulaCapacidad: ctx.aulaCapacidad,
@@ -72,7 +77,7 @@ export class ApproveHorarioUseCase {
         requiereLaboratorio: ctx.requiereLaboratorio,
       };
 
-      const others = asignaciones
+      const others = validAsignaciones
         .filter((a) => a.id !== asignacion.id)
         .map((a) => {
           const c = contextMap[a.id];
@@ -81,8 +86,8 @@ export class ApproveHorarioUseCase {
             grupoId: a.grupoId,
             docenteId: a.docenteId,
             aulaId: a.aulaId,
-            dia: a.dia,
-            bloque: a.bloque,
+            dia: a.dia as any,
+            bloque: a.bloque as any,
             tipo: a.tipo,
             ciclo: c.ciclo,
             aulaCapacidad: c.aulaCapacidad,

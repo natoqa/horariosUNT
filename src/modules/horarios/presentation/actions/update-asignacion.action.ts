@@ -107,7 +107,7 @@ export async function updateAsignacionAction(
     validated.data,
     async (asignacionId, newAulaId) => buildContext(asignacionId, newAulaId),
     allAsignaciones,
-    allContexts,
+    new Map(Object.entries(allContexts)),
   );
 
   if (!result.success) {

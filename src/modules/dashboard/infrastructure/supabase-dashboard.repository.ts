@@ -1,6 +1,6 @@
 import { createClient } from '@/shared/lib/supabase/server';
-import { IDashboardRepository } from '../../domain/repositories/dashboard.repository';
-import { DashboardDirectorDTO, DashboardSecretariaDTO, DashboardDocenteDTO, Alerta } from '../../application/dtos/dashboard.dto';
+import { IDashboardRepository } from '../domain/repositories/dashboard.repository';
+import { DashboardDirectorDTO, DashboardSecretariaDTO, DashboardDocenteDTO, Alerta } from '../application/dtos/dashboard.dto';
 
 export class SupabaseDashboardRepository implements IDashboardRepository {
   async getDirectorDashboard(): Promise<DashboardDirectorDTO> {
@@ -9,7 +9,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     // Obtener período activo
     const { data: periodo } = await supabase
       .from('periodos')
-      .select('estado')
+      .select('id, estado')
       .in('estado', ['recopilacion', 'generacion', 'aprobado', 'publicado'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -78,12 +78,12 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
 
     const totalCursos = cursos?.length || 0;
 
-    const { data: cursosAsignados } = await supabase
+    const { data: asignacionesData } = await supabase
       .from('asignaciones')
       .select('grupo_id')
       .eq('periodo_id', periodo?.id || '');
 
-    const cursosAsignados = new Set(cursosAsignados?.map((a) => a.grupo_id)).size;
+    const cursosAsignados = new Set(asignacionesData?.map((a) => a.grupo_id)).size;
 
     // Generar alertas
     const alertas: Alerta[] = [];
@@ -226,7 +226,7 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     // Obtener estadísticas de carga horaria
     const { data: cargasNoLectivas } = await supabase
       .from('cargas_no_lectivas')
-      .select('total_horas, estado, director_aprobado, secretaria_aprobado')
+      .select('docente_id, total_horas, estado, director_aprobado, secretaria_aprobado')
       .eq('periodo_id', periodo?.id || '');
 
     const docentesConCargaRegistrada = new Set(cargasNoLectivas?.map((c) => c.docente_id)).size;
@@ -346,15 +346,15 @@ export class SupabaseDashboardRepository implements IDashboardRepository {
     })) || [];
 
     // Obtener carga no lectiva
-    const { data: cargaNoLectiva } = await supabase
+    const { data: cargaNoLectivaData } = await supabase
       .from('cargas_no_lectivas')
       .select('total_horas, estado, director_aprobado, secretaria_aprobado')
       .eq('docente_id', docenteId)
       .eq('periodo_id', periodo?.id || '')
       .single();
 
-    const cargaNoLectiva = cargaNoLectiva?.total_horas || 0;
-    const estadoCargaNoLectiva = cargaNoLectiva?.estado || 'Sin registrar';
+    const cargaNoLectiva = cargaNoLectivaData?.total_horas || 0;
+    const estadoCargaNoLectiva = cargaNoLectivaData?.estado || 'Sin registrar';
     const horasDisponiblesNoLectivas = Math.max(0, cargaMaxima - cargaElectiva);
 
     // Obtener notificaciones

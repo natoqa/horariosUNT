@@ -1,4 +1,4 @@
-import { ICursoRepository } from '../domain/repositories/curso.repository';
+import { ICursoRepository } from '../../domain/repositories/curso.repository';
 import { SupabaseCursoRepository } from '../../infrastructure/supabase-curso.repository';
 
 export class DeleteCursoUseCase {

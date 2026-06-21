@@ -61,7 +61,7 @@ export async function validateGenerationAction(
       id: d.id, nombres: d.nombres, apellidos: d.apellidos, dni: d.dni,
       correo: d.correo, telefono: d.telefono, categoria: d.categoria,
       regimen: d.regimen, condicion: d.condicion, escuela: d.escuela,
-      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, estado: d.estado,
+      fechaIngreso: d.fecha_ingreso, cargaMaxima: d.carga_maxima, cargaElectiva: d.carga_electiva || 0, estado: d.estado,
       createdAt: d.created_at, updatedAt: d.updated_at,
     }));
 

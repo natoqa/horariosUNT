@@ -23,6 +23,7 @@ export class CreateCursoUseCase {
       creditos: validated.creditos,
       requiereLaboratorio: validated.requiereLaboratorio,
       tipoLaboratorio: validated.requiereLaboratorio ? validated.tipoLaboratorio || null : null,
+      planEstudioId: validated.planEstudioId || null,
       estado: 'Activo',
     });
   }

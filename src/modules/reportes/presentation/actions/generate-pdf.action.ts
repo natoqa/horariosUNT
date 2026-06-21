@@ -130,10 +130,10 @@ export async function generatePdfAction(
   }
 
   const nameMaps: PdfNameMaps = {
-    docentes: docenteNames,
-    cursos: cursoNames,
-    aulas: aulaNames,
-    grupoCiclos,
+    docentes: new Map(Object.entries(docenteNames)),
+    cursos: new Map(Object.entries(cursoNames)),
+    aulas: new Map(Object.entries(aulaNames)),
+    grupoCiclos: new Map(Object.entries(grupoCiclos)),
   };
 
   const config: ReportConfig = {

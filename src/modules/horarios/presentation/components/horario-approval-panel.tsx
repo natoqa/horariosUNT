@@ -27,8 +27,8 @@ export function HorarioApprovalPanel({
   const [success, setSuccess] = useState<string | null>(null);
   const [violations, setViolations] = useState<Violation[]>([]);
 
-  const canApprove = (horarioEstado === 'Borrador' || horarioEstado === 'borrador') && (periodoEstado === 'Generación' || periodoEstado === 'Publicado');
-  const canPublish = (horarioEstado === 'Aprobado' || horarioEstado === 'aprobado') && (periodoEstado === 'Aprobado' || periodoEstado === 'Publicado');
+  const canApprove = horarioEstado === 'Borrador' && (periodoEstado === 'Generación' || periodoEstado === 'Publicado');
+  const canPublish = horarioEstado === 'Aprobado' && (periodoEstado === 'Aprobado' || periodoEstado === 'Publicado');
   const needsFix = false; // Ya no necesita fix porque usamos mayúsculas
 
   console.log('[HorarioApprovalPanel] horarioEstado:', horarioEstado);

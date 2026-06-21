@@ -45,8 +45,8 @@ export async function exportAuditoriaExcelAction(filters?: {
     // Estilos
     const headerStyle = {
       fill: {
-        type: 'pattern',
-        pattern: 'solid',
+        type: 'pattern' as const,
+        pattern: 'solid' as const,
         fgColor: { argb: 'FF1E3A8A' },
       },
       font: {
@@ -60,10 +60,10 @@ export async function exportAuditoriaExcelAction(filters?: {
         wrapText: true,
       },
       border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
+        top: { style: 'thin' as const },
+        left: { style: 'thin' as const },
+        bottom: { style: 'thin' as const },
+        right: { style: 'thin' as const },
       },
     };
 
@@ -73,10 +73,10 @@ export async function exportAuditoriaExcelAction(filters?: {
         wrapText: true,
       },
       border: {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
+        top: { style: 'thin' as const },
+        left: { style: 'thin' as const },
+        bottom: { style: 'thin' as const },
+        right: { style: 'thin' as const },
       },
     };
 
@@ -210,7 +210,7 @@ export async function exportAuditoriaExcelAction(filters?: {
 
     const buffer = await workbook.xlsx.writeBuffer();
 
-    return { success: true, data: buffer as Buffer };
+    return { success: true, data: buffer as unknown as Buffer };
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : 'Error al exportar logs de auditoría.';

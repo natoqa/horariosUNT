@@ -155,9 +155,10 @@ export async function savePlanEstudioAction(formData: FormData) {
         }
         
         // Procesar cursos uno por uno para manejar duplicados
+        let cursosCreados = 0;
+        
         if (cursosValidos.length > 0) {
           console.log(`Procesando ${cursosValidos.length} cursos...`);
-          let cursosCreados = 0;
           
           for (const curso of cursosValidos) {
             try {

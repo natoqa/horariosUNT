@@ -40,6 +40,7 @@ export async function getOwnDocenteInfoAction(): Promise<{ data?: Docente; messa
       escuela: docenteData.escuela,
       fechaIngreso: docenteData.fecha_ingreso,
       cargaMaxima: docenteData.carga_maxima,
+      cargaElectiva: docenteData.carga_electiva || 0,
       estado: docenteData.estado,
       createdAt: docenteData.created_at,
       updatedAt: docenteData.updated_at,

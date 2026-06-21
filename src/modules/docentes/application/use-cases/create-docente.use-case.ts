@@ -30,6 +30,7 @@ export class CreateDocenteUseCase {
       escuela: validated.escuela,
       fechaIngreso: validated.fechaIngreso,
       cargaMaxima: validated.cargaMaxima,
+      cargaElectiva: 0,
       estado: 'Activo',
     });
   }

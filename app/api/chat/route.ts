@@ -1,6 +1,5 @@
 import { mistral } from '@ai-sdk/mistral';
 import { streamText } from 'ai';
-import { chatTools } from './tools';
 import { createClient } from '@/shared/lib/supabase/server';
 
 export const runtime = 'nodejs';
@@ -15,41 +14,99 @@ async function getUserRole() {
   }
 }
 
+async function getTeachers() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('docentes')
+    .select('*')
+    .eq('estado', 'Activo')
+    .limit(20);
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+async function getCourses() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('cursos')
+    .select('*')
+    .eq('estado', 'Activo')
+    .limit(20);
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+async function getPeriods() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('periodos')
+    .select('*')
+    .limit(20);
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+async function getClassrooms() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('aulas')
+    .select('*')
+    .limit(20);
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+async function getStudyPlans() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('planes_estudio')
+    .select('*')
+    .eq('estado', 'Activo')
+    .limit(20);
+
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
 async function detectIntentAndCallTools(userMessage: string) {
   const lowerMessage = userMessage.toLowerCase();
 
   // Detectar intención de consultar docentes
   if (lowerMessage.includes('docente') || lowerMessage.includes('profesor') || lowerMessage.includes('maestro')) {
     console.log('Detected intent: getTeachers');
-    const result = await chatTools.getTeachers.execute({});
+    const result = await getTeachers();
     return formatToolResult('docentes', result);
   }
 
   // Detectar intención de consultar cursos
   if (lowerMessage.includes('curso') || lowerMessage.includes('asignatura')) {
     console.log('Detected intent: getCourses');
-    const result = await chatTools.getCourses.execute({});
+    const result = await getCourses();
     return formatToolResult('cursos', result);
   }
 
   // Detectar intención de consultar periodos
   if (lowerMessage.includes('periodo') || lowerMessage.includes('semestre') || lowerMessage.includes('ciclo')) {
     console.log('Detected intent: getPeriods');
-    const result = await chatTools.getPeriods.execute({});
+    const result = await getPeriods();
     return formatToolResult('periodos', result);
   }
 
   // Detectar intención de consultar aulas
   if (lowerMessage.includes('aula') || lowerMessage.includes('salon') || lowerMessage.includes('salón')) {
     console.log('Detected intent: getClassrooms');
-    const result = await chatTools.getClassrooms.execute({});
+    const result = await getClassrooms();
     return formatToolResult('aulas', result);
   }
 
   // Detectar intención de consultar planes de estudio
   if (lowerMessage.includes('plan') && lowerMessage.includes('estudio')) {
     console.log('Detected intent: getStudyPlans');
-    const result = await chatTools.getStudyPlans.execute({});
+    const result = await getStudyPlans();
     return formatToolResult('planes de estudio', result);
   }
 

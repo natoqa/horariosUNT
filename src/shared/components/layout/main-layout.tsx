@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { ChatSidebar, ChatToggle } from '../../../app/chat/components/chat-interface';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <div className="flex h-screen">
@@ -16,6 +18,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+      <ChatSidebar isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatToggle onClick={() => setChatOpen(true)} />
     </div>
   );
 }

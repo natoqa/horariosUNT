@@ -7,7 +7,7 @@ export const updateAsignacionSchema = z.object({
   aulaId: z.string().uuid('ID de aula inválido').optional(),
   dia: z.enum(DIAS_SEMANA, { message: 'Día inválido' }).optional(),
   bloque: z.enum(BLOQUES_HORARIOS, { message: 'Bloque horario inválido' }).optional(),
-  motivo: z.string().min(5, 'El motivo debe tener al menos 5 caracteres'),
+  motivo: z.string().min(5, 'El motivo debe tener al menos 5 caracteres').optional(),
 });
 
 export type UpdateAsignacionDTO = z.infer<typeof updateAsignacionSchema>;

@@ -3,6 +3,9 @@ export { HORARIO_ESTADOS, HORARIO_ESTADO_LABELS, ASIGNACION_TIPOS, ASIGNACION_TI
 export type { IHorarioRepository } from './domain/repositories/horario.repository';
 export { HorariosContent } from './presentation/components/horarios-content';
 export { DocenteHorarioView } from './presentation/components/docente-horario-view';
+export { DragDropHorarioGrid } from './presentation/components/drag-drop-horario-grid';
+export { HorarioGraficoContent } from './presentation/components/horario-grafico-content';
 export { approveHorarioAction } from './presentation/actions/approve-horario.action';
 export { publishHorarioAction } from './presentation/actions/publish-horario.action';
 export { postPublishUpdateAction } from './presentation/actions/post-publish-update.action';
+export { checkAulaAvailabilityAction } from './presentation/actions/check-aula-availability.action';

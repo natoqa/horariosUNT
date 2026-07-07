@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Info, Save, AlertCircle, Download, Plus } from 'lucide-react';
+import { CheckCircle2, Info, Save, AlertCircle, Download, Plus, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -18,6 +18,7 @@ import {
   ACTIVIDADES_NO_LECTIVAS_INSTRUCTIONS,
   ActividadNoLectivaTipo,
 } from '../../domain/entities/carga-no-lectiva.entity';
+import { useRouter } from 'next/navigation';
 
 interface ActividadFormRow {
   tipo: ActividadNoLectivaTipo;
@@ -49,6 +50,7 @@ interface CargaNoLectivaData {
 
 export function CargaNoLectivaContent() {
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [data, setData] = useState<CargaNoLectivaData | null>(null);
@@ -218,6 +220,25 @@ export function CargaNoLectivaContent() {
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Periodo</p>
           <p className="text-base font-semibold text-foreground">{data?.periodoName}</p>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${user?.role}/horario-grafico`)}
+          className="flex items-center gap-2"
+        >
+          <Calendar className="w-4 h-4" />
+          Horario Lectivas
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${user?.role}/horario-grafico`)}
+          className="flex items-center gap-2"
+        >
+          <Clock className="w-4 h-4" />
+          Horario No Lectivas
+        </Button>
       </div>
 
       {data?.carga && (

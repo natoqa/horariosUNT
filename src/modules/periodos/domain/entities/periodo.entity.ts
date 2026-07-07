@@ -5,6 +5,8 @@ export type TipoCiclo = 'Impar' | 'Par';
 export const CICLOS_IMPAR = ['I', 'III', 'V', 'VII', 'IX'] as const;
 export const CICLOS_PAR = ['II', 'IV', 'VI', 'VIII', 'X'] as const;
 
+export type CicloType = typeof CICLOS_IMPAR[number] | typeof CICLOS_PAR[number];
+
 export function getCiclosByTipo(tipo: TipoCiclo): string[] {
   return tipo === 'Impar' ? [...CICLOS_IMPAR] : [...CICLOS_PAR];
 }

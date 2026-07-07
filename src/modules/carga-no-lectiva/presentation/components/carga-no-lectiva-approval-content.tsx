@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, Calendar, Clock } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { getCargasNoLectivaAction } from '../actions/get-cargas-no-lectiva.action';
 import { approveCargaNoLectivaAction } from '../actions/approve-carga-no-lectiva.action';
 import { saveCargaLectivaAsignacionAction } from '../actions/save-carga-lectiva-asignacion.action';
 import { useActionState } from 'react';
 import { UserRole } from '@/shared/types/roles';
+import { useRouter } from 'next/navigation';
 
 interface CargaRow {
   id: string;
@@ -45,6 +46,7 @@ interface ApprovalContentProps {
 
 export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [cargas, setCargas] = useState<CargaRow[]>([]);
@@ -81,6 +83,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
     }
     return cargas.map((carga) => ({
       ...carga,
+      id: carga.docenteId || carga.id, // Use docenteId for navigation
       actividades: (carga.docenteId && actividades[carga.docenteId]) || [],
     }));
   }, [role, docentes, cargas, actividades]);
@@ -145,6 +148,25 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
             Resumen de carga horaria de los docentes: cursos asignados y carga no lectiva registrada.
           </p>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${role}/horario-grafico`)}
+          className="flex items-center gap-2"
+        >
+          <Calendar className="w-4 h-4" />
+          Horario Lectivas
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${role}/horario-grafico`)}
+          className="flex items-center gap-2"
+        >
+          <Clock className="w-4 h-4" />
+          Horario No Lectivas
+        </Button>
       </div>
 
       {errorMessage ? (
@@ -239,17 +261,39 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                   </div>
                 </div>
 
-                <div className="p-5 border-t border-border bg-slate-50 flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Estado: <span className="font-medium text-foreground">{row.estado}</span>
+                <div className="p-5 border-t border-border bg-slate-50">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Estado: <span className="font-medium text-foreground">{row.estado}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/${role}/horario-grafico?docenteId=${row.id}`)}
+                        className="flex items-center gap-2"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        Horario Lectivas
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/${role}/horario-grafico?docenteId=${row.id}&viewMode=no-lectivas`)}
+                        className="flex items-center gap-2"
+                      >
+                        <Clock className="w-4 h-4" />
+                        Horario No Lectivas
+                      </Button>
+                      <form action={approvalAction}>
+                        <input type="hidden" name="cargaId" value={row.cargaId ?? ''} />
+                        <Button type="submit" size="sm" disabled={approving || alreadyApproved || !row.cargaId}>
+                          <Check className="mr-2 h-4 w-4" />
+                          {row.cargaId ? (alreadyApproved ? 'Aprobado' : 'Aprobar') : 'Sin carga'}
+                        </Button>
+                      </form>
+                    </div>
                   </div>
-                  <form action={approvalAction}>
-                    <input type="hidden" name="cargaId" value={row.cargaId ?? ''} />
-                    <Button type="submit" size="sm" disabled={approving || alreadyApproved || !row.cargaId}>
-                      <Check className="mr-2 h-4 w-4" />
-                      {row.cargaId ? (alreadyApproved ? 'Aprobado' : 'Aprobar') : 'Sin carga'}
-                    </Button>
-                  </form>
                 </div>
               </div>
             );

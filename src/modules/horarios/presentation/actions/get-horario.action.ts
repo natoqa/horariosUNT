@@ -15,8 +15,8 @@ export async function getHorarioAction(
   }
 
   const role = user.user_metadata?.role;
-  if (role !== 'director' && role !== 'secretaria') {
-    return { message: 'Solo director y secretaria pueden acceder a esta vista.' };
+  if (role !== 'director' && role !== 'secretaria' && role !== 'docente') {
+    return { message: 'Solo director, secretaria y docente pueden acceder a esta vista.' };
   }
 
   const repo = new SupabaseHorarioRepository();

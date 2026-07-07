@@ -8,6 +8,7 @@ import { DIAS_SEMANA, BLOQUES_HORARIOS } from '@/shared/constants/time-blocks';
 import { Asignacion, ASIGNACION_TIPO_LABELS } from '../../domain/entities/horario.entity';
 import { getDocenteHorarioAction } from '../actions/get-docente-horario.action';
 import { generateDocentePdfAction } from '../actions/generate-docente-pdf.action';
+import { useSearchParams } from 'next/navigation';
 
 type ViewState = 'loading' | 'error' | 'empty' | 'success';
 
@@ -26,6 +27,8 @@ const CICLO_COLORS: Record<string, string> = {
 
 export function DocenteHorarioView() {
   const { user, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const docenteIdFromUrl = searchParams.get('docenteId');
 
   const [state, setState] = useState<ViewState>('loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -50,7 +53,7 @@ export function DocenteHorarioView() {
     setState('loading');
     setErrorMessage(null);
 
-    const result = await getDocenteHorarioAction();
+    const result = await getDocenteHorarioAction(docenteIdFromUrl || undefined);
 
     if (result.debug) {
       console.log('[DocenteHorario Debug]', result.debug);

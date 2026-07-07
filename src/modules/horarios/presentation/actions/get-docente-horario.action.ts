@@ -2,6 +2,7 @@
 
 import { createClient } from '@/shared/lib/supabase/server';
 import { Asignacion } from '../../domain/entities/horario.entity';
+import { CICLOS_IMPAR, CICLOS_PAR } from '@/modules/periodos';
 
 interface DocenteHorarioData {
   periodoId: string;
@@ -37,7 +38,9 @@ interface GetDocenteHorarioResult {
   };
 }
 
-export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult> {
+export async function getDocenteHorarioAction(
+  overrideDocenteId?: string
+): Promise<GetDocenteHorarioResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -46,14 +49,18 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
   }
 
   const role = user.user_metadata?.role || 'docente';
-  if (role !== 'docente') {
-    return { message: 'Solo los docentes pueden acceder a esta vista.' };
+  // Allow docente, director, and secretaria to access
+  if (role !== 'docente' && role !== 'director' && role !== 'secretaria') {
+    return { message: 'No autorizado.' };
   }
+
+  // Use override docenteId if provided (for director/secretaria viewing other docentes)
+  const targetDocenteId = overrideDocenteId || user.id;
 
   // Find an active periodo (any state)
   const { data: periodoData } = await supabase
     .from('periodos')
-    .select('id, name, state')
+    .select('id, name, state, tipo_ciclo')
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
@@ -85,59 +92,48 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     .limit(1)
     .single();
 
-  console.log('[DocenteHorario] Horario encontrado:', horarioData?.id, horarioData?.estado);
-  console.log('[DocenteHorario] HorarioError:', horarioError);
-
-  const { data: docenteData, error: docenteError } = await supabase
-    .from('docentes')
-    .select('id')
-    .eq('correo', user.email)
-    .single();
-
-  if (docenteError || !docenteData) {
-    console.error('[DocenteHorario] Error buscando docente:', docenteError);
-    return { message: 'No se encontró un registro de docente asociado a este usuario.' };
+  // Get docente data - use targetDocenteId if provided, otherwise search by email
+  let docenteData;
+  let docenteError;
+  
+  if (overrideDocenteId) {
+    // Director/secretaria viewing another docente's schedule
+    const result = await supabase
+      .from('docentes')
+      .select('id')
+      .eq('id', targetDocenteId)
+      .single();
+    docenteData = result.data;
+    docenteError = result.error;
+  } else {
+    // Docente viewing their own schedule
+    const result = await supabase
+      .from('docentes')
+      .select('id')
+      .eq('correo', user.email)
+      .single();
+    docenteData = result.data;
+    docenteError = result.error;
   }
 
-  console.log('[DocenteHorario] Docente encontrado:', docenteData.id);
+  if (docenteError || !docenteData) {
+    return { message: 'No se encontró un registro de docente asociado a este usuario.' };
+  }
 
   // Get assignments - first try horario, then manual group assignments
   let asignaciones: Asignacion[] = [];
   let horarioId = '';
 
-  const debugInfo: any = {
-    periodoId: periodoData.id,
-    periodoState: periodoData.state,
-    horarioId: horarioData?.id,
-    horarioEstado: horarioData?.estado,
-    horarioDataExists: !!horarioData,
-    allHorariosCount: allHorarios?.length || 0,
-    allHorarios: allHorarios,
-    horarioError: horarioError?.message,
-    docenteId: docenteData.id,
-  };
-
-  console.log('[DocenteHorario] HorarioData:', horarioData);
-  console.log('[DocenteHorario] HorarioData exists:', !!horarioData);
-
   if (horarioData) {
     horarioId = horarioData.id;
-    // Get all assignments for this horario (without docente filter first to debug)
+    // Get all assignments for this horario
     const { data: allAsignaciones } = await supabase
       .from('asignaciones')
-      .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo_sesion, created_at')
+      .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo, created_at')
       .eq('horario_id', horarioData.id);
-
-    debugInfo.totalAsignaciones = allAsignaciones?.length || 0;
-    debugInfo.docenteIdsInAsignaciones = allAsignaciones?.map(a => a.docente_id);
-    console.log('[DocenteHorario] Total asignaciones en horario:', allAsignaciones?.length);
-    console.log('[DocenteHorario] Docente ID a buscar:', docenteData.id);
-    console.log('[DocenteHorario] Docente IDs en asignaciones:', allAsignaciones?.map(a => a.docente_id));
 
     // Filter by docente
     const rawAsignaciones = allAsignaciones?.filter((a) => a.docente_id === docenteData.id) ?? [];
-    debugInfo.asignacionesFiltradas = rawAsignaciones.length;
-    console.log('[DocenteHorario] Asignaciones filtradas por docente:', rawAsignaciones.length);
 
     if (rawAsignaciones && rawAsignaciones.length > 0) {
       asignaciones = rawAsignaciones.map((a) => ({
@@ -148,7 +144,7 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
         aulaId: a.aula_id,
         dia: a.dia,
         bloque: a.bloque,
-        tipo: a.tipo_sesion?.toLowerCase().startsWith('pr') ? 'practico' : 'teorico',
+        tipo: a.tipo?.toLowerCase().startsWith('pr') ? 'practico' : 'teorico',
         createdAt: a.created_at,
       }));
     }
@@ -163,9 +159,6 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
       .eq('docente_id', docenteData.id)
       .eq('periodo_id', periodoData.id);
 
-    debugInfo.gruposAsignados = gruposAsignados?.length || 0;
-    console.log('[DocenteHorario] Grupos asignados encontrados:', gruposAsignados);
-
     if (gruposAsignados && gruposAsignados.length > 0) {
       // Create placeholder assignments for manual group assignments
       asignaciones = gruposAsignados.map((g) => ({
@@ -179,7 +172,6 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
         tipo: 'teorico',
         createdAt: new Date().toISOString(),
       }));
-      console.log('[DocenteHorario] Asignaciones placeholder creadas:', asignaciones.length);
     }
   }
 
@@ -192,21 +184,20 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
       .eq('docente_id', docenteData.id)
       .eq('periodo_id', periodoData.id);
 
-    debugInfo.actividadesNoLectivas = actividadesCheck?.length || 0;
-
     if (!actividadesCheck || actividadesCheck.length === 0) {
       return { 
         message: 'No tienes asignaciones ni actividades no lectivas en el período actual.',
-        debug: debugInfo,
       };
     }
   }
 
-  // Load name maps
+  // Load name maps - only load groups that are in the docente's assignments
+  const grupoIdsInAsignaciones = asignaciones.map(a => a.grupoId);
+  
   const [cursosRes, aulasRes, gruposRes] = await Promise.all([
     supabase.from('cursos').select('id, nombre, ciclo'),
     supabase.from('aulas').select('id, nombre, codigo'),
-    supabase.from('grupos').select('id, curso_id, nombre'),
+    supabase.from('grupos').select('id, curso_id, nombre').in('id', grupoIdsInAsignaciones),
   ]);
 
   const cursoIdToName: Record<string, string> = {};
@@ -237,19 +228,38 @@ export async function getDocenteHorarioAction(): Promise<GetDocenteHorarioResult
     .eq('docente_id', docenteData.id)
     .eq('periodo_id', periodoData.id);
 
-  debugInfo.actividadesNoLectivas = actividadesNoLectivas?.length || 0;
+  // Filter lective asignaciones based on periodo tipoCiclo
+  const expectedCiclos = periodoData.tipo_ciclo === 'Impar' ? CICLOS_IMPAR : CICLOS_PAR;
+  
+  const filteredAsignaciones = asignaciones.filter((a) => {
+    const ciclo = grupoCiclos[a.grupoId];
+    if (!ciclo) return false;
+    return expectedCiclos.some(c => c === ciclo);
+  });
+
+  // Filter non-lective activities based on periodo tipoCiclo
+  // Only include non-lective activities if docente has courses in current periodo
+  const currentAssignmentCiclos = new Set<string>();
+  filteredAsignaciones.forEach((asignacion) => {
+    const ciclo = grupoCiclos[asignacion.grupoId];
+    if (ciclo) {
+      currentAssignmentCiclos.add(ciclo);
+    }
+  });
+  
+  const hasMatchingCourses = Array.from(currentAssignmentCiclos).some(ciclo => expectedCiclos.some(c => c === ciclo));
+  const filteredActividadesNoLectivas = hasMatchingCourses ? (actividadesNoLectivas ?? []) : [];
 
   return {
     data: {
       periodoId: periodoData.id,
       periodoName: periodoData.name,
       horarioEstado: horarioData?.estado || 'Pendiente',
-      asignaciones,
+      asignaciones: filteredAsignaciones,
       cursoNames,
       aulaNames,
       grupoCiclos,
-      actividadesNoLectivas: actividadesNoLectivas ?? [],
+      actividadesNoLectivas: filteredActividadesNoLectivas,
     },
-    debug: debugInfo,
   };
 }

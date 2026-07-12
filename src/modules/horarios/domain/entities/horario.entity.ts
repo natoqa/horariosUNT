@@ -32,7 +32,7 @@ export interface Horario {
   periodoId: string;
   estado: HorarioEstado;
   fechaGeneracion: string;
-  resumen: GenerationSummary | null;
+  resumen?: GenerationSummary | null;
   createdAt: string;
   updatedAt: string;
 }

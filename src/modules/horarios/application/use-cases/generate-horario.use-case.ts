@@ -31,7 +31,7 @@ export class GenerateHorarioUseCase {
     // Run algorithm
     const generationResult = generateSchedule(input);
 
-    // Save horario
+    // Save horario (resumen es opcional)
     const horario = await this.horarioRepository.save(periodoId, generationResult.summary);
 
     // Save asignaciones

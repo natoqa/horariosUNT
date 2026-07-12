@@ -34,7 +34,7 @@ export function HorariosContent() {
   const [generatingPhase, setGeneratingPhase] = useState(1);
   const [horario, setHorario] = useState<Horario | null>(null);
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
-  const [summary, setSummary] = useState<GenerationSummary | null>(null);
+  const [summary, setSummary] = useState<GenerationSummary | null | undefined>(null);
   const [unassigned, setUnassigned] = useState<UnassignedUnit[]>([]);
   const [planesEstudio, setPlanesEstudio] = useState<PlanEstudio[]>([]);
   const [selectedPlanEstudio, setSelectedPlanEstudio] = useState<string>('');

@@ -250,6 +250,20 @@ export async function getDocenteHorarioAction(
   const hasMatchingCourses = Array.from(currentAssignmentCiclos).some(ciclo => expectedCiclos.some(c => c === ciclo));
   const filteredActividadesNoLectivas = hasMatchingCourses ? (actividadesNoLectivas ?? []) : [];
 
+  // Debug info
+  const debug = {
+    periodoId: periodoData.id,
+    periodoState: periodoData.state,
+    horarioId: horarioData?.id,
+    horarioEstado: horarioData?.estado,
+    docenteId: docenteData.id,
+    totalAsignaciones: allAsignaciones?.length || 0,
+    asignacionesFiltradas: filteredAsignaciones.length,
+    gruposAsignados: gruposAsignados?.length || 0,
+    actividadesNoLectivas: actividadesNoLectivas?.length || 0,
+  };
+  console.log('[DocenteHorario] Debug:', debug);
+
   return {
     data: {
       periodoId: periodoData.id,
@@ -261,5 +275,6 @@ export async function getDocenteHorarioAction(
       grupoCiclos,
       actividadesNoLectivas: filteredActividadesNoLectivas,
     },
+    debug,
   };
 }

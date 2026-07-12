@@ -21,7 +21,7 @@ interface AsignacionRow {
   aula_id: string;
   dia: string;
   bloque: string;
-  tipo: string;
+  tipo?: string;
   created_at: string;
 }
 
@@ -115,7 +115,8 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       'practico': 'Práctica',
     };
 
-    const rows = asignaciones.map((a) => ({
+    // Primero intentamos con tipo
+    let rowsWithTipo = asignaciones.map((a) => ({
       horario_id: horarioId,
       grupo_id: a.grupoId,
       docente_id: a.docenteId,
@@ -125,10 +126,33 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       tipo: a.tipo,
     }));
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('asignaciones')
-      .insert(rows)
+      .insert(rowsWithTipo)
       .select();
+
+    // Si falla por la columna tipo, intentamos sin ella
+    if (error && error?.message?.includes('tipo')) {
+      console.warn('[HorarioRepository] Intentando guardar sin columna tipo...');
+      const rowsWithoutTipo = asignaciones.map((a) => ({
+        horario_id: horarioId,
+        grupo_id: a.grupoId,
+        docente_id: a.docenteId,
+        aula_id: a.aulaId,
+        dia: a.dia,
+        bloque: a.bloque,
+      }));
+
+      const resultWithoutTipo = await supabase
+        .from('asignaciones')
+        .insert(rowsWithoutTipo)
+        .select();
+
+      if (resultWithoutTipo.error || !resultWithoutTipo.data) {
+        throw new Error(resultWithoutTipo.error?.message || 'Error al guardar asignaciones sin tipo.');
+      }
+      return (resultWithoutTipo.data as AsignacionRow[]).map(this.mapToAsignacion);
+    }
 
     if (error || !data) {
       throw new Error(error?.message || 'Error al guardar asignaciones.');

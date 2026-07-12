@@ -266,6 +266,18 @@ export class SupabaseCursoRepository implements ICursoRepository {
     }
   }
 
+  async resetAsignaciones(periodoId: string): Promise<void> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('grupos')
+      .update({ docente_id: null })
+      .eq('periodo_id', periodoId);
+
+    if (error) {
+      throw new Error(error.message || 'Error al resetear las asignaciones.');
+    }
+  }
+
   private mapToCurso(row: CursoRow): Curso {
     return {
       id: row.id,

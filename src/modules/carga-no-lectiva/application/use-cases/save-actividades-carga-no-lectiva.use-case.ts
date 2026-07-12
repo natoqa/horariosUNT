@@ -31,19 +31,16 @@ export class SaveActividadesCargaNoLectivaUseCase {
     if (currentCarga) {
       // Si existe: Actualizar el total y marcar como borrador (si no estaba aprobado)
       const sameTotal = totalHoras === currentCarga.totalHoras;
-      const updatedEstado = currentCarga.directorAprobado && currentCarga.secretariaAprobado && sameTotal 
-        ? 'Aprobado' 
-        : 'En revisión';
-
-      await this.repository.saveCargaMeta(docenteId, periodoId, {
-        // Solo actualizamos el total si la carga no está aprobada o si el total cambió
-        ...(!(currentCarga.directorAprobado && currentCarga.secretariaAprobado && sameTotal) ? {
+      
+      // Solo actualizamos saveCargaMeta si hay algo que actualizar
+      if (!(currentCarga.directorAprobado && currentCarga.secretariaAprobado && sameTotal)) {
+        await this.repository.saveCargaMeta(docenteId, periodoId, {
           horasLectivasAsignadas: currentCarga.horasLectivasAsignadas,
           horasLectivasNoAsignadas: currentCarga.horasLectivasNoAsignadas,
           lectivaDeclarada: currentCarga.lectivaDeclarada,
           declaracionLectiva: currentCarga.declaracionLectiva,
-        } : {}),
-      });
+        });
+      }
 
       // Necesitamos actualizar el totalHoras específicamente (saveCargaMeta no lo hace)
       await this.repository.saveCargaTotal(docenteId, periodoId, totalHoras);

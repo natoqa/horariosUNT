@@ -94,7 +94,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       .eq('docente_id', docenteId)
       .eq('periodo_id', periodoId)
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (error || !data) return null;
     return this.mapCarga(data as CargaRow);

@@ -291,6 +291,12 @@ export function HorarioGraficoContent() {
         aulaNamesMap = aNames;
       }
 
+      console.log('[HorarioGraficoContent] loadData: docenteIdFromUrl:', docenteIdFromUrl);
+      console.log('[HorarioGraficoContent] loadData: currentPeriodo:', currentPeriodo);
+      console.log('[HorarioGraficoContent] loadData: unifiedAsignaciones:', unifiedAsignaciones);
+      console.log('[HorarioGraficoContent] loadData: cursoNamesMap:', cursoNamesMap);
+      console.log('[HorarioGraficoContent] loadData: grupoCiclosMap:', grupoCiclosMap);
+      
       setCursoNames(cursoNamesMap);
       setAulaNames(aulaNamesMap);
       setGrupoCiclos(grupoCiclosMap);
@@ -367,13 +373,22 @@ export function HorarioGraficoContent() {
   };
 
   const filteredAsignaciones = asignaciones.filter((a) => {
+    console.log('[HorarioGraficoContent] Filtering asignacion:', a);
     if (viewMode === 'lectivas') {
       // Only include real asignaciones with actual dia/bloque (not the placeholder "Pendiente")
-      return (a.tipo === 'teorico' || a.tipo === 'practico') && a.dia !== 'Pendiente' && a.bloque !== 'Pendiente';
+      const include = (a.tipo === 'teorico' || a.tipo === 'practico') && a.dia !== 'Pendiente' && a.bloque !== 'Pendiente';
+      console.log('[HorarioGraficoContent] Lectivas include:', include);
+      return include;
     } else {
-      return a.tipo === 'nolectiva';
+      const include = a.tipo === 'nolectiva';
+      console.log('[HorarioGraficoContent] No lectivas include:', include);
+      return include;
     }
   });
+
+  console.log('[HorarioGraficoContent] Total asignaciones:', asignaciones.length);
+  console.log('[HorarioGraficoContent] Filtered asignaciones:', filteredAsignaciones.length);
+  console.log('[HorarioGraficoContent] View mode:', viewMode);
 
   // Convert filtered asignaciones to the format expected by DragDropHorarioGrid
   const gridAsignaciones: Asignacion[] = filteredAsignaciones.map((a) => ({

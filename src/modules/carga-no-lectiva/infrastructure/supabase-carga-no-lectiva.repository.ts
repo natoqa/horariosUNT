@@ -72,8 +72,6 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       tipo: actividad.tipo,
       horas: actividad.horas,
       detalles: actividad.detalles,
-      dia: actividad.dia,
-      bloque: actividad.bloque,
     }));
 
     const { data, error: insertError } = await supabase

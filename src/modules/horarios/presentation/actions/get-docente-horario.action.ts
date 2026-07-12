@@ -123,6 +123,14 @@ export async function getDocenteHorarioAction(
   // Get assignments - first try horario, then manual group assignments
   let asignaciones: Asignacion[] = [];
   let horarioId = '';
+  let allAsignacionesFromHorario: any[] | null = null; // Declare outside the if block
+  
+  // Get groups assigned to the docente in this period (always for debug)
+  const { data: gruposAsignados } = await supabase
+    .from('grupos')
+    .select('id, curso_id, nombre')
+    .eq('docente_id', docenteData.id)
+    .eq('periodo_id', periodoData.id);
 
   if (horarioData) {
     horarioId = horarioData.id;
@@ -131,6 +139,7 @@ export async function getDocenteHorarioAction(
       .from('asignaciones')
       .select('id, horario_id, grupo_id, docente_id, aula_id, dia, bloque, tipo, created_at')
       .eq('horario_id', horarioData.id);
+    allAsignacionesFromHorario = allAsignaciones;
 
     // Filter by docente
     const rawAsignaciones = allAsignaciones?.filter((a) => a.docente_id === docenteData.id) ?? [];
@@ -152,13 +161,6 @@ export async function getDocenteHorarioAction(
 
   // If no assignments in horario, check for manual group assignments
   if (asignaciones.length === 0) {
-    // Get groups assigned to the docente in this period
-    const { data: gruposAsignados } = await supabase
-      .from('grupos')
-      .select('id, curso_id, nombre')
-      .eq('docente_id', docenteData.id)
-      .eq('periodo_id', periodoData.id);
-
     if (gruposAsignados && gruposAsignados.length > 0) {
       // Create placeholder assignments for manual group assignments
       asignaciones = gruposAsignados.map((g) => ({
@@ -250,6 +252,20 @@ export async function getDocenteHorarioAction(
   const hasMatchingCourses = Array.from(currentAssignmentCiclos).some(ciclo => expectedCiclos.some(c => c === ciclo));
   const filteredActividadesNoLectivas = hasMatchingCourses ? (actividadesNoLectivas ?? []) : [];
 
+  // Debug info
+  const debug = {
+    periodoId: periodoData.id,
+    periodoState: periodoData.state,
+    horarioId: horarioData?.id,
+    horarioEstado: horarioData?.estado,
+    docenteId: docenteData.id,
+    totalAsignaciones: allAsignacionesFromHorario?.length || 0,
+    asignacionesFiltradas: filteredAsignaciones.length,
+    gruposAsignados: gruposAsignados?.length || 0,
+    actividadesNoLectivas: actividadesNoLectivas?.length || 0,
+  };
+  console.log('[DocenteHorario] Debug:', debug);
+
   return {
     data: {
       periodoId: periodoData.id,
@@ -261,5 +277,6 @@ export async function getDocenteHorarioAction(
       grupoCiclos,
       actividadesNoLectivas: filteredActividadesNoLectivas,
     },
+    debug,
   };
 }

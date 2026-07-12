@@ -112,6 +112,7 @@ export function HorarioGraficoContent() {
 
         // Use getDocenteHorarioAction for viewing specific docente's schedule (loads both lective and non-lective activities)
         const docenteHorarioResult = await getDocenteHorarioAction(docenteIdFromUrl || undefined);
+        console.log('[HorarioGraficoContent] docenteHorarioResult:', docenteHorarioResult);
 
         if (docenteHorarioResult.data) {
           // Check if docente has any groups assigned

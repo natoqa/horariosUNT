@@ -22,7 +22,7 @@ export async function generateCargaNoLectivaPdfAction(formData: FormData) {
     .from('docentes')
     .select('id, nombres, apellidos')
     .eq('correo', user.email)
-    .single();
+    .maybeSingle();
 
   if (docenteError || !docenteData) {
     return { message: 'No se encontró un docente asociado a este usuario.' };

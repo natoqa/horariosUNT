@@ -29,7 +29,7 @@ export async function saveCargaNoLectivaAction(
     .from('docentes')
     .select('id')
     .eq('correo', user.email)
-    .single();
+    .maybeSingle();
 
   if (docenteError || !docenteData) {
     return { message: 'No se encontró un docente asociado a este usuario.' };

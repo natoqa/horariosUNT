@@ -21,7 +21,7 @@ export async function getCargaNoLectivaAction() {
     .from('docentes')
     .select('id, carga_maxima')
     .eq('correo', user.email)
-    .single();
+    .maybeSingle();
 
   if (docenteError || !docenteData) {
     return { message: 'No se encontró un docente asociado a este usuario.' };

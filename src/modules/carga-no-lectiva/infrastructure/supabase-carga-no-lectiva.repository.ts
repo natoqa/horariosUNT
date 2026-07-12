@@ -117,7 +117,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         })
         .eq('id', existing.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         throw new Error(error?.message || 'Error al actualizar la carga no lectiva.');
@@ -135,7 +135,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         estado: 'En revisión',
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       throw new Error(error?.message || 'Error al guardar la carga no lectiva.');
@@ -177,7 +177,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         .update(payload)
         .eq('id', existing.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         throw new Error(error?.message || 'Error al guardar la declaración lectiva.');
@@ -198,7 +198,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       .from('cargas_no_lectivas')
       .insert(insertPayload)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       throw new Error(error?.message || 'Error al guardar la declaración lectiva.');
@@ -256,7 +256,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       .from('cargas_no_lectivas')
       .select('*')
       .eq('id', cargaId)
-      .single();
+      .maybeSingle();
 
     if (currentError || !currentData) {
       throw new Error(currentError?.message || 'Registro de carga no lectiva no encontrado.');
@@ -275,7 +275,7 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
       })
       .eq('id', cargaId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       throw new Error(error?.message || 'Error al aprobar la carga no lectiva.');

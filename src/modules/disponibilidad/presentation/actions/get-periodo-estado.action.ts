@@ -16,7 +16,7 @@ export async function getActivePeriodoAction(): Promise<{ data?: Periodo; messag
     .select('*')
     .neq('state', 'Cerrado')
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     return { message: 'No hay un período académico activo.' };

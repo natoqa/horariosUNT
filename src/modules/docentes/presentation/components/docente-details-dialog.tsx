@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Docente } from '../../domain/entities/docente.entity';
 import { Button } from '@/shared/components/ui/button';
-import { X, Calendar, BookOpen, Clock, Mail, Phone, Info } from 'lucide-react';
-import { getDocenteDetailsAction } from '../actions/get-docente-details.action';
+import { X, Calendar, BookOpen, Clock, Mail, Phone, Info, Users } from 'lucide-react';
+import { getDocenteDetailsAction, GrupoAsignado } from '../actions/get-docente-details.action';
 import { Disponibilidad } from '@/modules/disponibilidad/domain/entities/disponibilidad.entity';
 import { Periodo } from '@/modules/periodos/domain/entities/periodo.entity';
 import { DisponibilidadGrid, makeKey } from '@/modules/disponibilidad/presentation/components/disponibilidad-grid';
@@ -20,16 +20,18 @@ export function DocenteDetailsDialog({ docente, onClose }: DocenteDetailsDialogP
   const [error, setError] = useState<string | null>(null);
   const [disponibilidad, setDisponibilidad] = useState<Disponibilidad[]>([]);
   const [periodo, setPeriodo] = useState<Periodo | null>(null);
+  const [asignaciones, setAsignaciones] = useState<GrupoAsignado[]>([]);
 
   useEffect(() => {
     const fetchDetails = async () => {
       setLoading(true);
       const result = await getDocenteDetailsAction(docente.id);
-      if (result.message && !result.disponibilidad) {
+      if (result.message && !result.disponibilidad && !result.asignaciones) {
         setError(result.message);
       } else {
-        if (result.disponibilidad) setDisponibilidad(result.disponibilidad);
+        setDisponibilidad(result.disponibilidad ?? []);
         if (result.periodo) setPeriodo(result.periodo);
+        setAsignaciones(result.asignaciones ?? []);
       }
       setLoading(false);
     };
@@ -105,6 +107,72 @@ export function DocenteDetailsDialog({ docente, onClose }: DocenteDetailsDialogP
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Cursos y grupos asignados */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                <Users className="w-4 h-4 text-primary" />
+                Cursos y Grupos Asignados
+              </h3>
+              {periodo && (
+                <span className="text-xs text-muted-foreground">
+                  Periodo: {periodo.name}
+                </span>
+              )}
+            </div>
+
+            {loading ? (
+              <div className="h-32 flex flex-col items-center justify-center gap-3 border border-border rounded-xl bg-muted/20">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-muted-foreground font-medium">Cargando asignaciones...</p>
+              </div>
+            ) : asignaciones.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center flex flex-col items-center justify-center">
+                <BookOpen className="w-8 h-8 text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  El docente no tiene cursos ni grupos asignados en el periodo activo.
+                </p>
+              </div>
+            ) : (
+              <div className="border border-border rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Código</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Curso</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Ciclo</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Grupo</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Horas</th>
+                        <th className="h-10 px-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estudiantes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {asignaciones.map((asignacion) => (
+                        <tr key={asignacion.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3 font-medium text-foreground">{asignacion.curso.codigo}</td>
+                          <td className="px-4 py-3 text-foreground">{asignacion.curso.nombre}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary">
+                              {asignacion.curso.ciclo}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-medium text-foreground">Grupo {asignacion.nombreGrupo}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{asignacion.curso.tipo}</td>
+                          <td className="px-4 py-3 text-muted-foreground">
+                            {asignacion.curso.horasTeoricas}T / {asignacion.curso.horasPracticas}P
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{asignacion.numEstudiantes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Disponibilidad Horaria */}

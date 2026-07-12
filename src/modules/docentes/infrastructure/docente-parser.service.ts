@@ -40,14 +40,24 @@ export class DocenteParserService {
         }
       }
       
-      // Si no se encontraron encabezados, asumir que la primera fila tiene datos
+      // Construir mapa de índices
+      let indices = this.obtenerIndicesDefectos();
+      if (headerRowIndex >= 0) {
+        const rowHeaders = jsonData[headerRowIndex].map(h => String(h || ''));
+        const mappedIndices = this.obtenerMapDeIndices(rowHeaders);
+        // Validar si encontramos al menos los campos obligatorios
+        if (mappedIndices.nombres !== -1 && mappedIndices.apellidos !== -1 && mappedIndices.dni !== -1 && mappedIndices.correo !== -1) {
+          indices = mappedIndices;
+        }
+      }
+      
       const startRow = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
       
       for (let i = startRow; i < jsonData.length; i++) {
         const row = jsonData[i];
-        if (!row || row.length < 8) continue;
+        if (!row || row.length < 4) continue; // Al menos nombres, apellidos, dni, correo
         
-        const docente = this.extraerDocenteDeFila(row);
+        const docente = this.extraerDocenteDeFila(row, indices);
         if (docente) {
           docentes.push(docente);
         }
@@ -84,7 +94,16 @@ export class DocenteParserService {
         }
       }
       
-      // Si no se encontraron encabezados, asumir que la primera fila tiene datos
+      // Construir mapa de índices
+      let indices = this.obtenerIndicesDefectos();
+      if (headerRowIndex >= 0) {
+        const lineHeaders = lines[headerRowIndex].split(delimiter).map(cell => cell.trim().replace(/^"|"$/g, ''));
+        const mappedIndices = this.obtenerMapDeIndices(lineHeaders);
+        if (mappedIndices.nombres !== -1 && mappedIndices.apellidos !== -1 && mappedIndices.dni !== -1 && mappedIndices.correo !== -1) {
+          indices = mappedIndices;
+        }
+      }
+      
       const startRow = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
       
       for (let i = startRow; i < lines.length; i++) {
@@ -92,7 +111,9 @@ export class DocenteParserService {
         if (!line.trim()) continue;
         
         const row = line.split(delimiter).map(cell => cell.trim().replace(/^"|"$/g, ''));
-        const docente = this.extraerDocenteDeFila(row);
+        if (row.length < 4) continue;
+        
+        const docente = this.extraerDocenteDeFila(row, indices);
         if (docente) {
           docentes.push(docente);
         }
@@ -104,24 +125,73 @@ export class DocenteParserService {
       throw new Error('No se pudo extraer la información del archivo CSV');
     }
   }
+
+  private obtenerIndicesDefectos(): Record<string, number> {
+    return {
+      nombres: 0,
+      apellidos: 1,
+      dni: 2,
+      correo: 3,
+      telefono: 4,
+      categoria: 5,
+      regimen: 6,
+      condicion: 7,
+      escuela: 8,
+      fechaIngreso: 9,
+      cargaMaxima: 10,
+      cargaElectiva: 11,
+      estado: 12,
+    };
+  }
+
+  private obtenerMapDeIndices(headers: string[]): Record<string, number> {
+    const clean = (str: string) => {
+      return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // quitar acentos
+        .replace(/ñ/g, "n")
+        .replace(/[^a-z0-9]/g, ""); // quitar espacios/símbolos
+    };
+
+    const cleanHeaders = headers.map(clean);
+
+    return {
+      nombres: cleanHeaders.indexOf('nombres'),
+      apellidos: cleanHeaders.indexOf('apellidos'),
+      dni: cleanHeaders.indexOf('dni'),
+      correo: cleanHeaders.indexOf('correo'),
+      telefono: cleanHeaders.indexOf('telefono'),
+      categoria: cleanHeaders.indexOf('categoria'),
+      regimen: cleanHeaders.indexOf('regimen'),
+      condicion: cleanHeaders.indexOf('condicion'),
+      escuela: cleanHeaders.indexOf('escuela'),
+      fechaIngreso: cleanHeaders.indexOf('fechaingreso'),
+      cargaMaxima: cleanHeaders.indexOf('cargamaxima'),
+      cargaElectiva: cleanHeaders.indexOf('cargaelectiva'),
+      estado: cleanHeaders.indexOf('estado'),
+    };
+  }
   
-  private extraerDocenteDeFila(row: any[]): DocenteExtraido | null {
-    if (row.length < 8) return null;
+  private extraerDocenteDeFila(row: any[], indices: Record<string, number>): DocenteExtraido | null {
+    const getValue = (idx: number) => {
+      return idx !== -1 && idx < row.length ? row[idx] : null;
+    };
     
     return {
-      nombres: this.extraerTexto(row[0]),
-      apellidos: this.extraerTexto(row[1]),
-      dni: this.extraerTexto(row[2]),
-      correo: this.extraerTexto(row[3]),
-      telefono: this.extraerTexto(row[4]) || null,
-      categoria: this.extraerTexto(row[5]),
-      regimen: this.extraerTexto(row[6]),
-      condicion: this.extraerTexto(row[7]),
-      escuela: this.extraerTexto(row[8]),
-      fechaIngreso: this.extraerTexto(row[9]),
-      cargaMaxima: this.extraerNumero(row[10]),
-      cargaElectiva: this.extraerNumero(row[11]),
-      estado: this.extraerTexto(row[12]) || 'Activo',
+      nombres: this.extraerTexto(getValue(indices.nombres)),
+      apellidos: this.extraerTexto(getValue(indices.apellidos)),
+      dni: this.extraerTexto(getValue(indices.dni)),
+      correo: this.extraerTexto(getValue(indices.correo)),
+      telefono: this.extraerTexto(getValue(indices.telefono)) || null,
+      categoria: this.extraerTexto(getValue(indices.categoria)),
+      regimen: this.extraerTexto(getValue(indices.regimen)),
+      condicion: this.extraerTexto(getValue(indices.condicion)),
+      escuela: this.extraerTexto(getValue(indices.escuela)),
+      fechaIngreso: this.extraerTexto(getValue(indices.fechaIngreso)),
+      cargaMaxima: this.extraerNumero(getValue(indices.cargaMaxima)),
+      cargaElectiva: this.extraerNumero(getValue(indices.cargaElectiva)),
+      estado: this.extraerTexto(getValue(indices.estado)) || 'Activo',
     };
   }
   

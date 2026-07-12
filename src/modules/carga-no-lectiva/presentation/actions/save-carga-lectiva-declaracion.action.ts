@@ -37,6 +37,21 @@ export async function saveCargaLectivaDeclaracionAction(
     return { message: 'No se encontró un docente asociado a este usuario.' };
   }
 
+  // Verificar si el docente tiene grupos asignados en este período
+  const { count: gruposCount, error: gruposError } = await supabase
+    .from('grupos')
+    .select('*', { count: 'exact', head: true })
+    .eq('periodo_id', periodoId)
+    .eq('docente_id', docenteData.id);
+
+  if (gruposError) {
+    return { message: 'Error al verificar los grupos asignados.' };
+  }
+
+  if (gruposCount === 0) {
+    return { message: 'No tienes grupos asignados este período. No necesitas registrar tu carga horaria.' };
+  }
+
   const repository = new SupabaseCargaNoLectivaRepository();
   const useCase = new SaveLectivaDeclaracionUseCase(repository);
 

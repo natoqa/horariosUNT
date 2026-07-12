@@ -21,7 +21,7 @@ interface AsignacionRow {
   aula_id: string;
   dia: string;
   bloque: string;
-  tipo_sesion: string;
+  tipo: string;
   created_at: string;
 }
 
@@ -98,7 +98,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       aula_id: a.aulaId,
       dia: a.dia,
       bloque: a.bloque,
-      tipo_sesion: TIPO_MAP[a.tipo] ?? 'Teórica',
+      tipo: a.tipo,
     }));
 
     const { data, error } = await supabase
@@ -216,7 +216,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
   }
 
   private mapToAsignacion(row: AsignacionRow): Asignacion {
-    const raw = (row.tipo_sesion ?? '').toLowerCase();
+    const raw = (row.tipo ?? '').toLowerCase();
     const tipo: Asignacion['tipo'] = raw.startsWith('pr') ? 'practico' : 'teorico';
     return {
       id: row.id,

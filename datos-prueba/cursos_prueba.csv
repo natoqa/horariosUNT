@@ -1,0 +1,26 @@
+id,codigo,nombre,ciclo,tipo,horasTeoricas,horasPracticas,creditos,requiereLaboratorio,tipoLaboratorio,estado,planEstudioId,createdAt,updatedAt
+c1,CS101,Programación I,I,Teórico-Práctico,4,2,6,true,Laboratorio de Computación,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c2,CS102,Estructuras de Datos,I,Teórico-Práctico,4,2,6,true,Laboratorio de Computación,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c3,CS103,Bases de Datos,II,Teórico-Práctico,3,3,6,true,Laboratorio de Computación,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c4,CS104,Ingeniería de Software,II,Teórico-Práctico,4,2,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c5,CS105,Redes de Computadoras,III,Teórico-Práctico,3,3,6,true,Laboratorio de Redes,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c6,CS106,Sistemas Operativos,III,Teórico-Práctico,4,2,6,true,Laboratorio de Computación,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c7,CS107,Inteligencia Artificial,IV,Teórico-Práctico,3,3,6,true,Laboratorio de Computación,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c8,CS108,Seguridad Informática,IV,Teórico-Práctico,4,2,6,true,Laboratorio de Seguridad,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c9,MAT101,Cálculo I,I,Teórico-Práctico,4,2,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c10,MAT102,Álgebra Lineal,I,Teórico-Práctico,4,2,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c11,MAT103,Probabilidad y Estadística,II,Teórico-Práctico,3,3,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c12,FIS101,Física I,I,Teórico-Práctico,3,3,6,true,Laboratorio de Física,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c13,FIS102,Física II,II,Teórico-Práctico,3,3,6,true,Laboratorio de Física,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c14,ECO101,Principios de Economía,I,Teórico,4,0,4,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c15,ECO102,Microeconomía,II,Teórico,4,0,4,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c16,CON101,Contabilidad General,I,Teórico-Práctico,3,3,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c17,CON102,Contabilidad de Costos,II,Teórico-Práctico,3,3,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c18,IND101,Ingeniería Industrial I,I,Teórico-Práctico,4,2,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c19,IND102,Gestión de Operaciones,II,Teórico-Práctico,4,2,6,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c20,MEC101,Mecánica Básica,I,Teórico-Práctico,3,3,6,true,Laboratorio de Mecánica,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c21,MEC102,Termodinámica,II,Teórico-Práctico,3,3,6,true,Laboratorio de Mecánica,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c22,CIV101,Resistencia de Materiales,I,Teórico-Práctico,4,2,6,true,Laboratorio de Ingeniería Civil,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c23,CIV102,Hidráulica,II,Teórico-Práctico,3,3,6,true,Laboratorio de Ingeniería Civil,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c24,PSI101,Psicología General,I,Teórico,4,0,4,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z
+c25,PSI102,Psicología Social,II,Teórico,4,0,4,false,null,Activo,plan1,2024-01-01T00:00:00Z,2024-01-01T00:00:00Z

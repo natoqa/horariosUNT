@@ -65,7 +65,7 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
   // Get docente assignments
   const { data: rawAsignaciones } = await supabase
     .from('asignaciones')
-    .select('grupo_id, aula_id, dia, bloque, tipo_sesion')
+    .select('grupo_id, aula_id, dia, bloque, tipo')
     .eq('horario_id', horarioData.id)
     .eq('docente_id', docenteData.id);
 
@@ -123,7 +123,7 @@ export async function generateDocentePdfAction(): Promise<GenerateDocentePdfResu
     aulaId: a.aula_id,
     dia: a.dia,
     bloque: a.bloque,
-    tipo: a.tipo_sesion,
+    tipo: a.tipo,
   }));
 
   const actividadesNoLectivasData = (actividadesNoLectivas ?? []).map((act) => ({

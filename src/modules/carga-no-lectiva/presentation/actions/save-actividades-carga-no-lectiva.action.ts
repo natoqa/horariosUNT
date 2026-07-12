@@ -22,11 +22,15 @@ export async function saveActividadesCargaNoLectivaAction(
   const horas = (fd.getAll('horas') || []).map((value: any) => Number(value?.toString()));
   const detalles = (fd.getAll('detalles') || []).map((value: any) => value?.toString());
 
-  const actividades: ActividadNoLectivaInput[] = tipos.map((tipo, index) => ({
-    tipo,
-    horas: horas[index] ?? 0,
-    detalles: detalles[index] ?? '',
-  }));
+  const actividades: ActividadNoLectivaInput[] = tipos.map((tipo, index) => {
+    const horasActividad = horas[index] ?? 0;
+    const detalleRaw = (detalles[index] ?? '').trim();
+    return {
+      tipo,
+      horas: horasActividad,
+      detalles: detalleRaw || (horasActividad > 0 ? '' : 'No aplica'),
+    };
+  });
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -43,6 +47,21 @@ export async function saveActividadesCargaNoLectivaAction(
 
   if (docenteError || !docenteData) {
     return { message: 'No se encontró un docente asociado a este usuario.' };
+  }
+
+  // Verificar si el docente tiene grupos asignados en este período
+  const { count: gruposCount, error: gruposError } = await supabase
+    .from('grupos')
+    .select('*', { count: 'exact', head: true })
+    .eq('periodo_id', periodoId)
+    .eq('docente_id', docenteData.id);
+
+  if (gruposError) {
+    return { message: 'Error al verificar los grupos asignados.' };
+  }
+
+  if (gruposCount === 0) {
+    return { message: 'No tienes grupos asignados este período. No necesitas registrar tu carga horaria.' };
   }
 
   const repository = new SupabaseCargaNoLectivaRepository();

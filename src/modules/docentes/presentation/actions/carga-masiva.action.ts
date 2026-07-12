@@ -15,17 +15,20 @@ export async function cargaMasivaDocentesAction(formData: FormData) {
     const arrayBuffer = await archivo.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const fileType = archivo.type;
+    const filename = archivo.name.toLowerCase();
     
+    const isCsv = filename.endsWith('.csv') || fileType === 'text/csv' || fileType === 'application/csv';
+    const isExcel = filename.endsWith('.xlsx') || filename.endsWith('.xls') || 
+                    fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                    fileType === 'application/vnd.ms-excel';
+
     const parser = new DocenteParserService();
     let docentesExtraidos: any[] = [];
     
-    if (
-      fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      fileType === 'application/vnd.ms-excel'
-    ) {
-      docentesExtraidos = await parser.extraerDocentesDesdeExcel(buffer);
-    } else if (fileType === 'text/csv' || fileType === 'application/csv') {
+    if (isCsv) {
       docentesExtraidos = await parser.extraerDocentesDesdeCsv(buffer);
+    } else if (isExcel) {
+      docentesExtraidos = await parser.extraerDocentesDesdeExcel(buffer);
     } else {
       return { success: false, error: 'Formato de archivo no soportado. Use Excel (.xlsx, .xls) o CSV' };
     }

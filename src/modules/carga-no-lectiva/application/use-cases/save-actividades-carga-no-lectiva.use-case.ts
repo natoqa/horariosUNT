@@ -19,6 +19,39 @@ export class SaveActividadesCargaNoLectivaUseCase {
       throw new Error('Debe completar todas las actividades no lectivas antes de registrar la carga total. Faltan: ' + missing.join(', '));
     }
 
-    return this.repository.saveActividades(docenteId, periodoId, validated.actividades);
+    // 1. Guardar las actividades
+    await this.repository.saveActividades(docenteId, periodoId, validated.actividades);
+
+    // 2. Calcular el total de horas
+    const totalHoras = validated.actividades.reduce((sum, a) => sum + a.horas, 0);
+
+    // 3. Obtener la carga actual (si existe)
+    const currentCarga = await this.repository.findCargaTotalByDocentePeriodo(docenteId, periodoId);
+
+    if (currentCarga) {
+      // Si existe: Actualizar el total y marcar como borrador (si no estaba aprobado)
+      const sameTotal = totalHoras === currentCarga.totalHoras;
+      const updatedEstado = currentCarga.directorAprobado && currentCarga.secretariaAprobado && sameTotal 
+        ? 'Aprobado' 
+        : 'En revisión';
+
+      await this.repository.saveCargaMeta(docenteId, periodoId, {
+        // Solo actualizamos el total si la carga no está aprobada o si el total cambió
+        ...(!(currentCarga.directorAprobado && currentCarga.secretariaAprobado && sameTotal) ? {
+          horasLectivasAsignadas: currentCarga.horasLectivasAsignadas,
+          horasLectivasNoAsignadas: currentCarga.horasLectivasNoAsignadas,
+          lectivaDeclarada: currentCarga.lectivaDeclarada,
+          declaracionLectiva: currentCarga.declaracionLectiva,
+        } : {}),
+      });
+
+      // Necesitamos actualizar el totalHoras específicamente (saveCargaMeta no lo hace)
+      await this.repository.saveCargaTotal(docenteId, periodoId, totalHoras);
+    } else {
+      // Si no existe: Crear una nueva en estado borrador
+      await this.repository.saveCargaTotal(docenteId, periodoId, totalHoras);
+    }
+
+    return;
   }
 }

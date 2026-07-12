@@ -15,7 +15,6 @@ interface DocenteRow {
   escuela: string;
   fecha_ingreso: string;
   carga_maxima: number;
-  carga_electiva: number;
   estado: string;
   created_at: string;
   updated_at: string;
@@ -98,7 +97,6 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
         escuela: docente.escuela,
         fecha_ingreso: docente.fechaIngreso,
         carga_maxima: docente.cargaMaxima,
-        carga_electiva: docente.cargaElectiva,
         estado: docente.estado,
       })
       .select()
@@ -127,7 +125,6 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
     if (updateData.escuela !== undefined) dbData.escuela = updateData.escuela;
     if (updateData.fechaIngreso !== undefined) dbData.fecha_ingreso = updateData.fechaIngreso;
     if (updateData.cargaMaxima !== undefined) dbData.carga_maxima = updateData.cargaMaxima;
-    if (updateData.cargaElectiva !== undefined) dbData.carga_electiva = updateData.cargaElectiva;
     if (updateData.estado !== undefined) dbData.estado = updateData.estado;
 
     const { data, error } = await supabase
@@ -169,7 +166,7 @@ export class SupabaseDocenteRepository implements IDocenteRepository {
       escuela: row.escuela as Docente['escuela'],
       fechaIngreso: row.fecha_ingreso,
       cargaMaxima: row.carga_maxima,
-      cargaElectiva: row.carga_electiva,
+      cargaElectiva: 0,
       estado: row.estado as Docente['estado'],
       createdAt: row.created_at,
       updatedAt: row.updated_at,

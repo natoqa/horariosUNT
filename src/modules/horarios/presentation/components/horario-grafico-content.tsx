@@ -42,6 +42,9 @@ export function HorarioGraficoContent() {
   const [periodo, setPeriodo] = useState<Periodo | null>(null);
   const [horario, setHorario] = useState<Horario | null>(null);
   const [asignaciones, setAsignaciones] = useState<UnifiedAsignacion[]>([]);
+  const [hasGruposAsignados, setHasGruposAsignados] = useState(false);
+  const [hasActividadesNoLectivasSinHorario, setHasActividadesNoLectivasSinHorario] = useState(false);
+  const [horarioGenerado, setHorarioGenerado] = useState(false);
 
   // Name maps for the grid
   const [docenteNames, setDocenteNames] = useState<Map<string, string>>(new Map());
@@ -49,10 +52,16 @@ export function HorarioGraficoContent() {
   const [aulaNames, setAulaNames] = useState<Map<string, string>>(new Map());
   const [grupoCiclos, setGrupoCiclos] = useState<Map<string, string>>(new Map());
   const [grupoCursoIds, setGrupoCursoIds] = useState<Map<string, string>>(new Map());
+  
+  // Aula conflicts: cells where the docente's aulas are occupied by other courses
+  const [aulaConflicts, setAulaConflicts] = useState<Map<string, { curso: string; docente: string; grupo: string }>>(new Map());
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setHasGruposAsignados(false);
+    setHasActividadesNoLectivasSinHorario(false);
+    setHorarioGenerado(false);
 
     try {
       const { createClient } = await import('@/shared/lib/supabase/client');
@@ -92,10 +101,28 @@ export function HorarioGraficoContent() {
 
       // Use different data loading logic based on role and docenteId
       if (docenteIdFromUrl || user?.role === 'docente') {
+        // First check if horario is already generated
+        const { data: horarioCheck } = await supabase
+          .from('horarios')
+          .select('id')
+          .eq('periodo_id', currentPeriodo.id)
+          .limit(1)
+          .single();
+        setHorarioGenerado(!!horarioCheck);
+
         // Use getDocenteHorarioAction for viewing specific docente's schedule (loads both lective and non-lective activities)
         const docenteHorarioResult = await getDocenteHorarioAction(docenteIdFromUrl || undefined);
 
         if (docenteHorarioResult.data) {
+          // Check if docente has any groups assigned
+          setHasGruposAsignados(docenteHorarioResult.data.asignaciones.some(a => a.grupoId));
+
+          // Check if there are any non-lective activities without time slots
+          const actividadesNoLectivas = docenteHorarioResult.data.actividadesNoLectivas;
+          setHasActividadesNoLectivasSinHorario(
+            actividadesNoLectivas.some(a => a.horas > 0 && (!a.dia || !a.bloque))
+          );
+
           // Get expected ciclos for current periodo
           const expectedCiclos = currentPeriodo.tipoCiclo === 'Impar' 
             ? CICLOS_IMPAR 
@@ -144,7 +171,6 @@ export function HorarioGraficoContent() {
                 }))
             : [];
 
-          console.log('[HorarioGrafico] No lectiva asignaciones con dia/bloque:', noLectivaAsignaciones.length);
           unifiedAsignaciones = [...unifiedAsignaciones, ...noLectivaAsignaciones];
 
           // Set name maps from docente horario result
@@ -157,24 +183,73 @@ export function HorarioGraficoContent() {
           Object.entries(docenteHorarioResult.data.grupoCiclos).forEach(([id, ciclo]) => {
             grupoCiclosMap.set(id, ciclo);
           });
+
+          // Load aula conflicts: find where the docente's aulas are occupied by other courses
+          const docenteAulas = new Set<string>();
+          unifiedAsignaciones.forEach((a) => {
+            if (a.aulaId) docenteAulas.add(a.aulaId);
+          });
+
+          if (docenteAulas.size > 0 && unifiedAsignaciones.length > 0) {
+            const currentDocenteId = docenteIdFromUrl || user?.id;
+            const { data: allAsignaciones } = await supabase
+              .from('asignaciones')
+              .select('id, aula_id, dia, bloque, docente_id, grupo_id')
+              .in('aula_id', Array.from(docenteAulas));
+
+            const conflictMap = new Map<string, { curso: string; docente: string; grupo: string }>();
+            
+            for (const a of allAsignaciones || []) {
+              // Skip if it's the same docente's assignment
+              if (a.docente_id === currentDocenteId) continue;
+              
+              const key = `${a.dia}||${a.bloque}||${a.aula_id}`;
+              if (!conflictMap.has(key)) {
+                // Get course and docente info for this conflict
+                const { data: grupo } = await supabase
+                  .from('grupos')
+                  .select('curso_id, nombre')
+                  .eq('id', a.grupo_id)
+                  .single();
+                
+                const { data: curso } = await supabase
+                  .from('cursos')
+                  .select('nombre')
+                  .eq('id', grupo?.curso_id)
+                  .single();
+                
+                const { data: docente } = await supabase
+                  .from('docentes')
+                  .select('nombres, apellidos')
+                  .eq('id', a.docente_id)
+                  .single();
+                
+                if (curso && docente) {
+                  conflictMap.set(key, {
+                    curso: curso.nombre,
+                    docente: `${docente.apellidos}, ${docente.nombres}`,
+                    grupo: grupo?.nombre || '',
+                  });
+                }
+              }
+            }
+            
+            setAulaConflicts(conflictMap);
+          }
         }
       } else {
         // Use getHorarioAction for director and secretaria
         const horarioResult = await getHorarioAction(currentPeriodo.id);
-        console.log('[HorarioGrafico] Horario result:', horarioResult);
 
         if (horarioResult.data) {
-          console.log('[HorarioGrafico] Horario:', horarioResult.data.horario);
-          console.log('[HorarioGrafico] Asignaciones:', horarioResult.data.asignaciones);
           setHorario(horarioResult.data.horario);
+          setHorarioGenerado(true);
 
           // Convert lective asignaciones to unified format
           unifiedAsignaciones = horarioResult.data.asignaciones.map((a: Asignacion) => ({
             ...a,
             tipo: a.tipo as 'teorico' | 'practico',
           }));
-        } else {
-          console.log('[HorarioGrafico] Horario result message:', horarioResult.message);
         }
 
         // Load name maps for the grid display
@@ -221,14 +296,13 @@ export function HorarioGraficoContent() {
       setGrupoCiclos(grupoCiclosMap);
       setGrupoCursoIds(grupoCursoIdsMap);
       setAsignaciones(unifiedAsignaciones);
-      console.log('[HorarioGrafico] Total unified asignaciones:', unifiedAsignaciones.length);
     } catch (err) {
       setError('Error al cargar los datos.');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, docenteIdFromUrl]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -294,7 +368,8 @@ export function HorarioGraficoContent() {
 
   const filteredAsignaciones = asignaciones.filter((a) => {
     if (viewMode === 'lectivas') {
-      return a.tipo === 'teorico' || a.tipo === 'practico';
+      // Only include real asignaciones with actual dia/bloque (not the placeholder "Pendiente")
+      return (a.tipo === 'teorico' || a.tipo === 'practico') && a.dia !== 'Pendiente' && a.bloque !== 'Pendiente';
     } else {
       return a.tipo === 'nolectiva';
     }
@@ -313,11 +388,6 @@ export function HorarioGraficoContent() {
     createdAt: a.createdAt,
     ...(a.actividadNoLectiva && { actividadNoLectiva: a.actividadNoLectiva }), // Preserve actividadNoLectiva
   }));
-
-  console.log('[HorarioGrafico] Total asignaciones:', asignaciones.length);
-  console.log('[HorarioGrafico] View mode:', viewMode);
-  console.log('[HorarioGrafico] Filtered asignaciones:', filteredAsignaciones.length);
-  console.log('[HorarioGrafico] Asignaciones tipos:', asignaciones.map(a => a.tipo));
 
   if (authLoading || loading) {
     return (
@@ -340,7 +410,7 @@ export function HorarioGraficoContent() {
     );
   }
 
-  const canEdit = user?.role === 'director' || user?.role === 'secretaria' || user?.role === 'docente';
+  const canEdit = user?.role === 'director' || user?.role === 'secretaria';
 
   return (
     <div className="space-y-6">
@@ -353,36 +423,74 @@ export function HorarioGraficoContent() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button
-          variant={viewMode === 'lectivas' ? 'default' : 'outline'}
-          onClick={() => setViewMode('lectivas')}
-          className="flex items-center gap-2"
-        >
-          <Calendar className="w-4 h-4" />
-          Horario Lectivas
-        </Button>
-        <Button
-          variant={viewMode === 'no-lectivas' ? 'default' : 'outline'}
-          onClick={() => setViewMode('no-lectivas')}
-          className="flex items-center gap-2"
-        >
-          <Clock className="w-4 h-4" />
-          Horario No Lectivas
-        </Button>
-      </div>
+      {horario || asignaciones.length > 0 ? (
+        <div className="flex items-center gap-4">
+          <Button
+            variant={viewMode === 'lectivas' ? 'default' : 'outline'}
+            onClick={() => setViewMode('lectivas')}
+            className="flex items-center gap-2"
+          >
+            <Calendar className="w-4 h-4" />
+            Horario Lectivas
+          </Button>
+          <Button
+            variant={viewMode === 'no-lectivas' ? 'default' : 'outline'}
+            onClick={() => setViewMode('no-lectivas')}
+            className="flex items-center gap-2"
+          >
+            <Clock className="w-4 h-4" />
+            Horario No Lectivas
+          </Button>
+        </div>
+      ) : null}
 
       {gridAsignaciones.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-12 text-center space-y-3">
           <Calendar className="w-10 h-10 text-muted-foreground mx-auto" />
-          <p className="text-sm font-medium text-foreground">
-            No hay actividades {viewMode === 'lectivas' ? 'lectivas' : 'no lectivas'} asignadas
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {viewMode === 'lectivas'
-              ? 'Genera el horario para ver las actividades lectivas'
-              : 'Registra actividades no lectivas para verlas aquí'}
-          </p>
+          
+          {/* Mensaje para Horario Lectivas */}
+          {viewMode === 'lectivas' && (
+            <>
+              <p className="text-sm font-medium text-foreground">
+                No hay actividades lectivas asignadas
+              </p>
+              {!hasGruposAsignados ? (
+                <p className="text-xs text-muted-foreground">
+                  Este docente no tiene grupos asignados en este período
+                </p>
+              ) : !horarioGenerado ? (
+                <p className="text-xs text-muted-foreground">
+                  El horario general aún no se ha generado
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No hay actividades lectivas para mostrar en este momento
+                </p>
+              )}
+            </>
+          )}
+
+          {/* Mensaje para Horario No Lectivas */}
+          {viewMode === 'no-lectivas' && (
+            <>
+              <p className="text-sm font-medium text-foreground">
+                No hay actividades no lectivas asignadas
+              </p>
+              {!hasGruposAsignados ? (
+                <p className="text-xs text-muted-foreground">
+                  Este docente no tiene grupos asignados en este período
+                </p>
+              ) : hasActividadesNoLectivasSinHorario ? (
+                <p className="text-xs text-muted-foreground">
+                  Hay actividades no lectivas registradas pero aún no se han distribuido en el horario
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No hay actividades no lectivas para mostrar en este momento
+                </p>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <DragDropHorarioGrid
@@ -398,12 +506,13 @@ export function HorarioGraficoContent() {
           userRole={user?.role as 'director' | 'secretaria' | 'docente'}
           onDrop={canEdit ? handleDrop : undefined}
           checkAulaAvailability={viewMode === 'lectivas' ? handleCheckAulaAvailability : undefined}
+          aulaConflicts={aulaConflicts}
         />
       )}
 
       {!canEdit && (
         <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-          Solo el director puede modificar los horarios.
+          Solo la secretaria y el director pueden modificar los horarios.
         </div>
       )}
     </div>

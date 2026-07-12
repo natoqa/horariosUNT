@@ -31,6 +31,11 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
 
   const [regimen, setRegimen] = useState<string>('');
   const [cargaMaxima, setCargaMaxima] = useState<string>('');
+  const [nombres, setNombres] = useState('');
+  const [apellidos, setApellidos] = useState('');
+  const [dni, setDni] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [isCorreoManual, setIsCorreoManual] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -38,9 +43,40 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
       formRef.current?.reset();
       setRegimen('');
       setCargaMaxima('');
+      setNombres('');
+      setApellidos('');
+      setDni('');
+      setCorreo('');
+      setIsCorreoManual(false);
       onSuccess?.();
     }
   }, [state, onSuccess]);
+
+  useEffect(() => {
+    if (!isCorreoManual) {
+      const clean = (str: string) => {
+        return str
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // quitar acentos
+          .replace(/ñ/g, "n")
+          .replace(/[^a-z0-9]/g, ""); // quitar otros caracteres especiales
+      };
+
+      const nameParts = nombres.trim().split(/\s+/).map(clean).filter(Boolean);
+      const lastNameParts = apellidos.trim().split(/\s+/).map(clean).filter(Boolean);
+
+      if (nameParts.length > 0 && lastNameParts.length > 0) {
+        const firstName = nameParts[0];
+        const firstLastName = lastNameParts[0];
+        // Usar los últimos 4 dígitos del DNI para asegurar unicidad
+        const suffix = dni ? dni.slice(-4) : '';
+        setCorreo(`${firstName}.${firstLastName}${suffix}@unitru.edu.pe`);
+      } else {
+        setCorreo('');
+      }
+    }
+  }, [nombres, apellidos, dni, isCorreoManual]);
 
   const handleRegimenChange = (value: string) => {
     setRegimen(value);
@@ -54,21 +90,40 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Nombres</Label>
-          <Input name="nombres" placeholder="Ej: Juan Carlos" className="h-10" />
+          <Input
+            name="nombres"
+            placeholder="Ej: Juan Carlos"
+            className="h-10"
+            value={nombres}
+            onChange={(e) => setNombres(e.target.value)}
+          />
           {state?.errors?.nombres && (
             <p className="text-xs text-destructive">{state.errors.nombres[0]}</p>
           )}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Apellidos</Label>
-          <Input name="apellidos" placeholder="Ej: Pérez Rojas" className="h-10" />
+          <Input
+            name="apellidos"
+            placeholder="Ej: Pérez Rojas"
+            className="h-10"
+            value={apellidos}
+            onChange={(e) => setApellidos(e.target.value)}
+          />
           {state?.errors?.apellidos && (
             <p className="text-xs text-destructive">{state.errors.apellidos[0]}</p>
           )}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">DNI</Label>
-          <Input name="dni" placeholder="12345678" maxLength={8} className="h-10" />
+          <Input
+            name="dni"
+            placeholder="12345678"
+            maxLength={8}
+            className="h-10"
+            value={dni}
+            onChange={(e) => setDni(e.target.value)}
+          />
           {state?.errors?.dni && (
             <p className="text-xs text-destructive">{state.errors.dni[0]}</p>
           )}
@@ -78,7 +133,22 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Correo Institucional</Label>
-          <Input name="correo" type="email" placeholder="docente@unitru.edu.pe" className="h-10" />
+          <Input
+            name="correo"
+            type="email"
+            placeholder="docente@unitru.edu.pe"
+            className="h-10"
+            value={correo}
+            onChange={(e) => {
+              const val = e.target.value;
+              setCorreo(val);
+              if (val === '') {
+                setIsCorreoManual(false);
+              } else {
+                setIsCorreoManual(true);
+              }
+            }}
+          />
           {state?.errors?.correo && (
             <p className="text-xs text-destructive">{state.errors.correo[0]}</p>
           )}

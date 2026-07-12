@@ -24,8 +24,8 @@ export async function updateAsignacionAction(
     return { message: 'No autorizado.' };
   }
 
-  if (user.user_metadata?.role !== 'director') {
-    return { message: 'Solo el director puede modificar asignaciones.' };
+  if (user.user_metadata?.role !== 'director' && user.user_metadata?.role !== 'secretaria') {
+    return { message: 'Solo la secretaria y el director pueden modificar asignaciones.' };
   }
 
   const validated = updateAsignacionSchema.safeParse(data);

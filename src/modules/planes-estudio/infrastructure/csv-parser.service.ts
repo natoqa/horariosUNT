@@ -33,7 +33,16 @@ export class CsvParserService {
         }
       }
       
-      // Si no se encontraron encabezados, asumir que la primera fila tiene datos
+      // Construir mapa de índices
+      let indices = this.obtenerIndicesDefectos();
+      if (headerRowIndex >= 0) {
+        const lineHeaders = lines[headerRowIndex].split(delimiter).map(cell => cell.trim().replace(/^"|"$/g, ''));
+        const mappedIndices = this.obtenerMapDeIndices(lineHeaders);
+        if (mappedIndices.codigo !== -1 && mappedIndices.nombre !== -1) {
+          indices = mappedIndices;
+        }
+      }
+      
       const startRow = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
       
       for (let i = startRow; i < lines.length; i++) {
@@ -41,7 +50,9 @@ export class CsvParserService {
         if (!line.trim()) continue;
         
         const row = line.split(delimiter).map(cell => cell.trim().replace(/^"|"$/g, ''));
-        const curso = this.extraerCursoDeFila(row);
+        if (row.length < 2) continue; // Al menos codigo y nombre
+        
+        const curso = this.extraerCursoDeFila(row, indices);
         if (curso) {
           cursos.push(curso);
         }
@@ -53,50 +64,61 @@ export class CsvParserService {
       throw new Error('No se pudo extraer la información del archivo CSV');
     }
   }
+
+  private obtenerIndicesDefectos(): Record<string, number> {
+    return {
+      codigo: 0,
+      nombre: 1,
+      ciclo: 2,
+      horasTeoricas: 3,
+      horasPracticas: 4,
+      creditos: 5,
+    };
+  }
+
+  private obtenerMapDeIndices(headers: string[]): Record<string, number> {
+    const clean = (str: string) => {
+      return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // quitar acentos
+        .replace(/[^a-z0-9]/g, ""); // quitar espacios/símbolos
+    };
+
+    const cleanHeaders = headers.map(clean);
+
+    return {
+      codigo: cleanHeaders.indexOf('codigo'),
+      nombre: cleanHeaders.indexOf('nombre'),
+      ciclo: cleanHeaders.indexOf('ciclo'),
+      horasTeoricas: cleanHeaders.findIndex(h => h === 'horasteoricas' || h === 'ht'),
+      horasPracticas: cleanHeaders.findIndex(h => h === 'horaspracticas' || h === 'hp'),
+      creditos: cleanHeaders.indexOf('creditos'),
+    };
+  }
   
-  private extraerCursoDeFila(row: string[]): CursoExtraido | null {
-    // Intentar diferentes patrones de columnas
-    // Patrón 1: Código, Nombre, Ciclo, HT, HP, Créditos
-    if (row.length >= 6) {
-      const codigo = this.extraerCodigo(row[0]);
-      const nombre = this.extraerTexto(row[1]);
-      const ciclo = this.extraerCiclo(row[2]);
-      const ht = this.extraerNumero(row[3]);
-      const hp = this.extraerNumero(row[4]);
-      const creditos = this.extraerNumero(row[5]);
-      
-      if (codigo && nombre) {
-        return {
-          codigo,
-          nombre,
-          ciclo,
-          tipo: this.determinarTipo(ht, hp),
-          horasTeoricas: ht,
-          horasPracticas: hp,
-          creditos,
-        };
-      }
-    }
+  private extraerCursoDeFila(row: string[], indices: Record<string, number>): CursoExtraido | null {
+    const getValue = (idx: number) => {
+      return idx !== -1 && idx < row.length ? row[idx] : null;
+    };
+
+    const codigo = this.extraerCodigo(this.extraerTexto(getValue(indices.codigo)));
+    const nombre = this.extraerTexto(getValue(indices.nombre));
+    const ciclo = this.extraerCiclo(this.extraerTexto(getValue(indices.ciclo)));
+    const ht = this.extraerNumero(this.extraerTexto(getValue(indices.horasTeoricas)));
+    const hp = this.extraerNumero(this.extraerTexto(getValue(indices.horasPracticas)));
+    const creditos = this.extraerNumero(this.extraerTexto(getValue(indices.creditos)));
     
-    // Patrón 2: Código, Nombre, HT, HP, Créditos (sin ciclo)
-    if (row.length >= 5) {
-      const codigo = this.extraerCodigo(row[0]);
-      const nombre = this.extraerTexto(row[1]);
-      const ht = this.extraerNumero(row[2]);
-      const hp = this.extraerNumero(row[3]);
-      const creditos = this.extraerNumero(row[4]);
-      
-      if (codigo && nombre) {
-        return {
-          codigo,
-          nombre,
-          ciclo: 'I', // Ciclo por defecto
-          tipo: this.determinarTipo(ht, hp),
-          horasTeoricas: ht,
-          horasPracticas: hp,
-          creditos,
-        };
-      }
+    if (codigo && nombre) {
+      return {
+        codigo,
+        nombre,
+        ciclo,
+        tipo: this.determinarTipo(ht, hp),
+        horasTeoricas: ht,
+        horasPracticas: hp,
+        creditos,
+      };
     }
     
     return null;

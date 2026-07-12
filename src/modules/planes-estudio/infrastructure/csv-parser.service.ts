@@ -124,18 +124,18 @@ export class CsvParserService {
     return null;
   }
   
-  private extraerCodigo(valor: string): string {
+  private extraerCodigo(valor: string | null): string {
     if (!valor) return '';
     const match = valor.match(/([A-Z]{2,4}\d{3,4})/i);
     return match ? match[1].toUpperCase() : valor.toUpperCase();
   }
   
-  private extraerTexto(valor: string): string {
+  private extraerTexto(valor: string | null): string {
     if (!valor) return '';
     return valor.trim();
   }
   
-  private extraerCiclo(valor: string): string {
+  private extraerCiclo(valor: string | null): string {
     if (!valor) return 'I';
     const str = valor.toUpperCase().trim();
     const ciclosValidos = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
@@ -158,7 +158,7 @@ export class CsvParserService {
     return 'I';
   }
   
-  private extraerNumero(valor: string): number {
+  private extraerNumero(valor: string | null): number {
     if (!valor) return 0;
     const num = parseInt(valor);
     return isNaN(num) ? 0 : num;

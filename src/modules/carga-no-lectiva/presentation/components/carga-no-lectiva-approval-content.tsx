@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { Check, AlertCircle, Calendar, Clock } from 'lucide-react';
+import { Check, AlertCircle, Calendar, Clock, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { getCargasNoLectivaAction } from '../actions/get-cargas-no-lectiva.action';
 import { approveCargaNoLectivaAction } from '../actions/approve-carga-no-lectiva.action';
 import { saveCargaLectivaAsignacionAction } from '../actions/save-carga-lectiva-asignacion.action';
+import { resetAllCargasNoLectivasAction } from '../actions/reset-all-cargas-no-lectivas.action';
 import { useActionState } from 'react';
 import { UserRole } from '@/shared/types/roles';
 import { useRouter } from 'next/navigation';
@@ -56,6 +58,8 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
 
   const [approvalState, approvalAction, approving] = useActionState(approveCargaNoLectivaAction as any, undefined as any);
   const [assignState, assignAction, assigning] = useActionState(saveCargaLectivaAsignacionAction as any, undefined as any);
+  const [resetState, resetAction, resetting] = useActionState(resetAllCargasNoLectivasAction as any, undefined as any);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const rows = useMemo(() => {
     if (role === 'secretaria') {
@@ -116,10 +120,11 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
   }, [authLoading]);
 
   useEffect(() => {
-    if (approvalState?.success || assignState?.success) {
+    if (approvalState?.success || assignState?.success || resetState?.success) {
       loadData();
+      setResetDialogOpen(false);
     }
-  }, [approvalState?.success, assignState?.success]);
+  }, [approvalState?.success, assignState?.success, resetState?.success]);
 
   if (authLoading || loading) {
     return (
@@ -148,6 +153,34 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
             Resumen de carga horaria de los docentes: cursos asignados y carga no lectiva registrada.
           </p>
         </div>
+        <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+          <DialogTrigger
+            render={
+              <Button variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Resetear Todas las Cargas
+              </Button>
+            }
+          />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>¿Estás seguro?</DialogTitle>
+              <DialogDescription>
+                Esto eliminará todas las cargas no lectivas y actividades registradas por los docentes en el período activo, incluso aquellas que ya han sido aprobadas. Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResetDialogOpen(false)} disabled={resetting}>
+                Cancelar
+              </Button>
+              <form action={resetAction}>
+                <Button type="submit" variant="destructive" disabled={resetting}>
+                  {resetting ? 'Reseteando...' : 'Resetear Todas las Cargas'}
+                </Button>
+              </form>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {errorMessage ? (
@@ -290,6 +323,11 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
       {assignState?.message && (
         <div className={`rounded-md px-4 py-3 ${assignState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
           {assignState.message}
+        </div>
+      )}
+      {resetState?.message && (
+        <div className={`rounded-md px-4 py-3 ${resetState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
+          {resetState.message}
         </div>
       )}
     </div>

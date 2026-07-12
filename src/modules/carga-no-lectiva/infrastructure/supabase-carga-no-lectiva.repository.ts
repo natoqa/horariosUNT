@@ -279,6 +279,30 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
     return this.mapCarga(data[0] as CargaRow);
   }
 
+  async resetAllCargas(periodoId: string): Promise<void> {
+    const supabase = await createClient();
+
+    // Primero borrar todas las actividades no lectivas del período
+    const { error: actividadesError } = await supabase
+      .from('actividades_no_lectivas')
+      .delete()
+      .eq('periodo_id', periodoId);
+
+    if (actividadesError) {
+      throw new Error(actividadesError.message || 'Error al borrar actividades no lectivas.');
+    }
+
+    // Luego borrar todas las cargas no lectivas del período
+    const { error: cargasError } = await supabase
+      .from('cargas_no_lectivas')
+      .delete()
+      .eq('periodo_id', periodoId);
+
+    if (cargasError) {
+      throw new Error(cargasError.message || 'Error al borrar cargas no lectivas.');
+    }
+  }
+
   private mapActividad(row: ActividadRow): ActividadNoLectiva {
     return {
       id: row.id,

@@ -270,7 +270,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
     const supabase = await createClient();
     const { error } = await supabase
       .from('grupos')
-      .update({ docente_id: null })
+      .delete()
       .eq('periodo_id', periodoId);
 
     if (error) {

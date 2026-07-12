@@ -18,6 +18,7 @@ interface DragDropHorarioGridProps {
   userRole?: 'director' | 'secretaria' | 'docente';
   onDrop?: (asignacion: Asignacion, newDia: string, newBloque: string) => Promise<void>;
   checkAulaAvailability?: (aulaId: string, dia: string, bloque: string, excludeAsignacionId?: string) => Promise<boolean>;
+  aulaConflicts?: Map<string, { curso: string; docente: string; grupo: string }>;
 }
 
 const CURSO_PALETTE = [
@@ -48,6 +49,7 @@ export function DragDropHorarioGrid({
   userRole = 'docente',
   onDrop,
   checkAulaAvailability,
+  aulaConflicts,
 }: DragDropHorarioGridProps) {
   const ciclosToShow = tipoCiclo ? getCiclosByTipo(tipoCiclo) : ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const [selectedCiclo, setSelectedCiclo] = useState<string>(ciclosToShow[0]);
@@ -55,6 +57,17 @@ export function DragDropHorarioGrid({
   const [droppingCell, setDroppingCell] = useState<{ dia: string; bloque: string } | null>(null);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [hoverConflict, setHoverConflict] = useState<{ dia: string; bloque: string; conflict: { curso: string; docente: string; grupo: string } } | null>(null);
+  const [selectedAula, setSelectedAula] = useState<string>('all');
+
+  // Get unique aulas from asignaciones
+  const uniqueAulas = useMemo(() => {
+    const aulaIds = new Set<string>();
+    asignaciones.forEach((a) => {
+      if (a.aulaId) aulaIds.add(a.aulaId);
+    });
+    return Array.from(aulaIds);
+  }, [asignaciones]);
 
   const filtered = asignaciones.filter((a) => {
     // For non-lective activities, check if they match the periodo's tipoCiclo
@@ -66,8 +79,10 @@ export function DragDropHorarioGrid({
       // If no tipoPeriodo assigned, include it (fallback)
       return true;
     }
-    // For lective activities, filter by ciclo
-    return grupoCiclos.get(a.grupoId) === selectedCiclo;
+    // For lective activities, filter by ciclo and aula
+    const cicloMatch = grupoCiclos.get(a.grupoId) === selectedCiclo;
+    const aulaMatch = selectedAula === 'all' || a.aulaId === selectedAula;
+    return cicloMatch && aulaMatch;
   });
 
   const assignmentMap = new Map<string, Asignacion[]>();
@@ -161,8 +176,8 @@ export function DragDropHorarioGrid({
     e.preventDefault();
     setDroppingCell(null);
 
-    // Only allow drag and drop for director
-    if (userRole !== 'director') {
+    // Only allow drag and drop for director and secretaria
+    if (userRole !== 'director' && userRole !== 'secretaria') {
       return;
     }
 
@@ -226,9 +241,48 @@ export function DragDropHorarioGrid({
         ))}
       </div>
 
+      {!isNonLectiva && uniqueAulas.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">Filtrar por aula:</span>
+          <button
+            key="all"
+            onClick={() => setSelectedAula('all')}
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              selectedAula === 'all'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+          >
+            Todas
+          </button>
+          {uniqueAulas.map((aulaId) => (
+            <button
+              key={aulaId}
+              onClick={() => setSelectedAula(aulaId)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                selectedAula === aulaId
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {aulaNames.get(aulaId) || aulaId}
+            </button>
+          ))}
+        </div>
+      )}
+
       {availabilityError && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           {availabilityError}
+        </div>
+      )}
+
+      {hoverConflict && (
+        <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800">
+          <p className="font-semibold mb-1">Aula ocupada en {hoverConflict.dia} {hoverConflict.bloque}:</p>
+          <p>Curso: {hoverConflict.conflict.curso}</p>
+          <p>Docente: {hoverConflict.conflict.docente}</p>
+          <p>Grupo: {hoverConflict.conflict.grupo}</p>
         </div>
       )}
 
@@ -262,17 +316,30 @@ export function DragDropHorarioGrid({
 
                     const isDropTarget = !cell || cell.assignments.length === 0;
 
+                    // Check for aula conflicts in this cell
+                    let cellConflict: { curso: string; docente: string; grupo: string } | null = null;
+                    if (aulaConflicts && draggedAsignacion?.aulaId) {
+                      // Only check conflicts for the selected aula
+                      const aulaToCheck = selectedAula === 'all' ? draggedAsignacion.aulaId : selectedAula;
+                      const conflictKey = `${dia}||${bloque}||${aulaToCheck}`;
+                      cellConflict = aulaConflicts.get(conflictKey) || null;
+                    }
+
                     return (
                       <td
                         key={dia}
                         rowSpan={cell?.span || 1}
                         className={`p-1 border-r border-border last:border-r-0 transition-colors ${
                           isDropping && isDropTarget ? 'bg-primary/20' : ''
-                        } ${isDropTarget && onDrop ? 'cursor-pointer hover:bg-muted/30' : ''}`}
+                        } ${cellConflict ? 'bg-red-50' : ''} ${
+                          isDropTarget && onDrop && !cellConflict ? 'cursor-pointer hover:bg-muted/30' : ''
+                        }`}
                         style={{ height: cell?.span ? cell.span * 48 : 48 }}
                         onDragOver={(e) => handleDragOver(e, dia, bloque)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, dia, bloque)}
+                        onMouseEnter={() => cellConflict && setHoverConflict({ dia, bloque, conflict: cellConflict })}
+                        onMouseLeave={() => setHoverConflict(null)}
                       >
                         {!cell || cell.assignments.length === 0 ? (
                           <div className="h-full flex items-center justify-center text-muted-foreground/30 text-xs">

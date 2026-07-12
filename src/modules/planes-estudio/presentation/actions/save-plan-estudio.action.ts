@@ -52,10 +52,18 @@ export async function savePlanEstudioAction(formData: FormData) {
       const arrayBuffer = await archivo.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const fileType = archivo.type;
+      const filename = archivo.name.toLowerCase();
+      
+      const isCsv = filename.endsWith('.csv') || fileType === 'text/csv' || fileType === 'application/csv' || fileType === 'text/comma-separated-values';
+      const isExcel = filename.endsWith('.xlsx') || filename.endsWith('.xls') || 
+                      fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                      fileType === 'application/vnd.ms-excel' ||
+                      fileType === 'application/octet-stream' ||
+                      fileType === 'application/excel';
       
       console.log('Buffer creado, tamaño:', buffer.length);
       
-      // Extraer cursos según el tipo de archivo
+      // Extraer cursos según el tipo de archivo o extensión
       if (fileType === 'application/pdf') {
         console.log('Procesando archivo PDF');
         const pdfService = new PdfStorageService();
@@ -75,12 +83,12 @@ export async function savePlanEstudioAction(formData: FormData) {
         const parser = new PdfParserService();
         cursosExtraidos = await parser.extraerCursosDesdePdf(buffer);
         console.log('Cursos extraídos del PDF:', cursosExtraidos.length);
-      } else if (
-        fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        fileType === 'application/vnd.ms-excel' ||
-        fileType === 'application/octet-stream' ||
-        fileType === 'application/excel'
-      ) {
+      } else if (isCsv) {
+        console.log('Procesando archivo CSV');
+        const parser = new CsvParserService();
+        cursosExtraidos = await parser.extraerCursosDesdeCsv(buffer);
+        console.log('Cursos extraídos del CSV:', cursosExtraidos.length);
+      } else if (isExcel) {
         console.log('Procesando archivo Excel');
         try {
           const parser = new ExcelParserService();
@@ -93,11 +101,6 @@ export async function savePlanEstudioAction(formData: FormData) {
           console.error('Error al procesar Excel:', excelError);
           throw new Error(`Error al procesar archivo Excel: ${excelError instanceof Error ? excelError.message : 'Error desconocido'}`);
         }
-      } else if (fileType === 'text/csv' || fileType === 'application/csv' || fileType === 'text/comma-separated-values') {
-        console.log('Procesando archivo CSV');
-        const parser = new CsvParserService();
-        cursosExtraidos = await parser.extraerCursosDesdeCsv(buffer);
-        console.log('Cursos extraídos del CSV:', cursosExtraidos.length);
       } else {
         console.log('Tipo de archivo no soportado:', fileType);
         return { success: false, error: 'Tipo de archivo no soportado. Use PDF, Excel (.xlsx, .xls) o CSV' };

@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 export class PlantillaGeneratorService {
   generarPlantillaCursos(formato: 'excel' | 'csv'): Buffer {
     const datos = [
-      ['CÓDIGO', 'NOMBRE', 'CICLO', 'HORAS TEÓRICAS', 'HORAS PRÁCTICAS', 'CRÉDITOS'],
+      ['codigo', 'nombre', 'ciclo', 'horasTeoricas', 'horasPracticas', 'creditos'],
       ['CS101', 'Programación I', 'I', '4', '2', '6'],
       ['MAT202', 'Matemáticas II', 'II', '3', '3', '6'],
       ['FIS301', 'Física III', 'III', '2', '4', '6'],

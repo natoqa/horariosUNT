@@ -68,7 +68,13 @@ export function generateSchedule(
   const partials: PartialAssignment[] = [];
   const unassigned: UnassignedUnit[] = [];
 
-  const activeDocentes = input.docentes.filter((d) => d.estado === 'Activo');
+  // Get only docentes with grupos assigned
+  const docentesAsignadosIds = new Set(
+    input.grupos
+      .filter((g) => g.docenteId)
+      .map((g) => g.docenteId)
+  );
+  const activeDocentes = input.docentes.filter((d) => d.estado === 'Activo' && docentesAsignadosIds.has(d.id));
   const activeAulas = input.aulas.filter((a) => a.estado === 'Activa');
 
   console.log('[GENERATION] Input data:', {

@@ -150,25 +150,6 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/${role}/horario-grafico`)}
-          className="flex items-center gap-2"
-        >
-          <Calendar className="w-4 h-4" />
-          Horario Lectivas
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/${role}/horario-grafico`)}
-          className="flex items-center gap-2"
-        >
-          <Clock className="w-4 h-4" />
-          Horario No Lectivas
-        </Button>
-      </div>
-
       {errorMessage ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-6 text-center">
           <AlertCircle className="mx-auto mb-3 h-8 w-8 text-destructive" />

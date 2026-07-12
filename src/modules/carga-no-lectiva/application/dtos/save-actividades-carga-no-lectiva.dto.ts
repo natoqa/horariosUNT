@@ -4,7 +4,15 @@ import { ACTIVIDADES_NO_LECTIVAS } from '../../domain/entities/carga-no-lectiva.
 const actividadSchema = z.object({
   tipo: z.enum(ACTIVIDADES_NO_LECTIVAS),
   horas: z.coerce.number().min(0),
-  detalles: z.string().min(1, 'El campo "Detalles" es obligatorio. Por favor, describa brevemente la actividad.'),
+  detalles: z.string(),
+}).superRefine((data, ctx) => {
+  if (data.horas > 0 && data.detalles.trim().length === 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'El campo "Detalles" es obligatorio cuando la actividad tiene horas asignadas.',
+      path: ['detalles'],
+    });
+  }
 });
 
 export const saveActividadesCargaNoLectivaSchema = z.object({

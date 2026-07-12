@@ -41,20 +41,29 @@ export class ValidatePreGenerationUseCase {
       });
     }
 
-    // Active docentes
+    // Get docentes with grupos assigned
+    const docentesAsignadosIds = new Set(
+      grupos
+        .filter((g) => g.docenteId)
+        .map((g) => g.docenteId)
+    );
+    const activeDocentesAsignados = docentes.filter(
+      (d) => d.estado === 'Activo' && docentesAsignadosIds.has(d.id),
+    );
     const activeDocentes = docentes.filter((d) => d.estado === 'Activo');
-    if (activeDocentes.length === 0) {
+    
+    if (activeDocentesAsignados.length === 0) {
       errors.push({
         category: 'docentes',
-        message: 'No hay docentes activos registrados.',
+        message: 'No hay docentes activos con grupos asignados.',
       });
     }
 
-    // Check availability
+    // Check availability only for docentes with grupos assigned
     const docenteIdsWithAvailability = new Set(
       disponibilidades.map((d) => d.docenteId),
     );
-    const docentesSinDisponibilidad = activeDocentes.filter(
+    const docentesSinDisponibilidad = activeDocentesAsignados.filter(
       (d) => !docenteIdsWithAvailability.has(d.id),
     );
 
@@ -91,12 +100,17 @@ export class ValidatePreGenerationUseCase {
       });
     }
 
+    // Calculate stats for docentes with grupos assigned
+    const docentesAsignadosConDisponibilidad = activeDocentesAsignados.filter(
+      (d) => docenteIdsWithAvailability.has(d.id),
+    );
+
     return {
       valid: errors.length === 0,
       errors,
       stats: {
-        totalDocentes: activeDocentes.length,
-        docentesConDisponibilidad: docenteIdsWithAvailability.size,
+        totalDocentes: activeDocentesAsignados.length,
+        docentesConDisponibilidad: docentesAsignadosConDisponibilidad.length,
         totalCursos: activeCursos.length,
         totalGrupos: grupos.length,
         totalAulas: activeAulas.length,

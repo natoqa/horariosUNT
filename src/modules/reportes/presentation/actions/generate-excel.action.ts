@@ -70,7 +70,7 @@ export async function generateExcelAction(
 
   const { data: rawAsignaciones } = await supabase
     .from('asignaciones')
-    .select('id, grupo_id, docente_id, aula_id, dia, bloque, tipo_sesion')
+    .select('id, grupo_id, docente_id, aula_id, dia, bloque, tipo')
     .eq('horario_id', horario.id);
 
   if (!rawAsignaciones || rawAsignaciones.length === 0) {
@@ -128,7 +128,7 @@ export async function generateExcelAction(
     aulaId: a.aula_id,
     dia: a.dia,
     bloque: a.bloque,
-    tipo: a.tipo_sesion,
+    tipo: a.tipo,
   }));
 
   const nameMaps: ExcelNameMaps = {

@@ -114,18 +114,21 @@ export async function getCargasNoLectivaAction() {
     console.log('getCargasNoLectivaAction - docentesError:', docentesError);
 
     if (!docentesError && docentesData) {
-      response.docentes = docentesData.map((d: any) => {
-        const cargaInfo = cargaElectivaMap[d.id] || { totalHoras: 0, cursos: [] };
-        return {
-          id: d.id,
-          nombres: d.nombres,
-          apellidos: d.apellidos,
-          correo: d.correo,
-          cargaMaxima: d.carga_maxima,
-          cargaElectiva: cargaInfo.totalHoras,
-          cursos: cargaInfo.cursos,
-        };
-      });
+      // Filtrar solo docentes que tienen grupos asignados
+      response.docentes = docentesData
+        .filter((d: any) => cargaElectivaMap[d.id]) // Solo docentes con cargaElectiva > 0
+        .map((d: any) => {
+          const cargaInfo = cargaElectivaMap[d.id] || { totalHoras: 0, cursos: [] };
+          return {
+            id: d.id,
+            nombres: d.nombres,
+            apellidos: d.apellidos,
+            correo: d.correo,
+            cargaMaxima: d.carga_maxima,
+            cargaElectiva: cargaInfo.totalHoras,
+            cursos: cargaInfo.cursos,
+          };
+        });
     } else {
       console.log('getCargasNoLectivaAction - Error loading docentes for secretaria');
     }
@@ -145,19 +148,22 @@ export async function getCargasNoLectivaAction() {
       });
     }
 
-    response.cargas = cargas.map((c: any) => {
-      const docenteInfo = docentesMap[c.docenteId];
-      const cargaInfo = cargaElectivaMap[c.docenteId] || { totalHoras: 0, cursos: [] };
-      return {
-        ...c,
-        id: c.id,
-        cargaId: c.id,
-        cargaMaxima: docenteInfo?.cargaMaxima ?? 0,
-        cargaElectiva: cargaInfo.totalHoras,
-        cursos: cargaInfo.cursos,
-        horasDisponiblesNoLectivas: Math.max(0, (docenteInfo?.cargaMaxima ?? 0) - cargaInfo.totalHoras),
-      };
-    });
+    // Filtrar solo cargas de docentes que tienen grupos asignados
+    response.cargas = cargas
+      .filter((c: any) => cargaElectivaMap[c.docenteId])
+      .map((c: any) => {
+        const docenteInfo = docentesMap[c.docenteId];
+        const cargaInfo = cargaElectivaMap[c.docenteId] || { totalHoras: 0, cursos: [] };
+        return {
+          ...c,
+          id: c.id,
+          cargaId: c.id,
+          cargaMaxima: docenteInfo?.cargaMaxima ?? 0,
+          cargaElectiva: cargaInfo.totalHoras,
+          cursos: cargaInfo.cursos,
+          horasDisponiblesNoLectivas: Math.max(0, (docenteInfo?.cargaMaxima ?? 0) - cargaInfo.totalHoras),
+        };
+      });
   }
 
   return { data: response };

@@ -116,14 +116,13 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
           secretaria_aprobado: sameTotal ? existing.secretariaAprobado : false,
         })
         .eq('id', existing.id)
-        .select()
-        .maybeSingle();
+        .select();
 
-      if (error || !data) {
-        throw new Error(error?.message || 'Error al actualizar la carga no lectiva.');
+      if (error || !data || data.length === 0) {
+        throw new Error(error ? `Error al actualizar: ${error.message}` : 'No se encontró la carga para actualizar.');
       }
 
-      return this.mapCarga(data as CargaRow);
+      return this.mapCarga(data[0] as CargaRow);
     }
 
     const { data, error } = await supabase
@@ -134,14 +133,13 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         total_horas: totalHoras,
         estado: 'En revisión',
       })
-      .select()
-      .maybeSingle();
+      .select();
 
-    if (error || !data) {
-      throw new Error(error?.message || 'Error al guardar la carga no lectiva.');
+    if (error || !data || data.length === 0) {
+      throw new Error(error ? `Error al insertar: ${error.message}` : 'No se pudo crear la carga.');
     }
 
-    return this.mapCarga(data as CargaRow);
+    return this.mapCarga(data[0] as CargaRow);
   }
 
   async saveCargaMeta(
@@ -176,14 +174,13 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         .from('cargas_no_lectivas')
         .update(payload)
         .eq('id', existing.id)
-        .select()
-        .maybeSingle();
+        .select();
 
-      if (error || !data) {
-        throw new Error(error?.message || 'Error al guardar la declaración lectiva.');
+      if (error || !data || data.length === 0) {
+        throw new Error(error ? `Error al actualizar declaración: ${error.message}` : 'No se encontró la carga para actualizar.');
       }
 
-      return this.mapCarga(data as CargaRow);
+      return this.mapCarga(data[0] as CargaRow);
     }
 
     const insertPayload = {
@@ -197,14 +194,13 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
     const { data, error } = await supabase
       .from('cargas_no_lectivas')
       .insert(insertPayload)
-      .select()
-      .maybeSingle();
+      .select();
 
-    if (error || !data) {
-      throw new Error(error?.message || 'Error al guardar la declaración lectiva.');
+    if (error || !data || data.length === 0) {
+      throw new Error(error ? `Error al insertar declaración: ${error.message}` : 'No se pudo crear la carga.');
     }
 
-    return this.mapCarga(data as CargaRow);
+    return this.mapCarga(data[0] as CargaRow);
   }
 
   async listCargasByPeriodo(periodoId: string): Promise<CargaNoLectivaWithDocente[]> {
@@ -274,14 +270,13 @@ export class SupabaseCargaNoLectivaRepository implements ICargaNoLectivaReposito
         estado,
       })
       .eq('id', cargaId)
-      .select()
-      .maybeSingle();
+      .select();
 
-    if (error || !data) {
-      throw new Error(error?.message || 'Error al aprobar la carga no lectiva.');
+    if (error || !data || data.length === 0) {
+      throw new Error(error ? `Error al aprobar: ${error.message}` : 'No se encontró la carga para aprobar.');
     }
 
-    return this.mapCarga(data as CargaRow);
+    return this.mapCarga(data[0] as CargaRow);
   }
 
   private mapActividad(row: ActividadRow): ActividadNoLectiva {

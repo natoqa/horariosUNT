@@ -24,4 +24,5 @@ export interface ICursoRepository {
   findGruposByCursoAndPeriodo(cursoId: string, periodoId: string): Promise<Grupo[]>;
   saveGrupo(grupo: Omit<Grupo, 'id' | 'createdAt' | 'updatedAt'>): Promise<Grupo>;
   deleteGrupo(id: string): Promise<void>;
+  resetAsignaciones(periodoId: string): Promise<void>;
 }

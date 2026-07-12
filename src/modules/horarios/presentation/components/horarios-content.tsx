@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, CalendarDays, AlertCircle, Play, RefreshCw } from 'lucide-react';
+import { Loader2, CalendarDays, AlertCircle, Play, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { Periodo } from '@/modules/periodos';
 import { Asignacion, GenerationSummary, Horario } from '../../domain/entities/horario.entity';
@@ -19,6 +20,7 @@ import { generateHorarioAction } from '../actions/generate-horario.action';
 import { getHorarioAction } from '../actions/get-horario.action';
 import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
 import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
+import { resetAsignacionesAction } from '@/modules/cursos/presentation/actions/reset-asignaciones.action';
 
 type ContentState = 'loading' | 'error' | 'empty' | 'ready' | 'generating' | 'result';
 
@@ -38,6 +40,8 @@ export function HorariosContent() {
   const [selectedPlanEstudio, setSelectedPlanEstudio] = useState<string>('');
 
   const [editingAsignacion, setEditingAsignacion] = useState<Asignacion | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Name maps for the grid
   const [docenteNames, setDocenteNames] = useState<Map<string, string>>(new Map());
@@ -181,6 +185,19 @@ export function HorariosContent() {
     setState('result');
   };
 
+  const handleReset = async () => {
+    setIsResetting(true);
+    const result = await resetAsignacionesAction();
+    setIsResetting(false);
+    if (result.success) {
+      setResetDialogOpen(false);
+      setHorario(null);
+      await loadData();
+    } else {
+      setErrorMessage(result.message || 'Error al resetear las asignaciones.');
+    }
+  };
+
   if (authLoading || state === 'loading') {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-2">
@@ -223,12 +240,47 @@ export function HorariosContent() {
             Período: {periodo?.name} — Estado: {periodo?.state}
           </p>
         </div>
-        {state === 'result' && (periodo?.state === 'Generación' || periodo?.state === 'Publicado') && (
-          <Button variant="outline" onClick={handleGenerate}>
-            <RefreshCw className="w-4 h-4 mr-1.5" />
-            Regenerar
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {(user?.role === 'director' || user?.role === 'secretaria') && (
+            <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+              <DialogTrigger
+                render={
+                  <Button variant="destructive">
+                    <Trash2 className="w-4 h-4 mr-1.5" />
+                    Resetear Asignaciones
+                  </Button>
+                }
+              />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>¿Estás seguro?</DialogTitle>
+                  <DialogDescription>
+                    Esto eliminará todas las asignaciones de docentes a cursos en el período activo. Esta acción no se puede deshacer.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setResetDialogOpen(false)} disabled={isResetting}>
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" onClick={handleReset} disabled={isResetting}>
+                    {isResetting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                        Reseteando...
+                      </>
+                    ) : 'Resetear'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          {state === 'result' && (periodo?.state === 'Generación' || periodo?.state === 'Publicado') && (
+            <Button variant="outline" onClick={handleGenerate}>
+              <RefreshCw className="w-4 h-4 mr-1.5" />
+              Regenerar
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

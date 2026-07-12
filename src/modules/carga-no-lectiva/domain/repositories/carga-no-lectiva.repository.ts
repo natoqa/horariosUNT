@@ -16,4 +16,5 @@ export interface ICargaNoLectivaRepository {
   saveCargaMeta(docenteId: string, periodoId: string, meta: Partial<Pick<CargaNoLectiva, 'horasLectivasAsignadas' | 'horasLectivasNoAsignadas' | 'lectivaDeclarada' | 'declaracionLectiva'>>): Promise<CargaNoLectiva>;
   listCargasByPeriodo(periodoId: string): Promise<CargaNoLectivaWithDocente[]>;
   approveCargaTotal(cargaId: string, role: 'director' | 'secretaria'): Promise<CargaNoLectiva>;
+  resetAllCargas(periodoId: string): Promise<void>;
 }

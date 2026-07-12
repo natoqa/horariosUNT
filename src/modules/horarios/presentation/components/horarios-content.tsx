@@ -247,15 +247,15 @@ export function HorariosContent() {
                 render={
                   <Button variant="destructive">
                     <Trash2 className="w-4 h-4 mr-1.5" />
-                    Resetear Asignaciones
+                    Borrar Secciones
                   </Button>
                 }
               />
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>¿Estás seguro?</DialogTitle>
+                  <DialogTitle>¿Está seguro?</DialogTitle>
                   <DialogDescription>
-                    Esto eliminará todas las asignaciones de docentes a cursos en el período activo. Esta acción no se puede deshacer.
+                    Esto eliminará todas las secciones (grupos) del período activo. Esta acción no se puede deshacer.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -266,9 +266,9 @@ export function HorariosContent() {
                     {isResetting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                        Reseteando...
+                        Borrando...
                       </>
-                    ) : 'Resetear'}
+                    ) : 'Borrar Secciones'}
                   </Button>
                 </DialogFooter>
               </DialogContent>

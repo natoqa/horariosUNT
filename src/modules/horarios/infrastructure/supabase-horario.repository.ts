@@ -8,7 +8,7 @@ interface HorarioRow {
   periodo_id: string;
   estado: string;
   fecha_generacion: string;
-  resumen: any;
+  resumen?: any;
   created_at: string;
   updated_at: string;
 }
@@ -52,7 +52,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     return this.mapToHorario(data as HorarioRow);
   }
 
-  async save(periodoId: string, resumen: GenerationSummary): Promise<Horario> {
+  async save(periodoId: string, resumen?: GenerationSummary): Promise<Horario> {
     const supabase = await createClient();
 
     // Delete existing horarios for this periodo
@@ -62,19 +62,43 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     console.log('[HorarioRepository] Guardando horario con estado:', estadoToSave);
     console.log('[HorarioRepository] Tipo de estado:', typeof estadoToSave);
 
+    const insertData: any = {
+      periodo_id: periodoId,
+      estado: estadoToSave,
+      fecha_generacion: new Date().toISOString(),
+    };
+
+    // Solo incluir resumen si existe y no es nulo
+    if (resumen !== undefined && resumen !== null) {
+      insertData.resumen = resumen;
+    }
+
     const { data, error } = await supabase
       .from('horarios')
-      .insert({
-        periodo_id: periodoId,
-        estado: estadoToSave,
-        fecha_generacion: new Date().toISOString(),
-        resumen: resumen,
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (error || !data) {
       console.error('[HorarioRepository] Error al guardar horario:', error);
+      // Si el error es por la columna resumen, intentar de nuevo sin ella
+      if (error?.message?.includes('resumen')) {
+        console.warn('[HorarioRepository] Intentando guardar sin columna resumen...');
+        const { data: dataFallback, error: errorFallback } = await supabase
+          .from('horarios')
+          .insert({
+            periodo_id: periodoId,
+            estado: estadoToSave,
+            fecha_generacion: new Date().toISOString(),
+          })
+          .select()
+          .single();
+        
+        if (errorFallback || !dataFallback) {
+          throw new Error(errorFallback?.message || 'Error al guardar horario sin resumen.');
+        }
+        return this.mapToHorario(dataFallback as HorarioRow);
+      }
       throw new Error(error?.message || 'Error al guardar horario.');
     }
     return this.mapToHorario(data as HorarioRow);

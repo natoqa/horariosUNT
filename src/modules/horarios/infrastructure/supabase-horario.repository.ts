@@ -110,6 +110,8 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
   ): Promise<Asignacion[]> {
     const supabase = await createClient();
 
+    console.log('[HorarioRepository] saveAsignaciones called with:', { horarioId, asignacionesCount: asignaciones.length, asignaciones });
+
     const TIPO_MAP: Record<string, string> = {
       'teorico': 'Teórica',
       'practico': 'Práctica',
@@ -125,11 +127,14 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       bloque: a.bloque,
       tipo: a.tipo,
     }));
+    console.log('[HorarioRepository] Rows to insert with tipo:', rowsWithTipo);
 
     let { data, error } = await supabase
       .from('asignaciones')
       .insert(rowsWithTipo)
       .select();
+
+    console.log('[HorarioRepository] Insert result with tipo:', { data, error });
 
     // Si falla por la columna tipo, intentamos sin ella
     if (error && error?.message?.includes('tipo')) {
@@ -148,6 +153,8 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
         .insert(rowsWithoutTipo)
         .select();
 
+      console.log('[HorarioRepository] Insert result without tipo:', resultWithoutTipo);
+
       if (resultWithoutTipo.error || !resultWithoutTipo.data) {
         throw new Error(resultWithoutTipo.error?.message || 'Error al guardar asignaciones sin tipo.');
       }
@@ -157,7 +164,9 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
     if (error || !data) {
       throw new Error(error?.message || 'Error al guardar asignaciones.');
     }
-    return (data as AsignacionRow[]).map(this.mapToAsignacion);
+    const mapped = (data as AsignacionRow[]).map(this.mapToAsignacion);
+    console.log('[HorarioRepository] Saved asignaciones:', mapped);
+    return mapped;
   }
 
   async deleteAsignacionesByHorario(horarioId: string): Promise<void> {

@@ -524,7 +524,6 @@ export function HorarioGraficoContent() {
           aulaNames={aulaNames}
           grupoCiclos={grupoCiclos}
           grupoCursoIds={grupoCursoIds}
-          tipoCiclo={periodo?.tipoCiclo}
           isNonLectiva={viewMode === 'no-lectivas'}
           isAulaView={viewMode === 'aulas'}
           periodoTipoCiclo={periodo?.tipoCiclo}

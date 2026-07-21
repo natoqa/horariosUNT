@@ -43,7 +43,6 @@ export function DragDropHorarioGrid({
   aulaNames,
   grupoCiclos,
   grupoCursoIds,
-  tipoCiclo,
   isNonLectiva = false,
   isAulaView = false,
   periodoTipoCiclo,
@@ -52,7 +51,7 @@ export function DragDropHorarioGrid({
   checkAulaAvailability,
   aulaConflicts,
 }: DragDropHorarioGridProps) {
-  const ciclosToShow = tipoCiclo ? getCiclosByTipo(tipoCiclo) : ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+  const ciclosToShow = periodoTipoCiclo ? getCiclosByTipo(periodoTipoCiclo) : ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const [selectedCiclo, setSelectedCiclo] = useState<string>(ciclosToShow[0]);
   const [draggedAsignacion, setDraggedAsignacion] = useState<Asignacion | null>(null);
   const [droppingCell, setDroppingCell] = useState<{ dia: string; bloque: string } | null>(null);

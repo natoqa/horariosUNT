@@ -123,13 +123,25 @@ export const PlanEstudioTable = forwardRef<PlanEstudioTableRef, PlanEstudioTable
                 <tr key={plan.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="px-6 py-3.5 font-medium text-foreground">{plan.nombre}</td>
                   <td className="px-6 py-3.5 text-muted-foreground text-xs">{plan.anio}</td>
-                  <td className="px-6 py-3.5 text-muted-foreground text-xs font-semibold">{plan.cursosCount || 0}</td>
-                  <td className="px-6 py-3.5 text-muted-foreground text-xs font-semibold">{plan.docentesCount || 0}</td>
+                  <td className="px-6 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                       <span className={`inline-flex items-center justify-center min-w-[28px] h-6 px-2 rounded-full text-xs font-bold ${plan.cursosCount ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                         {plan.cursosCount || 0}
+                       </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                       <span className={`inline-flex items-center justify-center min-w-[28px] h-6 px-2 rounded-full text-xs font-bold ${plan.docentesCount ? 'bg-chart-3/10 text-chart-3' : 'bg-destructive/10 text-destructive'}`}>
+                         {plan.docentesCount || 0}
+                       </span>
+                    </div>
+                  </td>
                   <td className="px-6 py-3.5">
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold ${
                       plan.estado === 'Activo' 
-                        ? 'bg-emerald-50 border border-emerald-100 text-emerald-700' 
-                        : 'bg-slate-50 border border-slate-200 text-slate-600'
+                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600' 
+                        : 'bg-muted border border-border text-muted-foreground'
                     }`}>
                       {PLAN_ESTADO_LABELS[plan.estado]}
                     </span>

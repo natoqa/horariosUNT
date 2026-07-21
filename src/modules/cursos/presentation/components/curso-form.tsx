@@ -230,8 +230,8 @@ export function CursoForm({ onSuccess }: CursoFormProps) {
         </div>
       )}
       {state?.success && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5">
-          <p className="text-sm text-emerald-700">{state.message}</p>
+        <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5">
+          <p className="text-sm text-emerald-600">{state.message}</p>
         </div>
       )}
 

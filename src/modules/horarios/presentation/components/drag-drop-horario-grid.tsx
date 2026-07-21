@@ -12,8 +12,8 @@ interface DragDropHorarioGridProps {
   aulaNames: Map<string, string>;
   grupoCiclos: Map<string, string>;
   grupoCursoIds: Map<string, string>;
-  tipoCiclo?: TipoCiclo;
   isNonLectiva?: boolean;
+  isAulaView?: boolean;
   periodoTipoCiclo?: TipoCiclo;
   userRole?: 'director' | 'secretaria' | 'docente';
   onDrop?: (asignacion: Asignacion, newDia: string, newBloque: string) => Promise<void>;
@@ -22,18 +22,18 @@ interface DragDropHorarioGridProps {
 }
 
 const CURSO_PALETTE = [
-  'bg-blue-50 border-blue-300 text-blue-900',
-  'bg-emerald-50 border-emerald-300 text-emerald-900',
-  'bg-amber-50 border-amber-300 text-amber-900',
-  'bg-purple-50 border-purple-300 text-purple-900',
-  'bg-rose-50 border-rose-300 text-rose-900',
-  'bg-cyan-50 border-cyan-300 text-cyan-900',
-  'bg-orange-50 border-orange-300 text-orange-900',
-  'bg-indigo-50 border-indigo-300 text-indigo-900',
-  'bg-teal-50 border-teal-300 text-teal-900',
-  'bg-pink-50 border-pink-300 text-pink-900',
-  'bg-lime-50 border-lime-300 text-lime-900',
-  'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-900',
+  'bg-blue-500/10 border-blue-500/20 text-blue-600',
+  'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
+  'bg-amber-500/10 border-amber-500/20 text-amber-600',
+  'bg-purple-500/10 border-purple-500/20 text-purple-600',
+  'bg-rose-500/10 border-rose-500/20 text-rose-600',
+  'bg-cyan-500/10 border-cyan-500/20 text-cyan-600',
+  'bg-orange-500/10 border-orange-500/20 text-orange-600',
+  'bg-indigo-500/10 border-indigo-500/20 text-indigo-600',
+  'bg-teal-500/10 border-teal-500/20 text-teal-600',
+  'bg-pink-500/10 border-pink-500/20 text-pink-600',
+  'bg-lime-500/10 border-lime-500/20 text-lime-600',
+  'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-600',
 ];
 
 export function DragDropHorarioGrid({
@@ -45,6 +45,7 @@ export function DragDropHorarioGrid({
   grupoCursoIds,
   tipoCiclo,
   isNonLectiva = false,
+  isAulaView = false,
   periodoTipoCiclo,
   userRole = 'docente',
   onDrop,
@@ -80,8 +81,8 @@ export function DragDropHorarioGrid({
       return true;
     }
     // For lective activities, filter by ciclo and aula
-    const cicloMatch = grupoCiclos.get(a.grupoId) === selectedCiclo;
-    const aulaMatch = selectedAula === 'all' || a.aulaId === selectedAula;
+    const cicloMatch = isAulaView ? true : grupoCiclos.get(a.grupoId) === selectedCiclo;
+    const aulaMatch = selectedAula === 'all' ? !isAulaView : a.aulaId === selectedAula;
     return cicloMatch && aulaMatch;
   });
 
@@ -224,37 +225,41 @@ export function DragDropHorarioGrid({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-muted-foreground">Filtrar por ciclo:</span>
-        {ciclosToShow.map((ciclo) => (
-          <button
-            key={ciclo}
-            onClick={() => setSelectedCiclo(ciclo)}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-              selectedCiclo === ciclo
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            {ciclo}
-          </button>
-        ))}
-      </div>
+      {!isAulaView && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">Filtrar por ciclo:</span>
+          {ciclosToShow.map((ciclo) => (
+            <button
+              key={ciclo}
+              onClick={() => setSelectedCiclo(ciclo)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                selectedCiclo === ciclo
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {ciclo}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!isNonLectiva && uniqueAulas.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground">Filtrar por aula:</span>
-          <button
-            key="all"
-            onClick={() => setSelectedAula('all')}
-            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-              selectedAula === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            Todas
-          </button>
+          {!isAulaView && (
+            <button
+              key="all"
+              onClick={() => setSelectedAula('all')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                selectedAula === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              Todas
+            </button>
+          )}
           {uniqueAulas.map((aulaId) => (
             <button
               key={aulaId}
@@ -272,13 +277,13 @@ export function DragDropHorarioGrid({
       )}
 
       {availabilityError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600">
           {availabilityError}
         </div>
       )}
 
       {hoverConflict && (
-        <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800">
+        <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 p-3 text-sm text-orange-600">
           <p className="font-semibold mb-1">Aula ocupada en {hoverConflict.dia} {hoverConflict.bloque}:</p>
           <p>Curso: {hoverConflict.conflict.curso}</p>
           <p>Docente: {hoverConflict.conflict.docente}</p>
@@ -331,7 +336,7 @@ export function DragDropHorarioGrid({
                         rowSpan={cell?.span || 1}
                         className={`p-1 border-r border-border last:border-r-0 transition-colors ${
                           isDropping && isDropTarget ? 'bg-primary/20' : ''
-                        } ${cellConflict ? 'bg-red-50' : ''} ${
+                        } ${cellConflict ? 'bg-red-500/10' : ''} ${
                           isDropTarget && onDrop && !cellConflict ? 'cursor-pointer hover:bg-muted/30' : ''
                         }`}
                         style={{ height: cell?.span ? cell.span * 48 : 48 }}
@@ -361,7 +366,7 @@ export function DragDropHorarioGrid({
                                   draggable={onDrop ? true : false}
                                   onDragStart={() => handleDragStart(a)}
                                   className={`rounded border px-1.5 py-1.5 flex-1 flex flex-col justify-center ${
-                                    isNonLectiva ? 'bg-orange-50 border-orange-200 text-orange-800' : colorClass
+                                    isNonLectiva ? 'bg-orange-500/10 border-orange-500/20 text-orange-600' : colorClass
                                   } ${
                                     onDrop ? 'cursor-move hover:ring-2 hover:ring-primary/40 transition-shadow' : ''
                                   }`}
@@ -373,7 +378,12 @@ export function DragDropHorarioGrid({
                                     {isNonLectiva ? actividadNoLectiva?.detalles || '' : (docenteNames.get(a.docenteId) ?? '')}
                                   </p>
                                   <p className="text-[10px] leading-tight truncate opacity-70">
-                                    {isNonLectiva ? `${actividadNoLectiva?.horas || 0}h` : `${aulaNames.get(a.aulaId) ?? ''} · ${ASIGNACION_TIPO_LABELS[a.tipo]}`}
+                                    {isNonLectiva 
+                                      ? `${actividadNoLectiva?.horas || 0}h` 
+                                      : isAulaView 
+                                        ? `Ciclo ${grupoCiclos.get(a.grupoId) ?? ''} · ${ASIGNACION_TIPO_LABELS[a.tipo]}`
+                                        : `${aulaNames.get(a.aulaId) ?? ''} · ${ASIGNACION_TIPO_LABELS[a.tipo]}`
+                                    }
                                   </p>
                                   {cell.span > 1 && (
                                     <p className="text-[9px] font-semibold opacity-60 mt-0.5">

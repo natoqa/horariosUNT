@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, CalendarDays, AlertCircle, Play, RefreshCw, Trash2 } from 'lucide-react';
+import { Loader2, CalendarDays, AlertCircle, Play, RefreshCw, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { useAuth } from '@/shared/hooks/use-auth';
@@ -15,8 +15,11 @@ import { GenerationSummaryPanel } from './generation-summary';
 import { HorarioGrid } from './horario-grid';
 import { AsignacionEditDialog } from './asignacion-edit-dialog';
 import { HorarioApprovalPanel } from './horario-approval-panel';
+import { ManualModeSelector } from './manual-mode-selector';
+import { ManualAssignmentDialog } from './manual-assignment-dialog';
 import { validateGenerationAction } from '../actions/validate-generation.action';
 import { generateHorarioAction } from '../actions/generate-horario.action';
+import { createManualHorarioAction } from '../actions/create-manual-horario.action';
 import { getHorarioAction } from '../actions/get-horario.action';
 import { getPlanesEstudioAction } from '@/modules/planes-estudio/presentation/actions/get-planes-estudio.action';
 import { PlanEstudio } from '@/modules/planes-estudio/domain/entities/plan-estudio.entity';
@@ -42,6 +45,10 @@ export function HorariosContent() {
   const [editingAsignacion, setEditingAsignacion] = useState<Asignacion | null>(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [manualDialogOpen, setManualDialogOpen] = useState(false);
+  const [manualPreDia, setManualPreDia] = useState<string | undefined>();
+  const [manualPreBloque, setManualPreBloque] = useState<string | undefined>();
+  const [gruposList, setGruposList] = useState<{ id: string; cursoId: string; nombre: string; cursoNombre: string; ciclo: string }[]>([]);
 
   // Name maps for the grid
   const [docenteNames, setDocenteNames] = useState<Map<string, string>>(new Map());
@@ -94,8 +101,21 @@ export function HorariosContent() {
       supabase.from('docentes').select('id, nombres, apellidos'),
       supabase.from('cursos').select('id, nombre, ciclo'),
       supabase.from('aulas').select('id, nombre, codigo'),
-      supabase.from('grupos').select('id, curso_id, nombre'),
+      supabase.from('grupos').select('id, curso_id, nombre').eq('periodo_id', currentPeriodo.id),
     ]);
+
+    // Build grupos list for manual assignment dialog
+    const gruposForDialog = (gruposRes.data ?? []).map((g) => {
+      const cursoData = cursosRes.data?.find((c) => c.id === g.curso_id);
+      return {
+        id: g.id,
+        cursoId: g.curso_id,
+        nombre: g.nombre,
+        cursoNombre: cursoData?.nombre ?? 'Curso',
+        ciclo: cursoData?.ciclo ?? '',
+      };
+    });
+    setGruposList(gruposForDialog);
 
     const dNames = new Map<string, string>();
     (docentesRes.data ?? []).forEach((d) => dNames.set(d.id, `${d.apellidos}, ${d.nombres}`));
@@ -198,6 +218,38 @@ export function HorariosContent() {
     }
   };
 
+  const handleCreateManual = async () => {
+    if (!periodo) return;
+    setState('generating');
+    setGeneratingPhase(1);
+
+    const result = await createManualHorarioAction(periodo.id);
+
+    if (result.message) {
+      setState('error');
+      setErrorMessage(result.message);
+      return;
+    }
+
+    setHorario(result.horario ?? null);
+    setAsignaciones([]);
+    setSummary(null);
+    setUnassigned([]);
+    setState('result');
+  };
+
+  const handleEmptyCellClick = (dia: string, bloque: string) => {
+    setManualPreDia(dia);
+    setManualPreBloque(bloque);
+    setManualDialogOpen(true);
+  };
+
+  const handleOpenManualDialog = () => {
+    setManualPreDia(undefined);
+    setManualPreBloque(undefined);
+    setManualDialogOpen(true);
+  };
+
   if (authLoading || state === 'loading') {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-2">
@@ -230,6 +282,8 @@ export function HorariosContent() {
   }
 
   const canGenerate = periodo?.state === 'Generación' && preCheck?.valid === true && (user?.role === 'director' || user?.role === 'secretaria');
+  const canManual = periodo?.state === 'Generación' && (user?.role === 'director' || user?.role === 'secretaria');
+  const isBorradorManualOrAuto = horario?.estado === 'Borrador' && (user?.role === 'director' || user?.role === 'secretaria');
 
   return (
     <div className="space-y-6">
@@ -309,17 +363,16 @@ export function HorariosContent() {
         <>
           <GenerationPreCheck result={preCheck} />
 
-          <div className="flex justify-end">
-            <Button disabled={!canGenerate} onClick={handleGenerate}>
-              <Play className="w-4 h-4 mr-1.5" />
-              Generar Horario
-            </Button>
-          </div>
+          <ManualModeSelector
+            onSelectAutomatic={handleGenerate}
+            onSelectManual={handleCreateManual}
+            disabled={!canManual}
+          />
         </>
       )}
 
       {state === 'ready' && periodo?.state !== 'Generación' && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+        <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-600">
           El período debe estar en estado &quot;Generación&quot; para ejecutar la generación automática.
           Estado actual: &quot;{periodo?.state}&quot;.
         </div>
@@ -332,12 +385,23 @@ export function HorariosContent() {
           )}
 
           {horario && (user?.role === 'director' || user?.role === 'secretaria') && (
-            <HorarioApprovalPanel
-              horarioId={horario.id}
-              horarioEstado={horario.estado}
-              periodoEstado={periodo?.state ?? 'Configuración'}
-              onStateChanged={loadData}
-            />
+            <div className="flex items-center justify-between">
+              <HorarioApprovalPanel
+                horarioId={horario.id}
+                horarioEstado={horario.estado}
+                periodoEstado={periodo?.state ?? 'Configuración'}
+                onStateChanged={loadData}
+              />
+            </div>
+          )}
+
+          {isBorradorManualOrAuto && (
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={handleOpenManualDialog}>
+                <Plus className="w-4 h-4 mr-1.5" />
+                Agregar Asignación Manual
+              </Button>
+            </div>
           )}
 
           <HorarioGrid
@@ -353,6 +417,7 @@ export function HorariosContent() {
               (periodo?.state === 'Publicado' && horario?.estado === 'Publicado' && (user?.role === 'director' || user?.role === 'secretaria'))
             }
             onSelectAsignacion={(a) => setEditingAsignacion(a)}
+            onEmptyCellClick={isBorradorManualOrAuto ? handleEmptyCellClick : undefined}
           />
 
           {editingAsignacion && (
@@ -365,6 +430,21 @@ export function HorariosContent() {
               onClose={() => setEditingAsignacion(null)}
               onSuccess={() => {
                 setEditingAsignacion(null);
+                loadData();
+              }}
+            />
+          )}
+
+          {manualDialogOpen && horario && periodo && (
+            <ManualAssignmentDialog
+              horarioId={horario.id}
+              periodoId={periodo.id}
+              grupos={gruposList}
+              preSelectedDia={manualPreDia}
+              preSelectedBloque={manualPreBloque}
+              onClose={() => setManualDialogOpen(false)}
+              onSuccess={() => {
+                setManualDialogOpen(false);
                 loadData();
               }}
             />

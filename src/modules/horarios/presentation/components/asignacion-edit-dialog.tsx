@@ -133,11 +133,11 @@ export function AsignacionEditDialog({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {isPostPublish && (
-            <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-2">
+            <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-800">Horario publicado</p>
-                <p className="text-xs text-amber-700 mt-0.5">
+                <p className="text-sm font-medium text-amber-600">Horario publicado</p>
+                <p className="text-xs text-amber-600 mt-0.5">
                   Este cambio se registrará en auditoría como modificación post-publicación.
                 </p>
               </div>
@@ -256,9 +256,9 @@ export function AsignacionEditDialog({
           )}
 
           {success && (
-            <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+            <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <p className="text-sm text-emerald-700">Asignación actualizada</p>
+              <p className="text-sm text-emerald-600">Asignación actualizada</p>
             </div>
           )}
 

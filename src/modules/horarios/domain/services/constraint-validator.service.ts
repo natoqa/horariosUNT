@@ -13,6 +13,7 @@ export interface PartialAssignment {
   numEstudiantes: number;
   aulaType: string;
   requiereLaboratorio: boolean;
+  pabellon?: string | null;
 }
 
 export interface Violation {
@@ -106,6 +107,42 @@ export function validateMaxConsecutiveHours(
       }
     } else {
       consecutive = 1;
+    }
+  }
+
+  return [];
+}
+
+export function validateTheoryPracticeSeparation(
+  existing: PartialAssignment[],
+  candidate: PartialAssignment,
+): Violation[] {
+  // RN-016/RN-020: El usuario indicó que sí se permite teoría y práctica consecutivas (ej. 2h teoría + 3h práctica seguidas)
+  return [];
+}
+
+export function validateBuildingSeparation(
+  existing: PartialAssignment[],
+  candidate: PartialAssignment,
+): Violation[] {
+  // RN-008: Si son pabellones diferentes, debe haber al menos 1 bloque de separación
+  if (!candidate.pabellon) return [];
+
+  const sameDocenteDay = existing.filter(
+    (a) => a.docenteId === candidate.docenteId && a.dia === candidate.dia
+  );
+
+  const candidateHour = parseInt(candidate.bloque.split(':')[0], 10);
+
+  for (const a of sameDocenteDay) {
+    if (!a.pabellon || a.pabellon === candidate.pabellon) continue;
+
+    const existingHour = parseInt(a.bloque.split(':')[0], 10);
+    if (Math.abs(candidateHour - existingHour) === 1) {
+      return [{
+        rule: 'RN-008',
+        message: `Docente no puede cambiar del pabellón ${a.pabellon} al ${candidate.pabellon} en bloques consecutivos`,
+      }];
     }
   }
 

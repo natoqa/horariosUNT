@@ -11,6 +11,8 @@ import {
 } from '../actions/get-ocupacion-aula.action';
 import { generateOcupacionAulasPdfAction } from '../actions/generate-ocupacion-aulas-pdf.action';
 import { generateExcelAction } from '../actions/generate-excel.action';
+import { PdfPreviewDialog } from './pdf-preview-dialog';
+import { Eye } from 'lucide-react';
 
 type ReportState = 'idle' | 'loading' | 'error' | 'empty' | 'success' | 'generating-pdf' | 'generating-excel';
 
@@ -28,6 +30,8 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
   const [periodoName, setPeriodoName] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const loadResumen = useCallback(async () => {
     setState('loading');
@@ -88,7 +92,7 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
     setState('success');
   };
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (preview: boolean = false) => {
     if (!selectedAulaId) return;
     setState('generating-pdf');
     setErrorMessage(null);
@@ -100,15 +104,21 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
       const bytes = Uint8Array.from(atob(result.pdfBase64), (c) => c.charCodeAt(0));
       const blob = new Blob([bytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = result.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
+      if (preview) {
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setSuccessMessage('PDF descargado exitosamente.');
+      }
 
-      setSuccessMessage('PDF descargado exitosamente.');
       setState('success');
     } else {
       setErrorMessage(result.message ?? 'Error al generar el PDF.');
@@ -206,7 +216,7 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
         )}
 
         {successMessage && (
-          <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
             {successMessage}
           </div>
         )}
@@ -241,7 +251,7 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
                         <td
                           key={dia}
                           className={`px-2 py-2 text-center ${
-                            slot ? 'bg-blue-50' : 'bg-muted/20'
+                            slot ? 'bg-blue-500/10' : 'bg-muted/20'
                           }`}
                         >
                           {slot ? (
@@ -283,8 +293,16 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
             )}
           </Button>
           <Button
+            variant="outline"
             disabled={isGenerating}
-            onClick={handleDownloadPdf}
+            onClick={() => handleDownloadPdf(true)}
+          >
+            <Eye className="w-4 h-4 mr-1.5" />
+            Previsualizar
+          </Button>
+          <Button
+            disabled={isGenerating}
+            onClick={() => handleDownloadPdf(false)}
           >
             {state === 'generating-pdf' ? (
               <>
@@ -320,8 +338,8 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
           <p className="text-2xl font-bold text-foreground">{promedioOcupacion}%</p>
           <p className="text-xs text-muted-foreground">Promedio ocupacion</p>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-          <p className="text-2xl font-bold text-red-700">{aulasAltas}</p>
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center">
+          <p className="text-2xl font-bold text-red-600">{aulasAltas}</p>
           <p className="text-xs text-red-600">Ocupacion &ge; 80%</p>
         </div>
       </div>
@@ -333,7 +351,7 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
       )}
 
       {successMessage && (
-        <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
           {successMessage}
         </div>
       )}
@@ -356,7 +374,7 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
                 return (
                   <tr
                     key={aula.aulaId}
-                    className={`border-b border-border last:border-0 hover:bg-muted/20 ${isHigh ? 'bg-red-50' : ''}`}
+                    className={`border-b border-border last:border-0 hover:bg-muted/20 ${isHigh ? 'bg-red-500/10' : ''}`}
                   >
                     <td className="px-4 py-3 font-medium text-foreground">{aula.aulaName}</td>
                     <td className="px-4 py-3 text-center text-muted-foreground">{aula.bloquesOcupados}</td>
@@ -364,10 +382,10 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${
                         isHigh
-                          ? 'bg-red-100 text-red-700'
+                          ? 'bg-red-100 text-red-600'
                           : aula.porcentaje === 0
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-emerald-50 text-emerald-700'
+                            ? 'bg-amber-100 text-amber-600'
+                            : 'bg-emerald-500/10 text-emerald-600'
                       }`}>
                         {aula.porcentaje}%
                       </span>
@@ -408,6 +426,17 @@ export function OcupacionAulasReport({ periodoId }: OcupacionAulasReportProps) {
           )}
         </Button>
       </div>
+
+      <PdfPreviewDialog
+        isOpen={previewOpen}
+        onClose={() => {
+          setPreviewOpen(false);
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+        }}
+        title={`Vista Previa - Ocupación ${aulaName}`}
+        pdfUrl={previewUrl}
+      />
     </div>
   );
 }

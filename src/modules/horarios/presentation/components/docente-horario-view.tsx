@@ -13,16 +13,16 @@ import { useSearchParams } from 'next/navigation';
 type ViewState = 'loading' | 'error' | 'empty' | 'success';
 
 const CICLO_COLORS: Record<string, string> = {
-  I: 'bg-blue-50 border-blue-200 text-blue-800',
-  II: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-  III: 'bg-amber-50 border-amber-200 text-amber-800',
-  IV: 'bg-purple-50 border-purple-200 text-purple-800',
-  V: 'bg-rose-50 border-rose-200 text-rose-800',
-  VI: 'bg-cyan-50 border-cyan-200 text-cyan-800',
-  VII: 'bg-orange-50 border-orange-200 text-orange-800',
-  VIII: 'bg-indigo-50 border-indigo-200 text-indigo-800',
-  IX: 'bg-teal-50 border-teal-200 text-teal-800',
-  X: 'bg-pink-50 border-pink-200 text-pink-800',
+  I: 'bg-blue-500/10 border-blue-500/20 text-blue-600',
+  II: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
+  III: 'bg-amber-500/10 border-amber-500/20 text-amber-600',
+  IV: 'bg-purple-500/10 border-purple-500/20 text-purple-600',
+  V: 'bg-rose-500/10 border-rose-500/20 text-rose-600',
+  VI: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-600',
+  VII: 'bg-orange-500/10 border-orange-500/20 text-orange-600',
+  VIII: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600',
+  IX: 'bg-teal-500/10 border-teal-500/20 text-teal-600',
+  X: 'bg-pink-500/10 border-pink-500/20 text-pink-600',
 };
 
 export function DocenteHorarioView() {
@@ -194,7 +194,7 @@ export function DocenteHorarioView() {
                   <p className="text-sm font-medium text-foreground">{cursoNames[a.grupoId] || 'Curso'}</p>
                   <p className="text-xs text-muted-foreground">Sin horario asignado</p>
                 </div>
-                <span className="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                <span className="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
                   Pendiente
                 </span>
               </div>
@@ -215,12 +215,12 @@ export function DocenteHorarioView() {
             </h3>
             <div className="space-y-3">
               {actividadesNoLectivas.map((act) => (
-                <div key={act.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-50 border border-orange-200">
+                <div key={act.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
                   <div>
-                    <p className="text-sm font-medium text-orange-900">{act.tipo}</p>
-                    <p className="text-xs text-orange-700">{act.detalles}</p>
+                    <p className="text-sm font-medium text-orange-600">{act.tipo}</p>
+                    <p className="text-xs text-orange-600">{act.detalles}</p>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800">
+                  <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600">
                     {act.horas}h
                   </span>
                 </div>
@@ -360,7 +360,7 @@ export function DocenteHorarioView() {
                             {cellActividades.map((act) => (
                               <div
                                 key={act.id}
-                                className="rounded border px-1.5 py-1 bg-orange-50 border-orange-200 text-orange-800"
+                                className="rounded border px-1.5 py-1 bg-orange-500/10 border-orange-500/20 text-orange-600"
                               >
                                 <p className="font-semibold text-[10px] leading-tight truncate">
                                   {act.tipo}

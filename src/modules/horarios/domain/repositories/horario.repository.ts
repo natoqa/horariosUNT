@@ -11,4 +11,6 @@ export interface IHorarioRepository {
   findAsignacionById(id: string): Promise<Asignacion | null>;
   updateAsignacion(id: string, data: Partial<Pick<Asignacion, 'docenteId' | 'aulaId' | 'dia' | 'bloque'>>): Promise<Asignacion>;
   updateEstado(id: string, estado: HorarioEstado): Promise<Horario>;
+  saveManualAsignacion(horarioId: string, asignacion: GeneratedAssignment): Promise<Asignacion>;
+  deleteAsignacion(id: string): Promise<void>;
 }

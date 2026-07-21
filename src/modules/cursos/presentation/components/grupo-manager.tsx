@@ -132,7 +132,7 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
         {/* Content */}
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
           {activePeriodName && (
-            <div className="px-3 py-1.5 bg-blue-50/50 border border-blue-100 rounded-md text-[11px] text-blue-800 font-medium inline-block">
+            <div className="px-3 py-1.5 bg-blue-500/10/50 border border-blue-500/20 rounded-md text-[11px] text-blue-600 font-medium inline-block">
               Período Activo: {activePeriodName}
             </div>
           )}
@@ -143,7 +143,7 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
               <p className="text-xs text-muted-foreground">Cargando secciones...</p>
             </div>
           ) : error && !activePeriodId ? (
-            <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-600">
               <ShieldAlert className="w-5 h-5 flex-shrink-0 text-amber-600" />
               <div className="text-xs">
                 <p className="font-semibold">Período Académico Requerido</p>
@@ -231,7 +231,7 @@ export function GrupoManager({ curso, onClose }: GrupoManagerProps) {
                           <p className="text-xs font-bold text-foreground">Seccion {g.nombre}</p>
                           <p className="text-[10px] text-muted-foreground">Aforo estimado: {g.numEstudiantes} estudiantes</p>
                           {docenteName ? (
-                            <p className="text-[10px] text-blue-700 font-medium mt-0.5">{docenteName}</p>
+                            <p className="text-[10px] text-blue-600 font-medium mt-0.5">{docenteName}</p>
                           ) : (
                             <p className="text-[10px] text-amber-600 italic mt-0.5">Sin docente asignado</p>
                           )}

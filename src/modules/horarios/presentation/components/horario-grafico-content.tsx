@@ -15,7 +15,7 @@ import { checkAulaAvailabilityAction } from '../actions/check-aula-availability.
 import { ActividadNoLectiva } from '@/modules/carga-no-lectiva/domain/entities/carga-no-lectiva.entity';
 import { SupabaseCargaNoLectivaRepository } from '@/modules/carga-no-lectiva/infrastructure/supabase-carga-no-lectiva.repository';
 
-type ViewMode = 'lectivas' | 'no-lectivas';
+type ViewMode = 'lectivas' | 'no-lectivas' | 'aulas';
 
 interface UnifiedAsignacion {
   id: string;
@@ -375,10 +375,10 @@ export function HorarioGraficoContent() {
 
   const filteredAsignaciones = asignaciones.filter((a) => {
     console.log('[HorarioGraficoContent] Filtering asignacion:', a);
-    if (viewMode === 'lectivas') {
+    if (viewMode === 'lectivas' || viewMode === 'aulas') {
       // Only include real asignaciones with actual dia/bloque (not the placeholder "Pendiente")
       const include = (a.tipo === 'teorico' || a.tipo === 'practico') && a.dia !== 'Pendiente' && a.bloque !== 'Pendiente';
-      console.log('[HorarioGraficoContent] Lectivas include:', include);
+      console.log('[HorarioGraficoContent] Lectivas/Aulas include:', include);
       return include;
     } else {
       const include = a.tipo === 'nolectiva';
@@ -450,6 +450,14 @@ export function HorarioGraficoContent() {
             Horario Lectivas
           </Button>
           <Button
+            variant={viewMode === 'aulas' ? 'default' : 'outline'}
+            onClick={() => setViewMode('aulas')}
+            className="flex items-center gap-2"
+          >
+            <Calendar className="w-4 h-4" />
+            Horario por Aula
+          </Button>
+          <Button
             variant={viewMode === 'no-lectivas' ? 'default' : 'outline'}
             onClick={() => setViewMode('no-lectivas')}
             className="flex items-center gap-2"
@@ -518,6 +526,7 @@ export function HorarioGraficoContent() {
           grupoCursoIds={grupoCursoIds}
           tipoCiclo={periodo?.tipoCiclo}
           isNonLectiva={viewMode === 'no-lectivas'}
+          isAulaView={viewMode === 'aulas'}
           periodoTipoCiclo={periodo?.tipoCiclo}
           userRole={user?.role as 'director' | 'secretaria' | 'docente'}
           onDrop={canEdit ? handleDrop : undefined}
@@ -527,7 +536,7 @@ export function HorarioGraficoContent() {
       )}
 
       {!canEdit && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+        <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-600">
           Solo la secretaria y el director pueden modificar los horarios.
         </div>
       )}

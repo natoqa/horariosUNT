@@ -92,8 +92,8 @@ export const PeriodoTable = forwardRef<PeriodoTableRef>(function PeriodoTable(_,
               <td className="px-6 py-3.5">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${
                   periodo.tipoCiclo === 'Impar'
-                    ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                    : 'bg-violet-50 text-violet-700 border border-violet-100'
+                    ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                    : 'bg-violet-500/10 text-violet-600 border border-violet-500/20'
                 }`}>
                   {periodo.tipoCiclo === 'Impar' ? 'Impar (I,III,V,VII,IX)' : 'Par (II,IV,VI,VIII,X)'}
                 </span>

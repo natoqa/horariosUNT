@@ -27,9 +27,9 @@ function getNextEstado(current: DisponibilidadEstado): DisponibilidadEstado {
 function getCellStyles(estado: DisponibilidadEstado): string {
   switch (estado) {
     case 'disponible':
-      return 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200/50 text-emerald-700';
+      return 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20/50 text-emerald-600';
     case 'preferido':
-      return 'bg-amber-50 hover:bg-amber-100 border-amber-200/50 text-amber-700';
+      return 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20/50 text-amber-600';
     case 'no_disponible':
       return 'bg-card hover:bg-muted/30 text-muted-foreground/40';
   }
@@ -54,11 +54,11 @@ export function DisponibilidadGrid({ gridState, onToggle, disabled }: Disponibil
       <div className="p-4 border-b border-border bg-muted/20">
         <div className="flex flex-wrap items-center gap-4 text-xs">
           <span className="font-semibold text-foreground">Leyenda:</span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 font-medium">
             <Clock className="w-3 h-3" />
             {DISPONIBILIDAD_LABELS.disponible}
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 font-medium">
             <Star className="w-3 h-3" />
             {DISPONIBILIDAD_LABELS.preferido}
           </span>

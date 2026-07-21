@@ -232,14 +232,14 @@ export function CargaNoLectivaContent() {
             }
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-white px-4 py-3 text-right">
+        <div className="rounded-2xl border border-border bg-card px-4 py-3 text-right">
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Periodo</p>
           <p className="text-base font-semibold text-foreground">{data?.periodoName}</p>
         </div>
       </div>
 
       {!tieneGruposAsignados ? (
-        <div className="rounded-2xl border border-border bg-gradient-to-r from-blue-50 to-white p-8 text-center">
+        <div className="rounded-2xl border border-border bg-blue-500/10 p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
             <Calendar className="w-8 h-8 text-blue-600" />
           </div>
@@ -251,7 +251,7 @@ export function CargaNoLectivaContent() {
       ) : (
         <>
           {data?.carga && (
-            <div className="rounded-2xl border border-border bg-gradient-to-r from-slate-50 to-white px-6 py-5">
+            <div className="rounded-2xl border border-border bg-muted/50 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h2 className="text-lg font-semibold text-foreground mb-3">Estado de Aprobación</h2>
@@ -275,10 +275,10 @@ export function CargaNoLectivaContent() {
                 <div className="text-right">
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
                     data.carga.estado === 'Aprobado'
-                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                      ? 'bg-emerald-100 text-emerald-600 border border-emerald-500/20'
                       : data.carga.estado === 'En revisión'
-                      ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                      : 'bg-slate-100 text-slate-600 border border-slate-200'
+                      ? 'bg-amber-100 text-amber-600 border border-amber-500/20'
+                      : 'bg-slate-100 text-muted-foreground border border-border'
                   }`}>
                     {data.carga.estado}
                   </div>
@@ -290,7 +290,7 @@ export function CargaNoLectivaContent() {
 
           {data?.docente && (
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-border bg-gradient-to-br from-blue-50 to-white px-5 py-4">
+              <div className="rounded-2xl border border-border bg-blue-500/10 px-5 py-4">
                 <h3 className="text-sm font-semibold text-foreground mb-3">Carga Lectiva</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -299,14 +299,14 @@ export function CargaNoLectivaContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Cursos asignados</span>
-                    <span className="text-sm font-semibold text-emerald-700">{data.docente.cargaElectiva} h</span>
+                    <span className="text-sm font-semibold text-emerald-600">{data.docente.cargaElectiva} h</span>
                   </div>
                   {data.docente.cursos && data.docente.cursos.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-xs text-muted-foreground mb-2">Cursos asignados:</p>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {data.docente.cursos.map((curso, idx) => (
-                          <div key={idx} className="rounded-lg bg-white p-2 text-xs border border-border">
+                          <div key={idx} className="rounded-lg bg-card p-2 text-xs border border-border">
                             <p className="font-medium text-foreground">{curso.codigo} - {curso.nombre}</p>
                             <div className="mt-1 flex gap-3 text-muted-foreground">
                               <span>Ciclo: {curso.ciclo}</span>
@@ -321,7 +321,7 @@ export function CargaNoLectivaContent() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border bg-gradient-to-br from-purple-50 to-white px-5 py-4">
+              <div className="rounded-2xl border border-border bg-purple-500/10 px-5 py-4">
                 <h3 className="text-sm font-semibold text-foreground mb-3">Carga No Lectiva</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -330,11 +330,11 @@ export function CargaNoLectivaContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Registrado</span>
-                    <span className="text-sm font-semibold text-purple-700">{totalActividadesGuardadas} h</span>
+                    <span className="text-sm font-semibold text-purple-600">{totalActividadesGuardadas} h</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Pendiente</span>
-                    <span className="text-sm font-semibold text-amber-700">{Math.max(0, horasDisponiblesNoLectivas - totalActividadesGuardadas)} h</span>
+                    <span className="text-sm font-semibold text-amber-600">{Math.max(0, horasDisponiblesNoLectivas - totalActividadesGuardadas)} h</span>
                   </div>
                 </div>
                 {data.actividades && data.actividades.length > 0 && data.actividades.some(a => a.horas > 0 || a.detalles) && (
@@ -342,10 +342,10 @@ export function CargaNoLectivaContent() {
                     <p className="text-xs text-muted-foreground mb-2">Actividades registradas:</p>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {data.actividades.filter(a => a.horas > 0 || a.detalles).map((actividad, idx) => (
-                        <div key={idx} className="rounded-lg bg-white p-2 text-xs border border-border">
+                        <div key={idx} className="rounded-lg bg-card p-2 text-xs border border-border">
                           <div className="flex justify-between items-start">
                             <p className="font-medium text-foreground">{actividad.tipo}</p>
-                            <span className="text-purple-700 font-semibold">{actividad.horas}h</span>
+                            <span className="text-purple-600 font-semibold">{actividad.horas}h</span>
                           </div>
                           {actividad.detalles && (
                             <p className="mt-1 text-muted-foreground">{actividad.detalles}</p>
@@ -387,7 +387,7 @@ export function CargaNoLectivaContent() {
                   <input type="hidden" name="periodoId" value={data?.periodoId ?? ''} />
 
                   {ACTIVIDADES_NO_LECTIVAS.map((tipo, index) => (
-                    <div key={tipo} className="rounded-3xl border border-border bg-white p-5 shadow-sm">
+                    <div key={tipo} className="rounded-3xl border border-border bg-card p-5 shadow-sm">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <h2 className="text-lg font-semibold text-foreground">{tipo}</h2>
@@ -430,7 +430,7 @@ export function CargaNoLectivaContent() {
                   ))}
 
                   {activitiesState?.message && (
-                    <div className={`rounded-md px-4 py-3 ${activitiesState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
+                    <div className={`rounded-md px-4 py-3 ${activitiesState.success ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
                       {activitiesState.message}
                     </div>
                   )}

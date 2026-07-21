@@ -118,12 +118,12 @@ export default function AyudaPage() {
           </div>
           
           {filteredFaq.length === 0 ? (
-            <div className="rounded-xl border border-border bg-white p-8 text-center">
+            <div className="rounded-xl border border-border bg-card p-8 text-center">
               <p className="text-sm text-muted-foreground">No se encontraron resultados para tu búsqueda.</p>
             </div>
           ) : (
             filteredFaq.map((category) => (
-              <div key={category.category} className="rounded-xl border border-border bg-white overflow-hidden">
+              <div key={category.category} className="rounded-xl border border-border bg-card overflow-hidden">
                 <button
                   onClick={() => toggleCategory(category.category)}
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
@@ -168,7 +168,7 @@ export default function AyudaPage() {
             {tutorials.map((tutorial, idx) => {
               const Icon = tutorial.icon;
               return (
-                <div key={idx} className="rounded-xl border border-border bg-white p-4 hover:border-primary/50 transition-colors cursor-pointer">
+                <div key={idx} className="rounded-xl border border-border bg-card p-4 hover:border-primary/50 transition-colors cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-5 h-5 text-primary" />
@@ -185,7 +185,7 @@ export default function AyudaPage() {
           </div>
 
           {/* Contacto de Soporte */}
-          <div className="rounded-xl border border-border bg-white p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-center gap-2 mb-3">
               <MessageCircle className="w-5 h-5 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">¿Necesitas más ayuda?</h3>

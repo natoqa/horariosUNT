@@ -15,7 +15,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-[380px] space-y-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-muted-foreground">
           Bienvenido
         </h1>
         <p className="text-sm text-gray-500">
@@ -26,7 +26,7 @@ export function LoginForm() {
       <form action={action} className="space-y-5">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
               Correo Institucional
             </Label>
             <div className="relative">
@@ -45,7 +45,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+            <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
               Contrasena
             </Label>
             <div className="relative">
@@ -60,7 +60,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-muted-foreground transition-colors"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />

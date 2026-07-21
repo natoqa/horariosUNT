@@ -155,7 +155,7 @@ export function DirectorDisponibilidadContent() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
               <Users className="w-4 h-4 text-blue-600" />
             </div>
             <span className="text-xs font-medium">Total Docentes</span>
@@ -165,7 +165,7 @@ export function DirectorDisponibilidadContent() {
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
               <UserCheck className="w-4 h-4 text-emerald-600" />
             </div>
             <span className="text-xs font-medium">Registrados</span>
@@ -175,7 +175,7 @@ export function DirectorDisponibilidadContent() {
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
               <UserX className="w-4 h-4 text-red-500" />
             </div>
             <span className="text-xs font-medium">Pendientes</span>
@@ -185,7 +185,7 @@ export function DirectorDisponibilidadContent() {
 
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4 text-violet-600" />
             </div>
             <span className="text-xs font-medium">Avance</span>
@@ -262,7 +262,7 @@ export function DirectorDisponibilidadContent() {
                   </TableCell>
                   <TableCell className="text-center">
                     {docente.registrado ? (
-                      <Badge variant="default" className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
+                      <Badge variant="default" className="bg-emerald-100 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
                         Registrado
                       </Badge>

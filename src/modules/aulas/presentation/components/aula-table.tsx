@@ -14,12 +14,12 @@ export interface AulaTableRef {
 }
 
 export function AulaStatusBadge({ estado }: { estado: 'Activa' | 'Inactiva' | 'Mantenimiento' }) {
-  let config = { bg: 'bg-emerald-50 border border-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' };
+  let config = { bg: 'bg-emerald-500/10 border border-emerald-500/20', text: 'text-emerald-600', dot: 'bg-emerald-500' };
 
   if (estado === 'Inactiva') {
-    config = { bg: 'bg-slate-50 border border-slate-200', text: 'text-slate-600', dot: 'bg-slate-400' };
+    config = { bg: 'bg-muted border border-border', text: 'text-muted-foreground', dot: 'bg-muted-foreground' };
   } else if (estado === 'Mantenimiento') {
-    config = { bg: 'bg-amber-50 border border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' };
+    config = { bg: 'bg-amber-500/10 border border-amber-500/20', text: 'text-amber-600', dot: 'bg-amber-500' };
   }
 
   return (

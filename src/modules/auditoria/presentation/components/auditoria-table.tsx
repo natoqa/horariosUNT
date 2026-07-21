@@ -16,45 +16,45 @@ export function AuditoriaTable({ logs }: AuditoriaTableProps) {
   const getModuleBadgeColor = (modulo: string) => {
     switch (modulo) {
       case 'auth':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
       case 'periodos':
-        return 'bg-violet-50 text-violet-700 border-violet-200';
+        return 'bg-violet-500/10 text-violet-600 border-violet-500/20';
       case 'docentes':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
       case 'cursos':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
       case 'aulas':
-        return 'bg-teal-50 text-teal-700 border-teal-200';
+        return 'bg-teal-500/10 text-teal-600 border-teal-500/20';
       case 'disponibilidad':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
+        return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
       case 'horarios':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
       case 'auditoria':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-muted text-foreground border-border';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted/50 text-muted-foreground border-border';
     }
   };
 
   const getActionBadgeColor = (accion: string) => {
     switch (accion) {
       case 'crear':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
       case 'editar':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
       case 'eliminar':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+        return 'bg-rose-500/10 text-rose-600 border-rose-500/20';
       case 'login':
-        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        return 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
       case 'logout':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-muted text-foreground border-border';
       case 'generar':
-        return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+        return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20';
       case 'aprobar':
       case 'publicar':
-        return 'bg-violet-50 text-violet-700 border-violet-200';
+        return 'bg-violet-500/10 text-violet-600 border-violet-500/20';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted text-foreground border-border';
     }
   };
 
@@ -154,7 +154,7 @@ export function AuditoriaTable({ logs }: AuditoriaTableProps) {
 
       {/* Modal de detalles */}
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
-        <DialogContent className="max-w-2xl bg-white">
+        <DialogContent className="max-w-2xl bg-background">
           <DialogHeader>
             <DialogTitle className="text-base font-bold tracking-tight">
               Detalle del Registro de Auditoría
@@ -220,7 +220,7 @@ export function AuditoriaTable({ logs }: AuditoriaTableProps) {
 
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-muted-foreground">Descripción de la acción</p>
-                <p className="text-sm border border-border rounded-lg p-3 bg-white font-medium">
+                <p className="text-sm border border-border rounded-lg p-3 bg-muted font-medium">
                   {selectedLog.descripcion || 'Sin descripción.'}
                 </p>
               </div>

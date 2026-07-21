@@ -129,7 +129,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
       />
 
       {/* Sidebar */}
-      <div className="relative w-full max-w-md bg-white shadow-2xl flex flex-col h-full">
+      <div className="relative w-full max-w-md bg-background shadow-2xl flex flex-col h-full border-l border-border">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
           {messages.length === 0 && (
             <div className="text-center text-gray-500 mt-10">
               <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-400" />
@@ -178,7 +178,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 className={`max-w-[85%] rounded-lg p-3 ${
                   message.role === 'user'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-800 shadow-sm'
+                    : 'bg-card text-foreground shadow-sm'
                 }`}
               >
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -188,8 +188,8 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
+              <div className="bg-muted rounded-lg p-3 shadow-sm">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               </div>
             </div>
           )}
@@ -198,20 +198,20 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
         </div>
 
         {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t bg-white">
+        <form onSubmit={handleSubmit} className="p-4 border-t border-border bg-background">
           <div className="flex gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Escribe tu mensaje..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

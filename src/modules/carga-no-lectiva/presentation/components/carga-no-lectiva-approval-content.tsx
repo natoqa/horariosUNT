@@ -197,7 +197,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
           {rows.map((row) => {
             const alreadyApproved = role === 'director' ? row.directorAprobado : row.secretariaAprobado;
             return (
-              <div key={row.id} className="rounded-3xl border border-border bg-white shadow-sm overflow-hidden">
+              <div key={row.id} className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -206,12 +206,12 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                     </div>
                     <div className="flex gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        row.directorAprobado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                        row.directorAprobado ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
                       }`}>
                         Director: {row.directorAprobado ? 'Aprobado' : 'Pendiente'}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        row.secretariaAprobado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                        row.secretariaAprobado ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
                       }`}>
                         Secretaria: {row.secretariaAprobado ? 'Aprobado' : 'Pendiente'}
                       </span>
@@ -223,21 +223,21 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                   <div className="space-y-4">
                     <h4 className="text-sm font-semibold text-foreground">Carga Horaria</h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="rounded-lg bg-slate-50 p-3">
+                      <div className="rounded-lg bg-muted/30 p-3">
                         <p className="text-xs text-muted-foreground">Carga Máxima</p>
                         <p className="text-lg font-semibold text-foreground">{row.cargaMaxima ?? 0} h</p>
                       </div>
-                      <div className="rounded-lg bg-emerald-50 p-3">
+                      <div className="rounded-lg bg-emerald-500/10 p-3">
                         <p className="text-xs text-muted-foreground">Carga Electiva (Cursos)</p>
-                        <p className="text-lg font-semibold text-emerald-700">{row.cargaElectiva ?? 0} h</p>
+                        <p className="text-lg font-semibold text-emerald-600">{row.cargaElectiva ?? 0} h</p>
                       </div>
-                      <div className="rounded-lg bg-blue-50 p-3">
+                      <div className="rounded-lg bg-blue-500/10 p-3">
                         <p className="text-xs text-muted-foreground">Disponible No Lectiva</p>
                         <p className="text-lg font-semibold text-primary">{row.horasDisponiblesNoLectivas ?? 0} h</p>
                       </div>
-                      <div className="rounded-lg bg-purple-50 p-3">
+                      <div className="rounded-lg bg-purple-500/10 p-3">
                         <p className="text-xs text-muted-foreground">Carga No Lectiva</p>
-                        <p className="text-lg font-semibold text-purple-700">{row.totalHoras} h</p>
+                        <p className="text-lg font-semibold text-purple-600">{row.totalHoras} h</p>
                       </div>
                     </div>
                   </div>
@@ -247,7 +247,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                     {row.cursos && row.cursos.length > 0 ? (
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {row.cursos.map((curso, idx) => (
-                          <div key={idx} className="rounded-lg bg-slate-50 p-2 text-sm">
+                          <div key={idx} className="rounded-lg bg-muted/30 p-2 text-sm">
                             <p className="font-medium text-foreground">{curso.codigo} - {curso.nombre}</p>
                             <p className="text-xs text-muted-foreground">{curso.horas} horas</p>
                           </div>
@@ -263,7 +263,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                     {row.actividades && row.actividades.length > 0 ? (
                       <div className="space-y-2 max-h-40 overflow-y-auto">
                         {row.actividades.map((actividad: any, idx: number) => (
-                          <div key={idx} className="rounded-lg bg-purple-50 p-2 text-sm">
+                          <div key={idx} className="rounded-lg bg-purple-500/10 p-2 text-sm">
                             <p className="font-medium text-foreground">{actividad.tipo}</p>
                             <p className="text-xs text-muted-foreground">{actividad.horas} horas - {actividad.detalles}</p>
                           </div>
@@ -275,7 +275,7 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
                   </div>
                 </div>
 
-                <div className="p-5 border-t border-border bg-slate-50">
+                <div className="p-5 border-t border-border bg-muted/10">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm text-muted-foreground">
                       Estado: <span className="font-medium text-foreground">{row.estado}</span>
@@ -316,17 +316,17 @@ export function CargaNoLectivaApprovalContent({ role }: ApprovalContentProps) {
       )}
 
       {approvalState?.message && (
-        <div className={`rounded-md px-4 py-3 ${approvalState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
+        <div className={`rounded-md px-4 py-3 ${approvalState.success ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
           {approvalState.message}
         </div>
       )}
       {assignState?.message && (
-        <div className={`rounded-md px-4 py-3 ${assignState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
+        <div className={`rounded-md px-4 py-3 ${assignState.success ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
           {assignState.message}
         </div>
       )}
       {resetState?.message && (
-        <div className={`rounded-md px-4 py-3 ${resetState.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
+        <div className={`rounded-md px-4 py-3 ${resetState.success ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600' : 'bg-destructive/10 border border-destructive/20 text-destructive'}`}>
           {resetState.message}
         </div>
       )}

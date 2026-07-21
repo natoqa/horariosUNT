@@ -59,7 +59,7 @@ export function GenerationPreCheck({ result }: GenerationPreCheckProps) {
               key={check.label}
               className={`flex items-start gap-3 rounded-lg border p-3 ${
                 check.ok
-                  ? 'border-emerald-200 bg-emerald-50/50'
+                  ? 'border-emerald-500/20 bg-emerald-500/10/50'
                   : 'border-destructive/20 bg-destructive/5'
               }`}
             >

@@ -35,19 +35,19 @@ export function DashboardDirector() {
   const getEstadoBadgeColor = (estado: string) => {
     switch (estado) {
       case 'configuracion':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted text-foreground border-border';
       case 'recopilacion':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
       case 'generacion':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
       case 'aprobado':
         return 'bg-green-50 text-green-700 border-green-200';
       case 'publicado':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
       case 'cerrado':
-        return 'bg-slate-50 text-slate-700 border-slate-200';
+        return 'bg-muted text-foreground border-border';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted text-foreground border-border';
     }
   };
 
@@ -116,8 +116,8 @@ export function DashboardDirector() {
             </Badge>
           </div>
           {!dashboard.generacionHabilitada && (
-            <div className="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
-              <p className="text-sm text-orange-800">
+            <div className="mt-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <p className="text-sm text-orange-600">
                 <AlertCircle className="w-4 h-4 inline mr-1" />
                 Generación de horarios deshabilitada: Faltan {dashboard.docentesPendientesGeneracion} docente(s) con carga aprobada
               </p>

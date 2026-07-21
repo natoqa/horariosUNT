@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Plus } from 'lucide-react';
 import { DIAS_SEMANA, BLOQUES_HORARIOS } from '@/shared/constants/time-blocks';
 import { Asignacion, ASIGNACION_TIPO_LABELS } from '../../domain/entities/horario.entity';
 import { type TipoCiclo, getCiclosByTipo } from '@/modules/periodos';
@@ -16,21 +16,22 @@ interface HorarioGridProps {
   tipoCiclo?: TipoCiclo;
   editable?: boolean;
   onSelectAsignacion?: (asignacion: Asignacion) => void;
+  onEmptyCellClick?: (dia: string, bloque: string) => void;
 }
 
 const CURSO_PALETTE = [
-  'bg-blue-50 border-blue-300 text-blue-900',
-  'bg-emerald-50 border-emerald-300 text-emerald-900',
-  'bg-amber-50 border-amber-300 text-amber-900',
-  'bg-purple-50 border-purple-300 text-purple-900',
-  'bg-rose-50 border-rose-300 text-rose-900',
-  'bg-cyan-50 border-cyan-300 text-cyan-900',
-  'bg-orange-50 border-orange-300 text-orange-900',
-  'bg-indigo-50 border-indigo-300 text-indigo-900',
-  'bg-teal-50 border-teal-300 text-teal-900',
-  'bg-pink-50 border-pink-300 text-pink-900',
-  'bg-lime-50 border-lime-300 text-lime-900',
-  'bg-fuchsia-50 border-fuchsia-300 text-fuchsia-900',
+  'bg-blue-500/10 border-blue-500/20 text-blue-600',
+  'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
+  'bg-amber-500/10 border-amber-500/20 text-amber-600',
+  'bg-purple-500/10 border-purple-500/20 text-purple-600',
+  'bg-rose-500/10 border-rose-500/20 text-rose-600',
+  'bg-cyan-500/10 border-cyan-500/20 text-cyan-600',
+  'bg-orange-500/10 border-orange-500/20 text-orange-600',
+  'bg-indigo-500/10 border-indigo-500/20 text-indigo-600',
+  'bg-teal-500/10 border-teal-500/20 text-teal-600',
+  'bg-pink-500/10 border-pink-500/20 text-pink-600',
+  'bg-lime-500/10 border-lime-500/20 text-lime-600',
+  'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-600',
 ];
 
 export function HorarioGrid({
@@ -43,6 +44,7 @@ export function HorarioGrid({
   tipoCiclo,
   editable = false,
   onSelectAsignacion,
+  onEmptyCellClick,
 }: HorarioGridProps) {
   const ciclosToShow = tipoCiclo ? getCiclosByTipo(tipoCiclo) : ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const [selectedCiclo, setSelectedCiclo] = useState<string>(ciclosToShow[0]);
@@ -177,8 +179,16 @@ export function HorarioGrid({
 
                     if (!cell || cell.assignments.length === 0) {
                       return (
-                        <td key={dia} className="p-1 border-r border-border align-top last:border-r-0">
-                          <div className="h-12" />
+                        <td
+                          key={dia}
+                          className={`p-1 border-r border-border align-top last:border-r-0${editable && onEmptyCellClick ? ' cursor-pointer hover:bg-primary/5 transition-colors' : ''}`}
+                          onClick={editable && onEmptyCellClick ? () => onEmptyCellClick(dia, bloque) : undefined}
+                        >
+                          <div className="h-12 flex items-center justify-center">
+                            {editable && onEmptyCellClick && (
+                              <Plus className="w-3.5 h-3.5 text-muted-foreground/20 group-hover:text-primary/40" />
+                            )}
+                          </div>
                         </td>
                       );
                     }
@@ -230,10 +240,10 @@ export function HorarioGrid({
       </div>
 
       {missingCursos.length > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 space-y-2">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <span className="text-xs font-semibold text-amber-800">
+            <span className="text-xs font-semibold text-amber-600">
               Cursos del ciclo {selectedCiclo} sin asignar ({missingCursos.length})
             </span>
           </div>
@@ -241,7 +251,7 @@ export function HorarioGrid({
             {missingCursos.map((c) => (
               <span
                 key={c.grupoId}
-                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200"
+                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-600 border border-amber-500/20"
               >
                 {c.nombre}
               </span>

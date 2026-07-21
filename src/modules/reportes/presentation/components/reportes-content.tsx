@@ -10,6 +10,8 @@ import { CargaDocenteReport } from './carga-docente-report';
 import { OcupacionAulasReport } from './ocupacion-aulas-report';
 import { generatePdfAction } from '../actions/generate-pdf.action';
 import { generateExcelAction } from '../actions/generate-excel.action';
+import { PdfPreviewDialog } from './pdf-preview-dialog';
+import { Eye } from 'lucide-react';
 
 type ContentState = 'loading' | 'error' | 'empty' | 'ready' | 'generating-pdf' | 'generating-excel';
 type ReportTab = 'horarios' | 'carga-docente' | 'ocupacion-aulas';
@@ -32,6 +34,8 @@ export function ReportesContent() {
   const [filterId, setFilterId] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ReportTab>('horarios');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const loadPeriodos = useCallback(async () => {
     setState('loading');
@@ -83,7 +87,7 @@ export function ReportesContent() {
     selectedPeriodoId &&
     (filterType === 'all' || filterId);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (preview: boolean = false) => {
     setState('generating-pdf');
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -98,15 +102,21 @@ export function ReportesContent() {
       const bytes = Uint8Array.from(atob(result.pdfBase64), (c) => c.charCodeAt(0));
       const blob = new Blob([bytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = result.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      setSuccessMessage('PDF descargado exitosamente.');
+      
+      if (preview) {
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setSuccessMessage('PDF descargado exitosamente.');
+      }
+      
       setState('ready');
     } else {
       setErrorMessage(result.message ?? 'Error al generar el PDF.');
@@ -236,7 +246,7 @@ export function ReportesContent() {
             )}
 
             {successMessage && (
-              <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
                 {successMessage}
               </div>
             )}
@@ -260,8 +270,16 @@ export function ReportesContent() {
                 )}
               </Button>
               <Button
+                variant="outline"
                 disabled={!canGenerate || state === 'generating-pdf' || state === 'generating-excel'}
-                onClick={handleDownloadPdf}
+                onClick={() => handleDownloadPdf(true)}
+              >
+                <Eye className="w-4 h-4 mr-1.5" />
+                Previsualizar
+              </Button>
+              <Button
+                disabled={!canGenerate || state === 'generating-pdf' || state === 'generating-excel'}
+                onClick={() => handleDownloadPdf(false)}
               >
                 {state === 'generating-pdf' ? (
                   <>
@@ -293,6 +311,17 @@ export function ReportesContent() {
           />
         )}
       </div>
+
+      <PdfPreviewDialog
+        isOpen={previewOpen}
+        onClose={() => {
+          setPreviewOpen(false);
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+        }}
+        title="Vista Previa - Horarios"
+        pdfUrl={previewUrl}
+      />
     </div>
   );
 }

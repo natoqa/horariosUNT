@@ -62,7 +62,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Evitar hidratación incorrecta
@@ -106,14 +106,14 @@ export function Header({ onMenuToggle }: HeaderProps) {
       case 'warning':
         return 'text-yellow-600 bg-yellow-50';
       case 'info':
-        return 'text-blue-600 bg-blue-50';
+        return 'text-blue-600 bg-blue-500/10';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-muted-foreground bg-muted';
     }
   };
 
   return (
-    <header className="h-14 border-b border-border bg-white flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
+    <header className="h-14 border-b border-border bg-background flex items-center justify-between px-4 md:px-6 sticky top-0 z-10">
       {/* Left: hamburger + breadcrumbs */}
       <div className="flex items-center gap-3 text-sm">
         <button
@@ -144,11 +144,11 @@ export function Header({ onMenuToggle }: HeaderProps) {
         {/* Dark mode toggle */}
         {mounted && (
           <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
-            title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+            title={resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
           >
-            {theme === 'dark' ? (
+            {resolvedTheme === 'dark' ? (
               <Sun className="w-[18px] h-[18px] text-muted-foreground" />
             ) : (
               <Moon className="w-[18px] h-[18px] text-muted-foreground" />
@@ -175,7 +175,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 className="fixed inset-0 z-40"
                 onClick={() => setShowNotifications(false)}
               />
-              <div className="absolute right-0 top-12 w-80 bg-white border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+              <div className="absolute right-0 top-12 w-80 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
                 <div className="px-4 py-3 border-b border-border flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-foreground">Notificaciones</h3>
                   <button

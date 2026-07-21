@@ -210,9 +210,9 @@ export function DisponibilidadContent() {
       </div>
 
       {!isEditable && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-2">
+        <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3 flex items-start gap-2">
           <Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-800">
+          <p className="text-sm text-amber-600">
             El período no está en estado &quot;Recopilación&quot;. La grilla es de solo lectura.
           </p>
         </div>
@@ -254,9 +254,9 @@ export function DisponibilidadContent() {
       )}
 
       {successMsg && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+        <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 flex items-center gap-2">
           <Check className="w-4 h-4 text-emerald-600" />
-          <p className="text-sm text-emerald-700 font-medium">{successMsg}</p>
+          <p className="text-sm text-emerald-600 font-medium">{successMsg}</p>
         </div>
       )}
 

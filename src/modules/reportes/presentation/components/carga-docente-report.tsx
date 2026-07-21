@@ -6,6 +6,8 @@ import { Button } from '@/shared/components/ui/button';
 import { getCargaDocenteAction, CargaDocenteRow } from '../actions/get-carga-docente.action';
 import { generateCargaDocentePdfAction } from '../actions/generate-carga-docente-pdf.action';
 import { generateExcelAction } from '../actions/generate-excel.action';
+import { PdfPreviewDialog } from './pdf-preview-dialog';
+import { Eye } from 'lucide-react';
 
 type ReportState = 'idle' | 'loading' | 'error' | 'empty' | 'success' | 'generating-pdf' | 'generating-excel';
 
@@ -19,6 +21,8 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
   const [periodoName, setPeriodoName] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     setState('loading');
@@ -51,7 +55,7 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
     handleLoadIfNeeded();
   }, [handleLoadIfNeeded]);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (preview: boolean = false) => {
     setState('generating-pdf');
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -62,15 +66,21 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
       const bytes = Uint8Array.from(atob(result.pdfBase64), (c) => c.charCodeAt(0));
       const blob = new Blob([bytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = result.fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      setSuccessMessage('PDF descargado exitosamente.');
+      
+      if (preview) {
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setSuccessMessage('PDF descargado exitosamente.');
+      }
+      
       setState('success');
     } else {
       setErrorMessage(result.message ?? 'Error al generar el PDF.');
@@ -151,12 +161,12 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
           <p className="text-2xl font-bold text-foreground">{totalDocentes}</p>
           <p className="text-xs text-muted-foreground">Total docentes</p>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
-          <p className="text-2xl font-bold text-red-700">{sobrecargados}</p>
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center">
+          <p className="text-2xl font-bold text-red-600">{sobrecargados}</p>
           <p className="text-xs text-red-600">Carga &ge; 90%</p>
         </div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center">
-          <p className="text-2xl font-bold text-amber-700">{sinAsignacion}</p>
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-center">
+          <p className="text-2xl font-bold text-amber-600">{sinAsignacion}</p>
           <p className="text-xs text-amber-600">Sin asignacion</p>
         </div>
       </div>
@@ -168,7 +178,7 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
       )}
 
       {successMessage && (
-        <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
           {successMessage}
         </div>
       )}
@@ -192,9 +202,9 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
                 const isOverloaded = row.porcentaje >= 90;
                 const isUnassigned = row.horasAsignadas === 0;
                 const rowBg = isOverloaded
-                  ? 'bg-red-50'
+                  ? 'bg-red-500/10'
                   : isUnassigned
-                    ? 'bg-amber-50'
+                    ? 'bg-amber-500/10'
                     : '';
 
                 return (
@@ -210,10 +220,10 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${
                         isOverloaded
-                          ? 'bg-red-100 text-red-700'
+                          ? 'bg-red-100 text-red-600'
                           : isUnassigned
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-emerald-50 text-emerald-700'
+                            ? 'bg-amber-100 text-amber-600'
+                            : 'bg-emerald-500/10 text-emerald-600'
                       }`}>
                         {row.porcentaje}%
                       </span>
@@ -248,8 +258,16 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
           )}
         </Button>
         <Button
+          variant="outline"
           disabled={isGenerating}
-          onClick={handleDownloadPdf}
+          onClick={() => handleDownloadPdf(true)}
+        >
+          <Eye className="w-4 h-4 mr-1.5" />
+          Previsualizar
+        </Button>
+        <Button
+          disabled={isGenerating}
+          onClick={() => handleDownloadPdf(false)}
         >
           {state === 'generating-pdf' ? (
             <>
@@ -264,6 +282,17 @@ export function CargaDocenteReport({ periodoId }: CargaDocenteReportProps) {
           )}
         </Button>
       </div>
+
+      <PdfPreviewDialog
+        isOpen={previewOpen}
+        onClose={() => {
+          setPreviewOpen(false);
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+        }}
+        title="Vista Previa - Carga Docente"
+        pdfUrl={previewUrl}
+      />
     </div>
   );
 }

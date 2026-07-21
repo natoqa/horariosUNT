@@ -59,11 +59,11 @@ export default function ComentariosPage() {
       case 'pending':
         return 'bg-yellow-50 text-yellow-700';
       case 'reviewed':
-        return 'bg-blue-50 text-blue-700';
+        return 'bg-blue-500/10 text-blue-600';
       case 'resolved':
         return 'bg-green-50 text-green-700';
       default:
-        return 'bg-gray-50 text-gray-700';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -92,7 +92,7 @@ export default function ComentariosPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Formulario de nuevo comentario */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-border bg-white p-6 sticky top-6">
+          <div className="rounded-xl border border-border bg-card p-6 sticky top-6">
             <div className="flex items-center gap-2 mb-4">
               <MessageSquare className="w-5 h-5 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Nuevo Comentario</h2>
@@ -103,7 +103,7 @@ export default function ComentariosPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm"
                 >
                   <option value="Sugerencia">Sugerencia</option>
                   <option value="Problema">Problema</option>
@@ -151,7 +151,7 @@ export default function ComentariosPage() {
         {/* Lista de comentarios */}
         <div className="lg:col-span-2 space-y-4">
           {/* Filtros y búsqueda */}
-          <div className="rounded-xl border border-border bg-white p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -197,7 +197,7 @@ export default function ComentariosPage() {
 
           {/* Comentarios */}
           {filteredComments.length === 0 ? (
-            <div className="rounded-xl border border-border bg-white p-8 text-center">
+            <div className="rounded-xl border border-border bg-card p-8 text-center">
               <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
                 {searchQuery || filter !== 'all' 
@@ -208,7 +208,7 @@ export default function ComentariosPage() {
           ) : (
             <div className="space-y-3">
               {filteredComments.map((comment) => (
-                <div key={comment.id} className="rounded-xl border border-border bg-white p-4">
+                <div key={comment.id} className="rounded-xl border border-border bg-card p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">

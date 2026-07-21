@@ -90,7 +90,7 @@ export function DashboardDocente() {
                 Registrada
               </Badge>
             ) : (
-              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+              <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
                 <AlertCircle className="w-3 h-3 mr-1" />
                 Pendiente
               </Badge>
@@ -184,7 +184,7 @@ export function DashboardDocente() {
           <CardContent>
             <div className="space-y-2">
               {dashboard.cursosAsignados.map((curso, idx) => (
-                <div key={idx} className="flex justify-between items-center p-2 rounded bg-slate-50">
+                <div key={idx} className="flex justify-between items-center p-2 rounded bg-muted/30">
                   <div>
                     <p className="text-sm font-medium">{curso.codigo} - {curso.nombre}</p>
                     <p className="text-xs text-muted-foreground">Ciclo {curso.ciclo} • Grupo {curso.grupo}</p>
@@ -199,7 +199,7 @@ export function DashboardDocente() {
 
       {/* Notificaciones */}
       {dashboard.notificaciones > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="border-orange-500/20 bg-orange-500/10">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Bell className="w-5 h-5 text-orange-600" />
@@ -207,7 +207,7 @@ export function DashboardDocente() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-orange-800">Tienes {dashboard.notificaciones} notificaciones pendientes.</p>
+            <p className="text-sm text-orange-600">Tienes {dashboard.notificaciones} notificaciones pendientes.</p>
           </CardContent>
         </Card>
       )}
@@ -250,7 +250,7 @@ export function DashboardDocente() {
                             className="h-20 px-2 border-r border-border last:border-r-0 bg-muted/30"
                           >
                             {asignacion ? (
-                              <div className="p-2 rounded bg-white border border-border h-full">
+                              <div className="p-2 rounded bg-card border border-border h-full">
                                 <div className="font-semibold text-xs text-foreground truncate">
                                   {asignacion.curso}
                                 </div>

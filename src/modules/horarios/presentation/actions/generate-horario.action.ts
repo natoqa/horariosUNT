@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { logger } from '@/shared/lib/logger';
 import { createClient } from '@/shared/lib/supabase/server';
 import { SupabaseHorarioRepository } from '../../infrastructure/supabase-horario.repository';
 import { GenerateHorarioUseCase, GenerateHorarioResult } from '../../application/use-cases/generate-horario.use-case';
@@ -25,20 +26,20 @@ export async function generateHorarioAction(
   periodoId: string,
   planEstudioId?: string,
 ): Promise<GenerateHorarioActionResult> {
-  console.log('[SERVER ACTION] generateHorarioAction called with periodoId:', periodoId);
+  logger.debug('GENERATE', 'generateHorarioAction called with periodoId:', periodoId);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    console.log('[SERVER ACTION] No user found');
+    logger.debug('GENERATE', 'No user found');
     return { message: 'No autorizado. Debe iniciar sesión.' };
   }
 
   const role = user.user_metadata?.role;
-  console.log('[SERVER ACTION] User role:', role);
-  if (role !== 'director') {
-    console.log('[SERVER ACTION] User not director');
-    return { message: 'Solo el Director puede generar horarios.' };
+  logger.debug('GENERATE', 'User role:', role);
+  if (role !== 'director' && role !== 'secretaria') {
+    logger.debug('GENERATE', 'User not director or secretaria');
+    return { message: 'Solo el Director o la Secretaria pueden generar horarios.' };
   }
 
   try {
@@ -186,7 +187,7 @@ export async function generateHorarioAction(
       return { message: 'No hay aulas activas. Active al menos un aula para generar horarios.' };
     }
 
-    console.log('[GEN] Data loaded:', {
+    logger.debug('GENERATE', 'Data loaded:', {
       docentes: docentes.length,
       cursos: cursos.length,
       grupos: grupos.length,
@@ -199,12 +200,12 @@ export async function generateHorarioAction(
     const repo = new SupabaseHorarioRepository();
     const useCase = new GenerateHorarioUseCase(repo);
 
-    console.log('[SERVER ACTION] Calling useCase.execute...');
+    logger.debug('GENERATE', 'Calling useCase.execute...');
     const result: GenerateHorarioResult = await useCase.execute(periodoId, {
       docentes, cursos, grupos, aulas, disponibilidades, restriccionesAula,
     });
 
-    console.log('[SERVER ACTION] Generation result:', {
+    logger.debug('GENERATE', 'Generation result:', {
       horarioId: result.horario?.id,
       asignacionesCount: result.asignaciones?.length,
       summary: result.generationResult.summary,
@@ -212,7 +213,7 @@ export async function generateHorarioAction(
     });
 
     // Distribuir aleatoriamente las actividades no lectivas después de generar el horario
-    console.log('[SERVER ACTION] Distribuyendo actividades no lectivas...');
+    logger.debug('GENERATE', 'Distribuyendo actividades no lectivas...');
     const { data: actividadesNoLectivas } = await supabase
       .from('actividades_no_lectivas')
       .select('id, tipo, horas, detalles, dia, bloque, docente_id')
@@ -242,7 +243,7 @@ export async function generateHorarioAction(
         );
 
         if (distribucionResult.success && distribucionResult.actividadesInstances) {
-          console.log(`[SERVER ACTION] Distribución para docente ${docenteId}:`, distribucionResult.message);
+          logger.debug('GENERATE', `Distribución para docente ${docenteId}:`, distribucionResult.message);
           
           // Preparar instancias para insertar
           for (const instancia of distribucionResult.actividadesInstances) {
@@ -269,9 +270,9 @@ export async function generateHorarioAction(
           .insert(instanciasParaInsertar);
         
         if (insertError) {
-          console.error('[SERVER ACTION] Error al insertar instancias:', insertError);
+          logger.error('GENERATE', 'Error al insertar instancias:', insertError);
         } else {
-          console.log(`[SERVER ACTION] Se insertaron ${instanciasParaInsertar.length} instancias de actividades no lectivas.`);
+          logger.debug('GENERATE', `Se insertaron ${instanciasParaInsertar.length} instancias de actividades no lectivas.`);
           
           // Solo eliminar actividades originales si la inserción fue exitosa
           if (actividadesOriginalesParaEliminar.length > 0) {
@@ -279,11 +280,11 @@ export async function generateHorarioAction(
               .from('actividades_no_lectivas')
               .delete()
               .in('id', actividadesOriginalesParaEliminar);
-            console.log(`[SERVER ACTION] Se eliminaron ${actividadesOriginalesParaEliminar.length} actividades originales.`);
+            logger.debug('GENERATE', `Se eliminaron ${actividadesOriginalesParaEliminar.length} actividades originales.`);
           }
         }
       } else {
-        console.log('[SERVER ACTION] No hay instancias para insertar, se preservan las actividades originales.');
+        logger.debug('GENERATE', 'No hay instancias para insertar, se preservan las actividades originales.');
       }
     }
 
@@ -295,7 +296,7 @@ export async function generateHorarioAction(
       unassigned: result.generationResult.unassigned,
     };
   } catch (error: unknown) {
-    console.error('[SERVER ACTION] Error al generar horario:', error);
+    logger.error('GENERATE', 'Error al generar horario:', error);
     return { message: error instanceof Error ? error.message : 'Error al generar horario.' };
   }
 }

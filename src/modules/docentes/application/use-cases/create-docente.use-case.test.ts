@@ -20,6 +20,7 @@ const VALID_DTO = {
 const SAVED_DOCENTE: Docente = {
   id: 'uuid-123',
   ...VALID_DTO,
+  cargaElectiva: 0,
   estado: 'Activo',
   createdAt: '2026-05-25T00:00:00Z',
   updatedAt: '2026-05-25T00:00:00Z',

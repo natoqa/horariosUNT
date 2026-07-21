@@ -19,8 +19,8 @@ export interface CursoTableRef {
 
 export function CursoStatusBadge({ estado }: { estado: 'Activo' | 'Inactivo' }) {
   const config = estado === 'Activo'
-    ? { bg: 'bg-emerald-50 border border-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' }
-    : { bg: 'bg-slate-50 border border-slate-200', text: 'text-slate-600', dot: 'bg-slate-400' };
+    ? { bg: 'bg-emerald-500/10 border border-emerald-500/20', text: 'text-emerald-600', dot: 'bg-emerald-500' }
+    : { bg: 'bg-muted border border-border', text: 'text-muted-foreground', dot: 'bg-muted-foreground' };
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold ${config.bg} ${config.text}`}>
@@ -277,14 +277,21 @@ export const CursoTable = forwardRef<CursoTableRef>(function CursoTable(_, ref) 
                       <td className="px-6 py-3.5 font-medium text-foreground">{curso.nombre}</td>
                       <td className="px-6 py-3.5 font-semibold text-muted-foreground text-xs">Ciclo {curso.ciclo}</td>
                       <td className="px-6 py-3.5 text-muted-foreground text-xs">{curso.tipo}</td>
-                      <td className="px-6 py-3.5 text-muted-foreground text-xs">
-                        {curso.horasTeoricas}h Teo / {curso.horasPracticas}h Prac
+                      <td className="px-6 py-3.5">
+                        <div className="flex items-center gap-1">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-muted text-foreground text-[10px] font-medium border border-border">T: {curso.horasTeoricas}h</span>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-muted text-foreground text-[10px] font-medium border border-border">P: {curso.horasPracticas}h</span>
+                        </div>
                       </td>
-                      <td className="px-6 py-3.5 font-medium text-muted-foreground text-xs">{curso.creditos}</td>
+                      <td className="px-6 py-3.5">
+                         <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-md bg-chart-4/10 text-chart-4 text-xs font-bold border border-chart-4/20">
+                           {curso.creditos} crd.
+                         </span>
+                      </td>
                       <td className="px-6 py-3.5">
                         {curso.requiereLaboratorio ? (
                           <div>
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-50 border border-blue-100 text-[10px] font-bold text-blue-700">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-600">
                               Requerido
                             </span>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{curso.tipoLaboratorio}</p>

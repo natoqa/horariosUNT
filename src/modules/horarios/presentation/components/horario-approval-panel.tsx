@@ -131,7 +131,7 @@ export function HorarioApprovalPanel({
             </Button>
           )}
           {horarioEstado === 'Publicado' && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-600">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Publicado
             </span>
@@ -167,7 +167,7 @@ export function HorarioApprovalPanel({
       )}
 
       {success && (
-        <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
           {success}
         </div>
       )}

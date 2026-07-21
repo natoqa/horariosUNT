@@ -61,7 +61,7 @@ export default function SecretariaDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select className="h-9 px-3 rounded-lg border border-border bg-white text-sm text-foreground font-medium cursor-pointer hover:bg-muted/50 transition-colors">
+          <select className="h-9 px-3 rounded-lg border border-border bg-card text-sm text-foreground font-medium cursor-pointer hover:bg-muted/50 transition-colors">
             <option>Último mes</option>
             <option>Última semana</option>
             <option>Hoy</option>
@@ -80,7 +80,7 @@ export default function SecretariaDashboard() {
             {/* Left: Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Card 1 - Docentes */}
-              <div className="rounded-xl border border-border bg-white p-5">
+              <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-muted-foreground">Docentes</p>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-3 bg-chart-3/10">
@@ -98,7 +98,7 @@ export default function SecretariaDashboard() {
               </div>
 
               {/* Card 2 - Cursos */}
-              <div className="rounded-xl border border-border bg-white p-5">
+              <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-muted-foreground">Cursos</p>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10">
@@ -116,7 +116,7 @@ export default function SecretariaDashboard() {
               </div>
 
               {/* Card 3 - Aulas */}
-              <div className="rounded-xl border border-border bg-white p-5">
+              <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-muted-foreground">Aulas Disponibles</p>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-4 bg-chart-4/10">
@@ -135,7 +135,7 @@ export default function SecretariaDashboard() {
             </div>
 
         {/* Right: Updates */}
-        <div className="rounded-xl border border-border bg-white overflow-hidden row-span-2">
+        <div className="rounded-xl border border-border bg-card overflow-hidden row-span-2">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Últimas Actualizaciones</h2>
           </div>
@@ -176,7 +176,7 @@ export default function SecretariaDashboard() {
         </div>
 
         {/* Estado del Sistema */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-sm font-semibold text-foreground mb-4">Estado del Sistema</h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 rounded-lg bg-muted/30">
@@ -196,11 +196,11 @@ export default function SecretariaDashboard() {
       </div>
 
       {/* Table: Tareas Pendientes */}
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Tareas Pendientes</h2>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 h-8 px-3 rounded-lg border border-border bg-white">
+            <div className="flex items-center gap-2 h-8 px-3 rounded-lg border border-border bg-card">
               <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <span className="text-xs text-muted-foreground">Tarea</span>
             </div>

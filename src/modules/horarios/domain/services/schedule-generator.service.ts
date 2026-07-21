@@ -9,6 +9,8 @@ import {
   PartialAssignment,
   validateHardConstraints,
   validateMaxConsecutiveHours,
+  validateTheoryPracticeSeparation,
+  validateBuildingSeparation,
 } from './constraint-validator.service';
 
 export interface GenerationInput {
@@ -170,97 +172,149 @@ export function generateSchedule(
       continue;
     }
 
-    let assigned = false;
+    const chunks = chunkHoras(unit.horasNeeded);
+    let chunksAssignedCount = 0;
 
-    for (let h = 0; h < unit.horasNeeded && !assigned; h++) {
-      let blockAssigned = false;
+    for (let c = 0; c < chunks.length; c++) {
+      const chunkSize = chunks[c];
+      let chunkAssigned = false;
 
-      // Sort slots: preferred first
-      const sortedSlots = [...slots].sort((a, b) => {
-        if (a.preferred && !b.preferred) return -1;
-        if (!a.preferred && b.preferred) return 1;
-        return 0;
+      // Heurística para intentar poner teoría y práctica cerca el mismo día
+      const otherTypePartials = partials.filter(p => p.grupoId === unit.grupo.id && p.tipo !== unit.tipo);
+      const otherTypeDays = new Set(otherTypePartials.map(p => p.dia));
+      const otherTypeBlocksByDay = new Map<string, number[]>();
+      otherTypePartials.forEach(p => {
+         const blocks = otherTypeBlocksByDay.get(p.dia) || [];
+         blocks.push(BLOQUES_HORARIOS.indexOf(p.bloque as BloqueHorario));
+         otherTypeBlocksByDay.set(p.dia, blocks);
       });
 
-      for (const slot of sortedSlots) {
-        const compatibleAulas = activeAulas.filter((aula) => {
-          if (restriccionAulaSet.has(`${aula.id}||${slot.dia}||${slot.bloque}`)) return false;
-          if (aula.capacidad < unit.grupo.numEstudiantes) return false;
-          if (curso.requiereLaboratorio && aula.tipo === 'Aula Teórica') return false;
-          if (!curso.requiereLaboratorio && aula.tipo !== 'Aula Teórica' && aula.tipo !== 'Auditorio') return false;
-          return true;
-        });
+      const candidateWindows: { dia: DiaSemana; startIndex: number; preferredCount: number }[] = [];
 
-        if (compatibleAulas.length === 0) {
-          console.log('[GENERATION] No compatible aulas for slot:', {
-            slot: `${slot.dia} ${slot.bloque}`,
-            curso: curso.nombre,
-            requiereLaboratorio: curso.requiereLaboratorio,
-            numEstudiantes: unit.grupo.numEstudiantes,
-            activeAulas: activeAulas.map(a => ({ nombre: a.nombre, tipo: a.tipo, capacidad: a.capacidad })),
-          });
-        }
-
-        for (const aula of compatibleAulas) {
-          const candidate: PartialAssignment = {
-            grupoId: unit.grupo.id,
-            docenteId,
-            aulaId: aula.id,
-            dia: slot.dia,
-            bloque: slot.bloque,
-            tipo: unit.tipo,
-            ciclo: curso.ciclo,
-            aulaCapacidad: aula.capacidad,
-            numEstudiantes: unit.grupo.numEstudiantes,
-            aulaType: aula.tipo,
-            requiereLaboratorio: curso.requiereLaboratorio,
-          };
-
-          const hardViolations = validateHardConstraints(partials, candidate);
-          const consecutiveViolations = validateMaxConsecutiveHours(partials, candidate);
-
-          console.log('[GENERATION] Assignment attempt:', {
-            curso: curso.nombre,
-            grupo: unit.grupo.nombre,
-            docente: docenteId,
-            aula: aula.nombre,
-            dia: slot.dia,
-            bloque: slot.bloque,
-            hardViolations: hardViolations.map(v => v.rule),
-            consecutiveViolations: consecutiveViolations.map(v => v.rule),
-          });
-
-          if (hardViolations.length === 0 && consecutiveViolations.length === 0) {
-            assignments.push({
-              grupoId: unit.grupo.id,
-              docenteId,
-              aulaId: aula.id,
-              dia: slot.dia,
-              bloque: slot.bloque,
-              tipo: unit.tipo,
-            });
-            partials.push(candidate);
-            slots.splice(slots.indexOf(slot), 1);
-            docenteLoadMap.set(docenteId, (docenteLoadMap.get(docenteId) ?? 0) + 1);
-            blockAssigned = true;
-            console.log('[GENERATION] Assignment successful');
-            break;
+      for (const dia of DIAS_SEMANA) {
+        for (let i = 0; i <= BLOQUES_HORARIOS.length - chunkSize; i++) {
+          let canFit = true;
+          let prefCount = 0;
+          for (let j = 0; j < chunkSize; j++) {
+            const block = BLOQUES_HORARIOS[i + j];
+            const slot = slots.find(s => s.dia === dia && s.bloque === block);
+            if (!slot) {
+              canFit = false;
+              break;
+            }
+            if (slot.preferred) prefCount++;
+          }
+          if (canFit) {
+             candidateWindows.push({ dia, startIndex: i, preferredCount: prefCount });
           }
         }
-
-        if (blockAssigned) break;
       }
 
-      if (!blockAssigned) {
-        if (h === 0) {
-          unassigned.push({
-            grupoId: unit.grupo.id,
-            cursoNombre: unit.curso.nombre,
-            tipo: unit.tipo,
-            reason: 'No se encontró bloque/aula compatible sin conflictos',
-          });
+      // Ordenar ventanas por preferencias y heurística de proximidad T/P
+      candidateWindows.sort((a, b) => {
+        let scoreA = a.preferredCount;
+        let scoreB = b.preferredCount;
+
+        if (otherTypeDays.has(a.dia)) scoreA += 5;
+        if (otherTypeDays.has(b.dia)) scoreB += 5;
+
+        if (otherTypeDays.has(a.dia)) {
+           const otherBlocks = otherTypeBlocksByDay.get(a.dia)!;
+           if (otherBlocks.includes(a.startIndex - 1) || otherBlocks.includes(a.startIndex + chunkSize)) {
+              scoreA += 10;
+           }
         }
-        assigned = true;
+        if (otherTypeDays.has(b.dia)) {
+           const otherBlocks = otherTypeBlocksByDay.get(b.dia)!;
+           if (otherBlocks.includes(b.startIndex - 1) || otherBlocks.includes(b.startIndex + chunkSize)) {
+              scoreB += 10;
+           }
+        }
+
+        return scoreB - scoreA;
+      });
+
+      for (const window of candidateWindows) {
+         const blocksInWindow = Array.from({length: chunkSize}, (_, idx) => BLOQUES_HORARIOS[window.startIndex + idx]);
+
+         const compatibleAulas = activeAulas.filter((aula) => {
+            if (aula.capacidad < unit.grupo.numEstudiantes) return false;
+            if (curso.requiereLaboratorio && aula.tipo === 'Aula Teórica') return false;
+            if (!curso.requiereLaboratorio && aula.tipo !== 'Aula Teórica' && aula.tipo !== 'Auditorio') return false;
+            
+            for (const b of blocksInWindow) {
+              if (restriccionAulaSet.has(`${aula.id}||${window.dia}||${b}`)) return false;
+              if (partials.some(p => p.aulaId === aula.id && p.dia === window.dia && p.bloque === b)) return false;
+            }
+            return true;
+         });
+
+         for (const aula of compatibleAulas) {
+            let hasViolations = false;
+            const candidates: PartialAssignment[] = [];
+            
+            for (const b of blocksInWindow) {
+               candidates.push({
+                 grupoId: unit.grupo.id,
+                 docenteId,
+                 aulaId: aula.id,
+                 dia: window.dia,
+                 bloque: b,
+                 tipo: unit.tipo,
+                 ciclo: curso.ciclo,
+                 aulaCapacidad: aula.capacidad,
+                 numEstudiantes: unit.grupo.numEstudiantes,
+                 aulaType: aula.tipo,
+                 requiereLaboratorio: curso.requiereLaboratorio,
+                 pabellon: aula.pabellon,
+               });
+            }
+
+            const tempPartials = [...partials];
+            for (const cand of candidates) {
+               const hardViolations = validateHardConstraints(tempPartials, cand);
+               const consecutiveViolations = validateMaxConsecutiveHours(tempPartials, cand);
+               const tpViolations = validateTheoryPracticeSeparation(tempPartials, cand);
+               const buildingViolations = validateBuildingSeparation(tempPartials, cand);
+               
+               if (hardViolations.length > 0 || consecutiveViolations.length > 0 || tpViolations.length > 0 || buildingViolations.length > 0) {
+                  hasViolations = true;
+                  break;
+               }
+               tempPartials.push(cand);
+            }
+
+            if (!hasViolations) {
+               for (const cand of candidates) {
+                  assignments.push({
+                    grupoId: cand.grupoId,
+                    docenteId: cand.docenteId,
+                    aulaId: cand.aulaId,
+                    dia: cand.dia,
+                    bloque: cand.bloque,
+                    tipo: cand.tipo,
+                  });
+                  partials.push(cand);
+                  const slotIdx = slots.findIndex(s => s.dia === cand.dia && s.bloque === cand.bloque);
+                  if (slotIdx >= 0) slots.splice(slotIdx, 1);
+               }
+               docenteLoadMap.set(docenteId, (docenteLoadMap.get(docenteId) ?? 0) + chunkSize);
+               chunkAssigned = true;
+               chunksAssignedCount++;
+               break;
+            }
+         }
+
+         if (chunkAssigned) break;
+      }
+
+      if (!chunkAssigned) {
+         unassigned.push({
+           grupoId: unit.grupo.id,
+           cursoNombre: unit.curso.nombre,
+           tipo: unit.tipo,
+           reason: `No se encontró bloque continuo de ${chunkSize} horas compatible sin conflictos`,
+         });
       }
     }
 
@@ -514,4 +568,28 @@ function optimizePreferences(
 
     if (!improved) break;
   }
+}
+
+export function chunkHoras(horasNeeded: number): number[] {
+  if (horasNeeded <= 0) return [];
+  if (horasNeeded === 1) return [1];
+  if (horasNeeded === 2) return [2];
+  if (horasNeeded === 3) return [3];
+  if (horasNeeded === 4) return [2, 2];
+  if (horasNeeded === 5) return [3, 2];
+  if (horasNeeded === 6) return [3, 3];
+  
+  const chunks: number[] = [];
+  let remaining = horasNeeded;
+  while (remaining >= 3) {
+    if (remaining === 4) {
+      chunks.push(2, 2);
+      remaining = 0;
+    } else {
+      chunks.push(3);
+      remaining -= 3;
+    }
+  }
+  if (remaining > 0) chunks.push(remaining);
+  return chunks;
 }

@@ -1,0 +1,1450 @@
+{
+  "Martha Cardoso": [
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    }
+  ],
+  "Juan Carrascal Cabanillas": [
+    {
+      "dia": "Lunes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    }
+  ],
+  "Juan Carlos Obando Roldan": [
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    }
+  ],
+  "Marcos Baca Lopez": [
+    {
+      "dia": "Jueves",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "08:00 - 09:00"
+    }
+  ],
+  "Jhoe Gonzalez Vasquez": [
+    {
+      "dia": "Miercoles",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "11:00 - 12:00"
+    }
+  ],
+  "Alberto Mendoza de los Santos": [
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "13:00 - 14:00"
+    }
+  ],
+  "Sheyla Laura Escobedo Rodriguez": [
+    {
+      "dia": "Martes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "19:00 - 20:00"
+    }
+  ],
+  "Luis Boy Chavil": [
+    {
+      "dia": "Lunes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    }
+  ],
+  "José Gómez Ávila": [
+    {
+      "dia": "Jueves",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    }
+  ],
+  "Segundo Guibar Obeso": [
+    {
+      "dia": "Lunes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    }
+  ],
+  "Jorge Luis Rios Gonzales": [
+    {
+      "dia": "Jueves",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    }
+  ],
+  "Ricardo Mendoza Rivera": [
+    {
+      "dia": "Jueves",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "20:00 - 21:00"
+    }
+  ],
+  "Miguel Ipanaque Zapata": [
+    {
+      "dia": "Jueves",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    }
+  ],
+  "Robert Jerry Sánchez Ticona": [
+    {
+      "dia": "Jueves",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    }
+  ],
+  "Ana Cuadra Mitzugaray": [
+    {
+      "dia": "Jueves",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    }
+  ],
+  "Zoraida Vidal Melgarejo": [
+    {
+      "dia": "Lunes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "11:00 - 12:00"
+    }
+  ],
+  "Camilo Suárez Rebaza": [
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "19:00 - 20:00"
+    }
+  ],
+  "Everson David Agreda Gamboa": [
+    {
+      "dia": "Jueves",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    }
+  ],
+  "Marcos Ferrer Reyna": [
+    {
+      "dia": "Jueves",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    }
+  ],
+  "Teresita Rojas Garcia": [
+    {
+      "dia": "Jueves",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "17:00 - 18:00"
+    }
+  ],
+  "Paul Cotrina Castellanos": [
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    }
+  ],
+  "Bertha Urtecho Zavaleta": [
+    {
+      "dia": "Sabado",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "11:00 - 12:00"
+    }
+  ],
+  "Jose Luis Ponte Bejarano": [
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "08:00 - 09:00"
+    }
+  ],
+  "Vilma Mendez Gil": [
+    {
+      "dia": "Jueves",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    }
+  ],
+  "Cesar Arellano Salazar": [
+    {
+      "dia": "Lunes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "17:00 - 18:00"
+    }
+  ],
+  "Oscar Romel Alcántara Moreno": [
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "10:00 - 11:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Viernes",
+      "bloque": "20:00 - 21:00"
+    }
+  ],
+  "Juan Pedro Santos Fernández": [
+    {
+      "dia": "Jueves",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Jueves",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "09:00 - 10:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    }
+  ],
+  "Marcelino Torres Villanueva": [
+    {
+      "dia": "Lunes",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "17:00 - 18:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Lunes",
+      "bloque": "20:00 - 21:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "15:00 - 16:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "16:00 - 17:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "18:00 - 19:00"
+    },
+    {
+      "dia": "Martes",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "11:00 - 12:00"
+    },
+    {
+      "dia": "Miercoles",
+      "bloque": "12:00 - 13:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "07:00 - 08:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "08:00 - 09:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "13:00 - 14:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "14:00 - 15:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "19:00 - 20:00"
+    },
+    {
+      "dia": "Sabado",
+      "bloque": "20:00 - 21:00"
+    }
+  ]
+}

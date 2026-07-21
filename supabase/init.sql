@@ -74,6 +74,53 @@ CREATE POLICY "Director puede eliminar docentes"
   );
 
 -- =============================================
+-- TABLA: periodos
+-- Módulo: periodos (Andy)
+-- NOTA: Definida aquí antes de cargas_no_lectivas porque
+--       cargas_no_lectivas tiene FK a periodos(id)
+-- =============================================
+CREATE TABLE public.periodos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  tipo_ciclo VARCHAR(10) NOT NULL CHECK (tipo_ciclo IN ('Impar', 'Par')),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  availability_deadline DATE NOT NULL,
+  state VARCHAR(20) NOT NULL DEFAULT 'Configuración' CHECK (state IN ('Configuración', 'Recopilación', 'Generación', 'Aprobado', 'Publicado', 'Cerrado')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER set_updated_at_periodos
+  BEFORE UPDATE ON public.periodos
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.periodos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Todos los autenticados pueden ver periodos"
+  ON public.periodos FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Director puede gestionar periodos"
+  ON public.periodos FOR INSERT
+  WITH CHECK (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+CREATE POLICY "Director puede editar periodos"
+  ON public.periodos FOR UPDATE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+CREATE POLICY "Director puede eliminar periodos"
+  ON public.periodos FOR DELETE
+  USING (
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
+  );
+
+-- =============================================
 -- TABLA: cargas_no_lectivas
 -- Módulo: carga no lectiva
 -- =============================================
@@ -340,50 +387,8 @@ USING (
   ((auth.jwt() -> 'user_metadata'::text) ->> 'role'::text) = 'director'::text
 );
 
--- =============================================
--- TABLA: periodos
--- Módulo: periodos (Andy)
--- =============================================
-CREATE TABLE public.periodos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  tipo_ciclo VARCHAR(10) NOT NULL CHECK (tipo_ciclo IN ('Impar', 'Par')),
-  start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
-  availability_deadline DATE NOT NULL,
-  state VARCHAR(20) NOT NULL DEFAULT 'Configuración' CHECK (state IN ('Configuración', 'Recopilación', 'Generación', 'Aprobado', 'Publicado', 'Cerrado')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER set_updated_at_periodos
-  BEFORE UPDATE ON public.periodos
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_updated_at();
-
-ALTER TABLE public.periodos ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Todos los autenticados pueden ver periodos"
-  ON public.periodos FOR SELECT
-  USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Director puede gestionar periodos"
-  ON public.periodos FOR INSERT
-  WITH CHECK (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
-  );
-
-CREATE POLICY "Director puede editar periodos"
-  ON public.periodos FOR UPDATE
-  USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
-  );
-
-CREATE POLICY "Director puede eliminar periodos"
-  ON public.periodos FOR DELETE
-  USING (
-    (auth.jwt() -> 'user_metadata' ->> 'role') = 'director'
-  );
+-- NOTA: La tabla periodos ya fue creada arriba (antes de cargas_no_lectivas)
+-- por orden de dependencias FK.
 
 -- =============================================
 -- TABLA: grupos (secciones de un curso por período)

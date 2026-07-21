@@ -113,9 +113,9 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
   return (
     <>
       {authSuccessMsg && (
-        <div className="mx-6 mt-3 rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+        <div className="mx-6 mt-3 rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 flex items-center gap-2">
           <KeyRound className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 font-medium">{authSuccessMsg}</p>
+          <p className="text-sm text-emerald-600 font-medium">{authSuccessMsg}</p>
         </div>
       )}
       <div className="px-6 py-3 border-b border-border flex flex-col sm:flex-row gap-3">
@@ -206,7 +206,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.regimen}</td>
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.condicion}</td>
                   <td className="px-6 py-3.5">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-violet-50 text-violet-700">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-violet-500/10 text-violet-600 whitespace-nowrap">
                       {docente.escuela}
                     </span>
                   </td>
@@ -216,7 +216,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                   <td className="px-6 py-3.5 text-muted-foreground">{docente.cargaMaxima}h</td>
                   <td className="px-6 py-3.5">
                     {authStatus[docente.correo.toLowerCase()] ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Vinculado
                       </span>
@@ -224,7 +224,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                       <button
                         onClick={() => handleCreateAuth(docente)}
                         disabled={creatingAuth === docente.id}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
                         title="Crear usuario de acceso para este docente"
                       >
                         {creatingAuth === docente.id ? (
@@ -262,7 +262,7 @@ export const DocenteTable = forwardRef<DocenteTableRef>(function DocenteTable(_,
                           className={`p-1.5 rounded-md transition-colors disabled:opacity-50 ${
                             docente.estado === 'Activo'
                               ? 'text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-                              : 'text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50'
+                              : 'text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10'
                           }`}
                           title={docente.estado === 'Activo' ? 'Desactivar docente' : 'Activar docente'}
                         >

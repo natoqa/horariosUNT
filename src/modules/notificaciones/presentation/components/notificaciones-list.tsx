@@ -36,15 +36,15 @@ export function NotificacionesList({
   const getBadgeColorForType = (tipo: string) => {
     switch (tipo) {
       case 'apertura_recopilacion':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
       case 'recordatorio':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
+        return 'bg-orange-500/10 text-orange-600 border-orange-500/20';
       case 'publicacion_horario':
         return 'bg-green-50 text-green-700 border-green-200';
       case 'alerta':
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'bg-red-500/10 text-red-600 border-red-500/20';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted text-foreground border-border';
     }
   };
 
@@ -110,7 +110,7 @@ export function NotificacionesList({
             key={notificacion.id}
             className={`p-4 transition-all ${
               !notificacion.leida
-                ? 'bg-blue-50/50 border-blue-200'
+                ? 'bg-blue-500/10/50 border-blue-500/20'
                 : 'bg-card border-border'
             }`}
           >

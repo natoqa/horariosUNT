@@ -14,7 +14,7 @@ export function RecoverPasswordForm() {
   return (
     <div className="w-full max-w-[380px] space-y-8">
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-muted-foreground">
           Recuperar Contrasena
         </h1>
         <p className="text-sm text-gray-500">
@@ -24,7 +24,7 @@ export function RecoverPasswordForm() {
 
       <form action={action} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+          <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
             Correo Institucional
           </Label>
           <div className="relative">
@@ -49,8 +49,8 @@ export function RecoverPasswordForm() {
         )}
 
         {state?.success && (
-          <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-3">
-            <p className="text-sm text-emerald-700">{state.message}</p>
+          <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
+            <p className="text-sm text-emerald-600">{state.message}</p>
           </div>
         )}
 

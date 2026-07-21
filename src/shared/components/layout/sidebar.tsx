@@ -178,7 +178,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     <>
       {/* Logo */}
       <div className="h-14 flex items-center gap-3 px-5 border-b border-[var(--sidebar-border)]">
-        <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-white flex items-center justify-center shadow-sm">
           <CalendarDays className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1">
@@ -201,8 +201,8 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
           <span className="text-xs text-muted-foreground">Buscar...</span>
           <div className="ml-auto items-center gap-0.5 hidden lg:flex">
-            <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">⌘</kbd>
-            <kbd className="h-5 px-1.5 rounded bg-white border border-border text-[10px] font-medium text-muted-foreground flex items-center">K</kbd>
+            <kbd className="h-5 px-1.5 rounded bg-muted border border-border text-[10px] font-medium text-muted-foreground flex items-center">⌘</kbd>
+            <kbd className="h-5 px-1.5 rounded bg-muted border border-border text-[10px] font-medium text-muted-foreground flex items-center">K</kbd>
           </div>
         </div>
       </div>
@@ -312,7 +312,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       {/* Sidebar — desktop: fixed, mobile: slide-in overlay */}
       <aside
         className={cn(
-          "w-64 h-screen bg-white border-r border-[var(--sidebar-border)] flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 ease-in-out",
+          "w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col fixed left-0 top-0 z-40 transition-transform duration-200 ease-in-out",
           "lg:translate-x-0 lg:z-20",
           open ? "translate-x-0" : "-translate-x-full"
         )}

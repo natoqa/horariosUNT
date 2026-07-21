@@ -112,8 +112,8 @@ export function HorarioPorCiclo() {
     const asigs = getAsignacionesForCell(dia, bloque);
     
     if (asigs.length === 0) return 'bg-muted/30';
-    if (conflictos.has(key)) return 'bg-red-50 border-red-300';
-    return 'bg-blue-50 border-blue-200';
+    if (conflictos.has(key)) return 'bg-red-500/10 border-red-500/20';
+    return 'bg-blue-500/10 border-blue-500/20';
   };
 
   return (
@@ -143,12 +143,12 @@ export function HorarioPorCiclo() {
       </div>
 
       {conflictos.size > 0 && (
-        <Card className="p-4 bg-red-50 border-red-200">
+        <Card className="p-4 bg-red-500/10 border-red-500/20">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
             <div>
-              <p className="font-semibold text-red-900">Conflictos detectados</p>
-              <p className="text-sm text-red-700">
+              <p className="font-semibold text-red-600">Conflictos detectados</p>
+              <p className="text-sm text-red-600">
                 Se encontraron {conflictos.size} bloques con múltiples cursos del mismo ciclo.
                 Revisa la grilla para identificar los conflictos.
               </p>
@@ -218,8 +218,8 @@ export function HorarioPorCiclo() {
                                   key={asig.id}
                                   className={`p-2 rounded text-xs ${
                                     hasConflict
-                                      ? 'bg-red-100 border border-red-300'
-                                      : 'bg-white border border-border'
+                                      ? 'bg-red-100 border border-red-500/20'
+                                      : 'bg-card border border-border'
                                   }`}
                                 >
                                   <div className="font-semibold text-foreground truncate">

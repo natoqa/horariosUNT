@@ -53,7 +53,7 @@ export function GenerationProgress({ currentPhase }: GenerationProgressProps) {
             key={name}
             className={`text-[10px] px-2 py-1 rounded ${
               i + 1 < currentPhase
-                ? 'bg-emerald-50 text-emerald-700'
+                ? 'bg-emerald-500/10 text-emerald-600'
                 : i + 1 === currentPhase
                   ? 'bg-primary/10 text-primary font-medium'
                   : 'bg-muted/50 text-muted-foreground'

@@ -151,7 +151,7 @@ export function AulaRestriccionGrid({ aula, onClose }: AulaRestriccionGridProps)
                               className={`p-2 border-r border-border text-center cursor-pointer select-none transition-all duration-200 ${
                                 isRestricted
                                   ? 'bg-destructive/15 hover:bg-destructive/20 border-destructive/20 text-destructive font-bold'
-                                  : 'bg-card hover:bg-emerald-50/40 text-muted-foreground'
+                                  : 'bg-card hover:bg-emerald-500/10/40 text-muted-foreground'
                               }`}
                             >
                               {isRestricted ? (
@@ -180,9 +180,9 @@ export function AulaRestriccionGrid({ aula, onClose }: AulaRestriccionGridProps)
           )}
 
           {successMsg && (
-            <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+            <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 flex items-center gap-2">
               <Check className="w-4 h-4 text-emerald-600" />
-              <p className="text-sm text-emerald-700 font-medium">{successMsg}</p>
+              <p className="text-sm text-emerald-600 font-medium">{successMsg}</p>
             </div>
           )}
         </div>

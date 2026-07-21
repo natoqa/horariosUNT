@@ -4,8 +4,8 @@ interface DocenteStatusBadgeProps {
 
 export function DocenteStatusBadge({ estado }: DocenteStatusBadgeProps) {
   const config = estado === 'Activo'
-    ? { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' }
-    : { bg: 'bg-slate-50', text: 'text-slate-700', dot: 'bg-slate-500' };
+    ? { bg: 'bg-emerald-500/10', text: 'text-emerald-600', dot: 'bg-emerald-500' }
+    : { bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' };
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${config.bg} ${config.text}`}>

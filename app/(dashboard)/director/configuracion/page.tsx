@@ -36,7 +36,7 @@ export default function ConfiguracionPage() {
 
       <div className="grid gap-6">
         {/* Información de Perfil */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <User className="w-5 h-5 text-primary" />
@@ -71,7 +71,7 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Notificaciones */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Bell className="w-5 h-5 text-primary" />
@@ -94,7 +94,7 @@ export default function ConfiguracionPage() {
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-card transition-transform ${
                     settings.notifications ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
                 />
@@ -112,7 +112,7 @@ export default function ConfiguracionPage() {
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-card transition-transform ${
                     settings.emailAlerts ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
                 />
@@ -122,7 +122,7 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Preferencias del Sistema */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Globe className="w-5 h-5 text-primary" />
@@ -140,7 +140,7 @@ export default function ConfiguracionPage() {
                   id="language"
                   value={settings.language}
                   onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-                  className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm"
                 >
                   <option value="es">Español</option>
                   <option value="en">English</option>
@@ -152,7 +152,7 @@ export default function ConfiguracionPage() {
                   id="timezone"
                   value={settings.timezone}
                   onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
-                  className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-card text-sm"
                 >
                   <option value="America/Lima">Lima (UTC-5)</option>
                   <option value="America/Mexico_City">Ciudad de México (UTC-6)</option>
@@ -164,7 +164,7 @@ export default function ConfiguracionPage() {
         </div>
 
         {/* Seguridad */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Lock className="w-5 h-5 text-primary" />

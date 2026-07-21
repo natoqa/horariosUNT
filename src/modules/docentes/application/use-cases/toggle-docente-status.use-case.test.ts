@@ -16,6 +16,7 @@ const ACTIVE_DOCENTE: Docente = {
   escuela: 'Ingeniería de Sistemas',
   fechaIngreso: '2015-03-15',
   cargaMaxima: 20,
+  cargaElectiva: 0,
   estado: 'Activo',
   createdAt: '2026-05-25T00:00:00Z',
   updatedAt: '2026-05-25T00:00:00Z',

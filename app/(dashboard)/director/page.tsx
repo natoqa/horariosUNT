@@ -1,10 +1,11 @@
 'use client';
 
-import { CalendarDays, Users, BookOpen, Building2, TrendingUp, TrendingDown, Clock, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { CalendarDays, Users, BookOpen, Building2, TrendingUp, TrendingDown, Clock, CheckCircle2, AlertTriangle, FileText, Play, CheckCircle, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/shared/hooks/use-auth';
 import { getDashboardStatsAction, DashboardStats } from './actions/get-dashboard-stats.action';
 import { getPeriodosAction, PeriodoDisplay } from './actions/get-periodos.action';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 /* ─── Sparkline SVGs ─── */
 function SparklineUp() {
@@ -32,85 +33,21 @@ function SparklineFlat() {
   );
 }
 
-/* ─── Bar Chart (decorative) ─── */
-const barData: any[] = [];
-
-function BarChart() {
-  if (barData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-44 mt-4">
-        <p className="text-sm text-muted-foreground">Sin datos de carga horaria</p>
-      </div>
-    );
-  }
-  const maxVal = Math.max(...barData.map(d => d.value));
-  return (
-    <div className="flex items-end gap-3 h-44 mt-4">
-      {barData.map((d, i) => {
-        const heightPct = (d.value / maxVal) * 100;
-        const isHighlighted = i === 3;
-        return (
-          <div key={d.label} className="flex-1 flex flex-col items-center gap-2">
-            <div className="relative w-full flex justify-center">
-              {isHighlighted && (
-                <div className="absolute -top-8 bg-foreground text-white text-[10px] font-medium px-2 py-1 rounded-md whitespace-nowrap">
-                  Jue: {d.value}
-                </div>
-              )}
-              <div
-                className={`w-full max-w-[40px] rounded-md transition-all duration-500 ${
-                  isHighlighted ? 'bg-foreground' : 'bg-muted-foreground/15'
-                }`}
-                style={{ height: `${heightPct}%`, minHeight: '8px' }}
-              />
-            </div>
-            <span className="text-[11px] text-muted-foreground font-medium">{d.label}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ─── Updates Feed ─── */
-const updates = [
-  { icon: CheckCircle2, color: 'text-success', title: 'Periodo Actualizado', time: '11:20 AM', desc: 'Periodo 2026-I configurado' },
-  { icon: Users, color: 'text-chart-2', title: 'Docente Agregado', time: '11:15 AM', desc: 'Juan Pérez registrado' },
-  { icon: AlertTriangle, color: 'text-warning', title: 'Conflicto Detectado', time: '11:00 AM', desc: 'Aula A-201 con solapamiento' },
-  { icon: CalendarDays, color: 'text-primary', title: 'Horario Generado', time: '10:45 AM', desc: 'Horario borrador 2026-I' },
-  { icon: FileText, color: 'text-chart-4', title: 'Reporte Exportado', time: '10:30 AM', desc: 'Reporte de disponibilidad' },
-  { icon: BookOpen, color: 'text-chart-3', title: 'Curso Actualizado', time: '10:30 AM', desc: 'Cálculo I - 3 grupos' },
-];
-
-/* ─── Recent Periods Table ─── */
-const periods = [
-  { id: '#2026-I', name: 'Primer Semestre 2026', estado: 'Configuración', fecha: '2026-03-15', responsable: 'Dir. García', estadoColor: 'bg-blue-50 text-blue-700' },
-  { id: '#2025-II', name: 'Segundo Semestre 2025', estado: 'Finalizado', fecha: '2025-08-10', responsable: 'Dir. García', estadoColor: 'bg-emerald-50 text-emerald-700' },
-  { id: '#2025-I', name: 'Primer Semestre 2025', estado: 'Finalizado', fecha: '2025-03-01', responsable: 'Dir. López', estadoColor: 'bg-emerald-50 text-emerald-700' },
-  { id: '#2024-II', name: 'Segundo Semestre 2024', estado: 'Archivado', fecha: '2024-08-12', responsable: 'Dir. López', estadoColor: 'bg-gray-100 text-gray-600' },
-];
-
 function getEstadoColor(estado: string): string {
   switch (estado) {
-    case 'Configuración':
-      return 'bg-blue-50 text-blue-700';
-    case 'Recopilación':
-      return 'bg-yellow-50 text-yellow-700';
-    case 'Generación':
-      return 'bg-purple-50 text-purple-700';
-    case 'Aprobado':
-      return 'bg-green-50 text-green-700';
-    case 'Publicado':
-      return 'bg-emerald-50 text-emerald-700';
-    case 'Cerrado':
-      return 'bg-gray-100 text-gray-600';
-    default:
-      return 'bg-gray-100 text-gray-600';
+    case 'Configuración': return 'bg-blue-500/10 text-blue-600';
+    case 'Recopilación': return 'bg-yellow-50 text-yellow-700';
+    case 'Generación': return 'bg-purple-500/10 text-purple-600';
+    case 'Aprobado': return 'bg-green-50 text-green-700';
+    case 'Publicado': return 'bg-emerald-500/10 text-emerald-600';
+    case 'Cerrado': return 'bg-gray-100 text-muted-foreground';
+    default: return 'bg-gray-100 text-muted-foreground';
   }
 }
 
 export default function DirectorDashboard() {
   const { user } = useAuth();
+  const router = useRouter();
   const firstName = user?.fullName?.split(' ')[0] || user?.email?.split('@')[0] || 'Director';
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -137,20 +74,21 @@ export default function DirectorDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Greeting + Time Filter */}
-      <div className="flex items-start justify-between">
+      {/* Greeting + Quick Actions */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Hola, {firstName} 👋</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Aquí tienes las últimas novedades del sistema de horarios.
+            Centro de control ejecutivo.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <select className="h-9 px-3 rounded-lg border border-border bg-white text-sm text-foreground font-medium cursor-pointer hover:bg-muted/50 transition-colors">
-            <option>Último mes</option>
-            <option>Última semana</option>
-            <option>Hoy</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => router.push('/director/horarios')} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all flex items-center gap-2 shadow-sm shadow-primary/20 cursor-pointer">
+            <Play className="w-4 h-4" /> Generar Horario
+          </button>
+          <button onClick={() => router.push('/director/periodos')} className="h-10 px-4 rounded-lg border border-border bg-card text-foreground text-sm font-medium hover:bg-muted transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+            <CheckCircle className="w-4 h-4 text-success" /> Aprobar Periodo
+          </button>
         </div>
       </div>
 
@@ -160,134 +98,199 @@ export default function DirectorDashboard() {
         </div>
       ) : (
         <>
-          {/* Top Row: 3 Stat Cards + Updates */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          {/* Top Row: Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
+            
             {/* Left: Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Card 1 - Periodo Activo */}
-              <div className="rounded-xl border border-border bg-white p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">Periodo Activo</p>
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-primary bg-primary/10">
-                    <CalendarDays className="w-3.5 h-3.5" />
+            <div className="flex flex-col gap-4">
+              
+              {/* Card 1 - Periodo Activo con Stepper */}
+              <div className="rounded-xl border border-border bg-card p-5 lg:col-span-3 sm:col-span-3 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+                 <div className="min-w-[200px] flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-primary bg-primary/10">
+                        <CalendarDays className="w-4 h-4" />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">Periodo Activo</p>
+                    </div>
+                    <p className="text-3xl font-bold text-foreground tracking-tight mt-2">
+                      {stats?.periodoNombre || 'Sin periodo'}
+                    </p>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 mt-2 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+                      Activo
+                    </span>
+                 </div>
+                 
+                 {/* Stepper visual */}
+                 <div className="flex-1 w-full border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-8">
+                    <div className="flex items-center justify-between w-full relative">
+                      {/* Progress Line */}
+                      <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-muted rounded-full overflow-hidden">
+                         <div className="h-full bg-primary transition-all duration-1000" style={{ width: '50%' }}></div>
+                      </div>
+                      {/* Step 1 */}
+                      <div className="relative z-10 flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs ring-4 ring-card">✓</div>
+                        <span className="text-[10px] sm:text-xs font-medium text-foreground">Configuración</span>
+                      </div>
+                      {/* Step 2 */}
+                      <div className="relative z-10 flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs ring-4 ring-card">✓</div>
+                        <span className="text-[10px] sm:text-xs font-medium text-foreground">Disponibilidad</span>
+                      </div>
+                      {/* Step 3 */}
+                      <div className="relative z-10 flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-card border-2 border-primary text-primary flex items-center justify-center font-bold text-xs ring-4 ring-card shadow-sm shadow-primary/20">3</div>
+                        <span className="text-[10px] sm:text-xs font-medium text-primary">Generación</span>
+                      </div>
+                      {/* Step 4 */}
+                      <div className="relative z-10 flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs ring-4 ring-card">4</div>
+                        <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">Publicado</span>
+                      </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Stat Cards 2 & 3 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Docentes */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm group hover:border-primary/30 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-muted-foreground">Docentes Activos</p>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-chart-3 bg-chart-3/10 group-hover:scale-110 transition-transform">
+                      <Users className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.docentesActivos || 0}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="flex items-center gap-1 text-xs font-medium text-success">
+                      <TrendingUp className="w-3 h-3" />
+                      100% registros
+                    </span>
+                    <SparklineFlat />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-foreground tracking-tight">
-                  {stats?.periodoNombre || 'Sin periodo'}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="flex items-center gap-1 text-xs font-medium text-success">
-                    <TrendingUp className="w-3 h-3" />
-                    {stats?.periodoActivo ? 'Activo' : 'No activo'}
-                  </span>
-                  <SparklineUp />
+
+                {/* Cursos */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm group hover:border-primary/30 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-muted-foreground">Cursos Registrados</p>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10 group-hover:scale-110 transition-transform">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.cursosRegistrados || 0}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="flex items-center gap-1 text-xs font-medium text-success">
+                      <TrendingUp className="w-3 h-3" />
+                      Total periodo
+                    </span>
+                    <SparklineUp />
+                  </div>
                 </div>
               </div>
 
-              {/* Card 2 - Docentes */}
-              <div className="rounded-xl border border-border bg-white p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">Docentes Activos</p>
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-3 bg-chart-3/10">
-                    <Users className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.docentesActivos || 0}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="flex items-center gap-1 text-xs font-medium text-success">
-                    <TrendingUp className="w-3 h-3" />
-                    Total
-                  </span>
-                  <SparklineFlat />
-                </div>
-              </div>
-
-              {/* Card 3 - Cursos */}
-              <div className="rounded-xl border border-border bg-white p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-muted-foreground">Cursos Registrados</p>
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10">
-                    <BookOpen className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <p className="text-3xl font-bold text-foreground tracking-tight">{stats?.cursosRegistrados || 0}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="flex items-center gap-1 text-xs font-medium text-destructive">
-                    <TrendingDown className="w-3 h-3" />
-                    Total
-                  </span>
-                  <SparklineDown />
-                </div>
-              </div>
             </div>
 
-        {/* Right: Latest Updates */}
-        <div className="rounded-xl border border-border bg-white overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
-            <h2 className="text-sm font-semibold text-foreground">Últimas Actualizaciones</h2>
-          </div>
-          <div className="px-5 py-8 text-center">
-            <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No hay actualizaciones recientes</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Table: Resumen de Periodos */}
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
-        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Resumen de Periodos</h2>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 h-8 px-3 rounded-lg border border-border bg-white">
-              <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <span className="text-xs text-muted-foreground">Periodo</span>
+            {/* Right: Critical Alerts Panel */}
+            <div className="rounded-xl border border-destructive/30 bg-destructive/[0.02] flex flex-col shadow-sm">
+              <div className="px-5 py-4 border-b border-destructive/10 flex items-center justify-between bg-destructive/[0.03]">
+                <h2 className="text-sm font-bold text-destructive flex items-center gap-2">
+                   <AlertTriangle className="w-4.5 h-4.5" /> Estado de Salud
+                </h2>
+              </div>
+              <div className="p-5 flex flex-col gap-3.5 flex-1">
+                 {/* Alerta 1 */}
+                 <div className="p-3.5 rounded-lg bg-card/80 border border-border shadow-sm flex items-start gap-3.5 hover:bg-card transition-colors cursor-pointer group">
+                    <div className="mt-0.5 p-2 rounded-md bg-warning/10 text-warning group-hover:scale-110 transition-transform">
+                       <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">3 docentes incompletos</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Faltan horas lectivas por asignar en su carga.</p>
+                    </div>
+                 </div>
+                 {/* Alerta 2 */}
+                 <div className="p-3.5 rounded-lg bg-card/80 border border-border shadow-sm flex items-start gap-3.5 hover:bg-card transition-colors cursor-pointer group">
+                    <div className="mt-0.5 p-2 rounded-md bg-destructive/10 text-destructive group-hover:scale-110 transition-transform">
+                       <BookOpen className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">2 cursos sin profesor</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Sistemas Operativos, Inteligencia Artificial.</p>
+                    </div>
+                 </div>
+                 {/* Alerta 3 */}
+                 <div className="p-3.5 rounded-lg bg-card/80 border border-border shadow-sm flex items-start gap-3.5 hover:bg-card transition-colors cursor-pointer group">
+                    <div className="mt-0.5 p-2 rounded-md bg-chart-3/10 text-chart-3 group-hover:scale-110 transition-transform">
+                       <CalendarDays className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Disp. al 85%</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Faltan 4 docentes por llenar su horario.</p>
+                    </div>
+                 </div>
+              </div>
+              <div className="p-4 border-t border-destructive/10 mt-auto bg-card/50 rounded-b-xl">
+                 <button onClick={() => router.push('/director/horarios')} className="w-full h-9 rounded-md bg-card border border-border text-xs font-medium hover:bg-muted text-foreground transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+                    Revisar todos los conflictos <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+                 </button>
+              </div>
             </div>
-            <button className="h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:bg-muted transition-colors flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-              Filtrar
-            </button>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Periodo ID</th>
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Nombre</th>
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estado</th>
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</th>
-                <th className="h-10 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Fecha Inicio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {periodos.length > 0 ? (
-                periodos.map((p) => (
-                  <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-3.5">
-                      <span className="font-medium text-foreground">{p.id.slice(0, 8)}...</span>
-                    </td>
-                    <td className="px-6 py-3.5 text-muted-foreground">{p.name}</td>
-                    <td className="px-6 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${getEstadoColor(p.state)}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
-                        {p.state}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3.5 text-muted-foreground">{p.tipoCiclo}</td>
-                    <td className="px-6 py-3.5 text-muted-foreground">{new Date(p.startDate).toLocaleDateString('es-PE')}</td>
+
+          {/* Table: Resumen de Periodos */}
+          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">Historial de Periodos</h2>
+              <div className="flex items-center gap-2">
+                <button className="h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:bg-muted transition-colors flex items-center gap-1.5 cursor-pointer">
+                  Filtrar
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="h-11 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Periodo ID</th>
+                    <th className="h-11 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Nombre</th>
+                    <th className="h-11 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estado</th>
+                    <th className="h-11 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</th>
+                    <th className="h-11 px-6 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Fecha Inicio</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
-                    No hay periodos registrados
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {periodos.length > 0 ? (
+                    periodos.map((p) => (
+                      <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors group">
+                        <td className="px-6 py-4">
+                          <span className="font-medium text-foreground group-hover:text-primary transition-colors cursor-pointer">{p.id.slice(0, 8)}...</span>
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground">{p.name}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${getEstadoColor(p.state)}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+                            {p.state}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground">{p.tipoCiclo}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{new Date(p.startDate).toLocaleDateString('es-PE')}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                        No hay periodos registrados
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </>
       )}
     </div>

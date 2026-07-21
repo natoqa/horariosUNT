@@ -21,8 +21,8 @@ export async function validateGenerationAction(
   }
 
   const role = user.user_metadata?.role;
-  if (role !== 'director') {
-    return { message: 'Solo el Director puede validar la generación de horarios.' };
+  if (role !== 'director' && role !== 'secretaria') {
+    return { message: 'Solo el Director o la Secretaria pueden validar la generación de horarios.' };
   }
 
   try {

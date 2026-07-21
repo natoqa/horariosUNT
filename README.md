@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Horarios Académicos — UNT
 
-## Getting Started
+> Sistema Inteligente de Gestión y Generación Automática de Horarios Académicos  
+> Escuela Profesional de Ingeniería de Sistemas — Universidad Nacional de Trujillo
 
-First, run the development server:
+Sistema web que automatiza la creación de horarios semestrales, reemplazando el proceso manual (hojas de cálculo, coordinaciones informales). Mediante un algoritmo de asignación inteligente, considera disponibilidad docente, capacidad de aulas, restricciones de simultaneidad, prioridades por categoría/antigüedad y restricciones del plan de estudios.
+
+## Stack Tecnológico
+
+| Categoría | Tecnología |
+|---|---|
+| **Framework** | Next.js 16 (App Router + Server Actions) |
+| **Frontend** | React 19 · TypeScript · TailwindCSS 4 · Shadcn/UI |
+| **Backend** | Supabase (Auth + PostgreSQL + RLS) |
+| **Validación** | Zod 4 · React Hook Form |
+| **Reportes** | PDF-lib · ExcelJS |
+| **Testing** | Vitest |
+
+## Prerequisitos
+
+- **Node.js** ≥ 20
+- **npm** ≥ 10
+- Cuenta en [Supabase](https://supabase.com/) (proyecto creado)
+
+## Instalación
 
 ```bash
+# 1. Clonar el repositorio
+git clone <url-del-repositorio>
+cd horarios_unt
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+cp .env.local.example .env.local
+# Editar .env.local con los datos de tu proyecto Supabase
+
+# 4. Crear las tablas en Supabase
+# Ejecutar el contenido de supabase/init.sql en Supabase Dashboard > SQL Editor
+
+# 5. Iniciar servidor de desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts disponibles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev       # Servidor de desarrollo
+npm run build     # Build de producción
+npm run start     # Servidor de producción
+npm run lint      # Linter (ESLint)
+npx vitest run    # Ejecutar tests
+npx tsc --noEmit  # Verificar tipos
+```
 
-## Learn More
+## Arquitectura
 
-To learn more about Next.js, take a look at the following resources:
+El proyecto sigue **Clean Architecture** con diseño módulo-first:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── modules/              # Módulos del dominio
+│   ├── auth/             # Autenticación y RBAC
+│   ├── periodos/         # Períodos académicos (máquina de estados)
+│   ├── docentes/         # Gestión de docentes
+│   ├── cursos/           # Cursos y grupos/secciones
+│   ├── aulas/            # Aulas y restricciones
+│   ├── disponibilidad/   # Grilla de disponibilidad docente
+│   ├── horarios/         # ★ Algoritmo de generación (CSP)
+│   ├── reportes/         # Generación PDF/Excel
+│   ├── dashboard/        # KPIs por rol
+│   ├── auditoria/        # Registro inmutable de acciones
+│   ├── notificaciones/   # Sistema de notificaciones
+│   ├── planes-estudio/   # Planes de estudio
+│   └── carga-no-lectiva/ # Carga no lectiva docente
+└── shared/               # Código compartido
+    ├── components/       # UI (Shadcn/UI) + Layout
+    ├── hooks/            # useAuth, useCurrentUser, etc.
+    ├── lib/              # Supabase client, utils
+    ├── types/            # Tipos compartidos
+    └── constants/        # Bloques horarios, categorías, etc.
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Cada módulo sigue la estructura de capas:
+```
+modulo/
+├── domain/          # Entidades, interfaces de repositorio, servicios de dominio
+├── application/     # Casos de uso, DTOs (Zod)
+├── infrastructure/  # Implementación Supabase
+├── presentation/    # Componentes React, Server Actions
+└── index.ts         # API pública del módulo
+```
 
-## Deploy on Vercel
+## Roles del Sistema
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Rol | Permisos |
+|---|---|
+| **Director** | Acceso total. Genera, aprueba y publica horarios. Dashboard ejecutivo. Auditoría. |
+| **Secretaria** | CRUD docentes/cursos/aulas (sin eliminar). Reportes. Dashboard operativo. |
+| **Docente** | Registra disponibilidad. Consulta su horario y carga asignada. |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [PLANNING.md](PLANNING.md) | Índice de progreso del proyecto |
+| [TEAM.md](TEAM.md) | Distribución de trabajo del equipo |
+| [docs/contexto.md](docs/contexto.md) | Problema, objetivos, actores |
+| [docs/requerimientos.md](docs/requerimientos.md) | RF-001 a RF-062, RNF, RN-001 a RN-032 |
+| [docs/algoritmo.md](docs/algoritmo.md) | Algoritmo CSP y sistema de puntuación |
+| [MANUAL_INSTALACION.md](MANUAL_INSTALACION.md) | Guía detallada de instalación |
+
+## Equipo
+
+Proyecto desarrollado por 6 integrantes. Ver [TEAM.md](TEAM.md) para la distribución completa.

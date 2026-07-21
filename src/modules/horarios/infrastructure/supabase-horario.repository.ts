@@ -125,7 +125,7 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       aula_id: a.aulaId,
       dia: a.dia,
       bloque: a.bloque,
-      tipo: a.tipo,
+      tipo: TIPO_MAP[a.tipo] || a.tipo,
     }));
     console.log('[HorarioRepository] Rows to insert with tipo:', rowsWithTipo);
 
@@ -287,4 +287,45 @@ export class SupabaseHorarioRepository implements IHorarioRepository {
       createdAt: row.created_at,
     };
   }
+
+  async saveManualAsignacion(
+    horarioId: string,
+    asignacion: GeneratedAssignment,
+  ): Promise<Asignacion> {
+    const supabase = await createClient();
+
+    const row = {
+      horario_id: horarioId,
+      grupo_id: asignacion.grupoId,
+      docente_id: asignacion.docenteId,
+      aula_id: asignacion.aulaId,
+      dia: asignacion.dia,
+      bloque: asignacion.bloque,
+      tipo: asignacion.tipo,
+    };
+
+    const { data, error } = await supabase
+      .from('asignaciones')
+      .insert(row)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Error al guardar asignación manual.');
+    }
+    return this.mapToAsignacion(data as AsignacionRow);
+  }
+
+  async deleteAsignacion(id: string): Promise<void> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('asignaciones')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message || 'Error al eliminar asignación.');
+    }
+  }
 }
+

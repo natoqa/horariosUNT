@@ -257,22 +257,22 @@ export function DocenteForm({ onSuccess }: DocenteFormProps) {
         </div>
       )}
       {state?.success && state.authLinked === true && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-3 space-y-1">
+        <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 space-y-1">
           <div className="flex items-start gap-2">
             <LinkIcon className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-emerald-700 font-medium">{state.message}</p>
+            <p className="text-sm text-emerald-600 font-medium">{state.message}</p>
           </div>
         </div>
       )}
       {state?.success && state.authLinked === false && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-2">
+        <div className="rounded-md bg-amber-500/10 border border-amber-500/20 px-4 py-3 flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-800">{state.message}</p>
+          <p className="text-sm text-amber-600">{state.message}</p>
         </div>
       )}
       {state?.success && state.authLinked === undefined && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 px-4 py-2.5">
-          <p className="text-sm text-emerald-700">{state.message}</p>
+        <div className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5">
+          <p className="text-sm text-emerald-600">{state.message}</p>
         </div>
       )}
 

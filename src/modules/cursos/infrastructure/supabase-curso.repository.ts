@@ -48,7 +48,7 @@ export class SupabaseCursoRepository implements ICursoRepository {
     const supabase = await createClient();
     let query = supabase.from('cursos').select(`
       *,
-      planes_estudio!inner(estado)
+      planes_estudio(estado)
     `);
 
     if (filters?.search) {
@@ -75,9 +75,6 @@ export class SupabaseCursoRepository implements ICursoRepository {
     if (filters?.planEstudioId) {
       query = query.eq('plan_estudio_id', filters.planEstudioId);
     }
-
-    // Filtrar solo cursos de planes activos
-    query = query.filter('planes_estudio.estado', 'eq', 'Activo');
 
     // Ordenar de manera natural: primero por ciclo (I, II, III... pero como son strings, ordenamos de alguna forma o simplemente por ciclo y nombre)
     // El ciclo en DB es VARCHAR: 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'

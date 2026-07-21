@@ -57,7 +57,7 @@ export default function DocenteDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select className="h-9 px-3 rounded-lg border border-border bg-white text-sm text-foreground font-medium cursor-pointer hover:bg-muted/50 transition-colors">
+          <select className="h-9 px-3 rounded-lg border border-border bg-card text-sm text-foreground font-medium cursor-pointer hover:bg-muted/50 transition-colors">
             <option>Este semestre</option>
             <option>Semestre anterior</option>
           </select>
@@ -75,7 +75,7 @@ export default function DocenteDashboard() {
             {/* Left: Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Card 1 - Sesiones */}
-              <div className="rounded-xl border border-border bg-white p-5">
+              <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-muted-foreground">Sesiones Asignadas</p>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-chart-2 bg-chart-2/10">
@@ -93,7 +93,7 @@ export default function DocenteDashboard() {
               </div>
 
               {/* Card 2 - Horario */}
-              <div className="rounded-xl border border-border bg-white p-5">
+              <div className="rounded-xl border border-border bg-card p-5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-muted-foreground">Mi Horario</p>
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center text-primary bg-primary/10">
@@ -112,7 +112,7 @@ export default function DocenteDashboard() {
             </div>
 
         {/* Right: Updates */}
-        <div className="rounded-xl border border-border bg-white overflow-hidden row-span-2">
+        <div className="rounded-xl border border-border bg-card overflow-hidden row-span-2">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Notificaciones</h2>
           </div>
@@ -153,7 +153,7 @@ export default function DocenteDashboard() {
         </div>
 
         {/* Mi Horario Visual */}
-        <div className="rounded-xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Mi Horario Semanal</h2>
             <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function DocenteDashboard() {
       </div>
 
       {/* Mis Cursos */}
-      <div className="rounded-xl border border-border bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border">
           <h2 className="text-sm font-semibold text-foreground">Mis Cursos Asignados</h2>
         </div>

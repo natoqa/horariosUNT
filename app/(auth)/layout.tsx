@@ -30,7 +30,7 @@ export default function AuthLayout({
           2026 - Todos los derechos reservados
         </p>
       </div>
-      <div className="flex items-center justify-center p-8 bg-white">
+      <div className="flex items-center justify-center p-8 bg-background">
         {children}
       </div>
     </div>
